@@ -43,7 +43,7 @@ export interface IFieldsKeeperBucketProps {
    */
   maxItems?: number;
   /**
-   * @default - true
+   * @default - false
    */
   allowRemoveFields?: boolean;
   /**

@@ -1,11 +1,13 @@
 // imports
 import {
+  useEffect,
   useMemo,
   useState
 } from "react";
 import "./fieldsKeeper.less";
 import { IFieldsKeeperProviderProps, IFieldsKeeperState } from "./FieldsKeeper.types";
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
+import isEqual from 'lodash.isequal';
 
 
 // components
@@ -33,6 +35,13 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
       buckets: requriedState.buckets
     });
   };
+
+  // effects
+  useEffect(() => {
+    if (!isEqual({ allItems, buckets }, { allItems: state.allItems, buckets: state.buckets }))
+      updateState({ allItems, buckets })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allItems, buckets])
 
   // paint
   return (

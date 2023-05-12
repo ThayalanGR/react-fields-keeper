@@ -8,7 +8,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
   const {
     id,
     label,
-    allowRemoveFields = true,
+    allowRemoveFields = false,
     maxItems = Number.MAX_SAFE_INTEGER,
     disabled = false,
     suffixNode,

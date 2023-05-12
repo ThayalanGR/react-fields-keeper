@@ -7,8 +7,11 @@
 
 body {
   padding: 20px;
+  display: grid;
+  place-items: center;
 }
 
 h1 {
   margin-bottom: 20px;
+  text-align: center;
 }

@@ -10,10 +10,10 @@ export default function App() {
       <h1>Fields Keeper</h1>
 
       <FieldsKeeperProvider
-        allItems={["a", "b", "c", "d"]}
+        allItems={[{ id: "a", label: "a" }, { id: "b", label: "b" }, { id: "c", label: "c" }, { id: "d", label: "d" },]}
         buckets={[
-          { id: "bucket1", items: ["a", "c"] },
-          { id: "bucket2", items: ["b", "d"] }
+          { id: "bucket1", items: [{ id: "a", label: "a" },] },
+          { id: "bucket2", items: [{ id: "b", label: "b" },] }
         ]}
         onUpdate={(state) => {
           console.log(state);
@@ -28,7 +28,7 @@ export default function App() {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <FieldsKeeperBucket id="bucket1" label="Bucket 1" />
+            <FieldsKeeperBucket id="bucket1" label="Bucket 1" disabled />
             <FieldsKeeperBucket id="bucket2" label="Bucket 2" />
           </div>
           <div>

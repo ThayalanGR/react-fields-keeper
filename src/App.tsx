@@ -14,7 +14,7 @@ export default function App() {
         buckets={[
           { id: "bucket1", items: [{ id: "a", label: "a" },] },
           { id: "bucket2", items: [{ id: "b", label: "b" }, { id: "c", label: "c" },] },
-          { id: "bucket2", items: [] },
+          { id: "bucket3", items: [] },
         ]}
         onUpdate={(state) => {
           console.log(state);

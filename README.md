@@ -2,6 +2,9 @@
 
 Flexible bucket based data assignment tool for react
 
+[![npm version](https://badge.fury.io/js/react-fields-keeper.svg)](https://badge.fury.io/js/react-fields-keeper)
+![Vercel](https://therealsujitk-vercel-badge.vercel.app/?app=react-fields-keeper)
+
 ### Gettings Started
 1. Installation
    
@@ -37,11 +40,14 @@ Flexible bucket based data assignment tool for react
     }
    
    ```
-   3. Output
-      ![alt](./public/demo.png)
+   
+   https://github.com/ThayalanGR/react-fields-keeper/blob/3b6dbadd79c3890314952de7f08ba6285c95f2c0/src/App.tsx#LL1C1-L41C2  
+
+3. Output
+   ![alt](./public/demo.png)
 
 
-### Preview
+### Get Hands On
 
 * [Demo (vercel) ](https://react-fields-keeper.vercel.app/)
 

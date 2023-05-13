@@ -7,7 +7,7 @@ import {
 export default function App() {
   return (
     <div className="App">
-      <h1>ReactFields Keeper</h1>
+      <h1>React Fields Keeper</h1>
 
       <FieldsKeeperProvider
         allItems={[{ id: "a", label: "a" }, { id: "b", label: "b" }, { id: "c", label: "c" }, { id: "d", label: "d" },]}

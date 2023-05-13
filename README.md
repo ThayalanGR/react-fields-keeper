@@ -42,6 +42,7 @@ Flexible bucket based data assignment tool for react
    ```
 
 3. Sample Output
+   
    ![alt](./public/demo.png)
 
 

@@ -43,7 +43,7 @@ Flexible bucket based data assignment tool for react
 
 3. Sample Output
    
-   ![alt](./public/demo.png)
+   ![alt](https://github.com/ThayalanGR/react-fields-keeper/blob/46d36630b7d5bb714b8bb47385f3f7da2a6b74bf/public/demo.png)
 
 
 ### Getting Hands On

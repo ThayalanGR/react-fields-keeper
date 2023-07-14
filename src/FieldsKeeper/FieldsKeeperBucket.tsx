@@ -1,7 +1,10 @@
 import { useState, useContext, useMemo } from "react";
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
-import { IFieldsKeeperBucketProps, IFieldsKeeperItem } from "./FieldsKeeper.types";
-import cn from 'classnames';
+import {
+  IFieldsKeeperBucketProps,
+  IFieldsKeeperItem,
+} from "./FieldsKeeper.types";
+import cn from "classnames";
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
   // props
@@ -12,19 +15,23 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     maxItems = Number.MAX_SAFE_INTEGER,
     disabled = false,
     suffixNode,
-    emptyFieldPlaceholder = 'Add data fields here'
+    emptyFieldPlaceholder = "Add data fields here",
   } = props;
 
   // state
   const [isCurrentFieldActive, setIsCurrentFieldActive] = useState(false);
-  const { instanceId, allItems, buckets, updateState } = useContext(FieldsKeeperContext);
+  const { instanceId, allItems, buckets, updateState } =
+    useContext(FieldsKeeperContext);
   const { items } = useMemo(
     () => buckets.find((bucket) => bucket.id === id),
     [buckets, id]
   ) ?? { items: [] };
 
   // actions
-  const assignFieldItem = (fieldItem: IFieldsKeeperItem, removeOnly?: boolean) => {
+  const assignFieldItem = (
+    fieldItem: IFieldsKeeperItem,
+    removeOnly?: boolean
+  ) => {
     const newBuckets = [...buckets];
     newBuckets.forEach((bucket) => {
       // removes item from old bucket
@@ -69,9 +76,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
   const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
     const fieldItemId = e.dataTransfer.getData(instanceId);
-    const fieldItem = allItems.find(item => item.id === fieldItemId);
-    if (fieldItem)
-      assignFieldItem(fieldItem);
+    const fieldItem = allItems.find((item) => item.id === fieldItemId);
+    if (fieldItem) assignFieldItem(fieldItem);
     onDragLeaveHandler();
   };
 
@@ -88,8 +94,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             hasRoomForFieldAssignment,
           "column-as-measure-mapping-content-input-active":
             isCurrentFieldActive,
-          "column-as-measure-mapping-content-disabled":
-            disabled,
+          "column-as-measure-mapping-content-disabled": disabled,
         })}
         onDrop={onDropHandler}
         onDragOver={onDragOverHandler}
@@ -100,7 +105,10 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
           items.map((item) => (
             <div
               key={item.id}
-              className="column-as-measure-mapping-content-input-filled"
+              className={cn(
+                "column-as-measure-mapping-content-input-filled",
+                item.activeNodeClassName
+              )}
               draggable
               onDragStart={onDragStartHandler(item)}
               onDragOver={onDragOverHandler}
@@ -111,7 +119,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
               {allowRemoveFields && suffixNode !== undefined && (
                 <div
                   className={cn(
-                    "column-as-measure-mapping-content-input-filled-close",
+                    "column-as-measure-mapping-content-input-filled-close"
                   )}
                   role="button"
                   onClick={onFieldItemRemove(item)}
@@ -128,6 +136,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
           </div>
         )}
       </div>
-    </div >
+    </div>
   );
 };

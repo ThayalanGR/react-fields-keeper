@@ -1,7 +1,7 @@
 import {
   FieldsKeeperProvider,
   FieldsKeeperBucket,
-  FieldsKeeperRootBucket
+  FieldsKeeperRootBucket,
 } from "./FieldsKeeper/FieldsKeeper";
 
 export default function App() {
@@ -10,10 +10,29 @@ export default function App() {
       <h1>React Fields Keeper</h1>
 
       <FieldsKeeperProvider
-        allItems={[{ id: "a", label: "a" }, { id: "b", label: "b" }, { id: "c", label: "c" }, { id: "d", label: "d" },]}
+        allItems={[
+          { id: "a", label: "a" },
+          {
+            id: "b",
+            label: "b",
+            activeNodeClassName: "active-node-class-name",
+          },
+          { id: "c", label: "c" },
+          { id: "d", label: "d" },
+        ]}
         buckets={[
-          { id: "bucket1", items: [{ id: "a", label: "a" },] },
-          { id: "bucket2", items: [{ id: "b", label: "b" }, { id: "c", label: "c" },] },
+          { id: "bucket1", items: [{ id: "a", label: "a" }] },
+          {
+            id: "bucket2",
+            items: [
+              {
+                id: "b",
+                label: "b",
+                activeNodeClassName: "active-node-class-name",
+              },
+              { id: "c", label: "c" },
+            ],
+          },
           { id: "bucket3", items: [] },
         ]}
         onUpdate={(state) => {
@@ -25,7 +44,7 @@ export default function App() {
             width: 400,
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: 10
+            gap: 10,
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

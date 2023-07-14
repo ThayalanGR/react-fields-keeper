@@ -5,6 +5,7 @@ export interface IFieldsKeeperItem<T = string> {
   label: string;
   id: string;
   value?: T;
+  activeNodeClassName?: string;
 }
 
 export interface IFieldsKeeperBucket<T = string> {

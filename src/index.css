@@ -15,3 +15,8 @@ h1 {
   margin-bottom: 20px;
   text-align: center;
 }
+
+.active-node-class-name {
+  background-color: lightcoral !important;
+  color: white !important;
+}

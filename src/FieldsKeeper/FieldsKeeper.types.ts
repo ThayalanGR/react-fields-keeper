@@ -56,4 +56,5 @@ export interface IFieldsKeeperBucketProps {
    */
   suffixNode?: ReactNode;
   emptyFieldPlaceholder?: string;
+  defaultBucket?: boolean;
 }

@@ -38,7 +38,7 @@ export interface IFieldsKeeperProviderProps extends IFieldsKeeperState {
 
 export interface IFieldsKeeperBucketProps {
   id: string;
-  label?: string;
+  label?: ReactNode;
   /**
    * @default - Infinite
    */
@@ -56,5 +56,4 @@ export interface IFieldsKeeperBucketProps {
    */
   suffixNode?: ReactNode;
   emptyFieldPlaceholder?: string;
-  defaultBucket?: boolean;
 }

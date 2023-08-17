@@ -16,7 +16,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     disabled = false,
     suffixNode,
     emptyFieldPlaceholder = "Add data fields here",
-    defaultBucket,
   } = props;
 
   // state
@@ -88,10 +87,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
   // paint
   return (
     <div className="column-as-measure-mapping-content">
-      <div className="column-as-measure-mapping-content-title">
-        {label}
-        {defaultBucket && <span className="default-bucket-text">Default</span>}
-      </div>
+      <div className="column-as-measure-mapping-content-title">{label}</div>
       <div
         className={cn("column-as-measure-mapping-content-input", {
           "column-as-measure-mapping-content-multi-input":

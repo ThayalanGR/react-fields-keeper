@@ -116,8 +116,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
               <div className="column-as-measure-mapping-content-input-filled-value">
                 {item.label}
               </div>
-              {allowRemoveFields &&
-                (suffixNode || (
+              {suffixNode ||
+                (allowRemoveFields && (
                   <div
                     className={cn(
                       "column-as-measure-mapping-content-input-filled-close"

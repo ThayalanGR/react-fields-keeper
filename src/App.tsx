@@ -48,9 +48,9 @@ export default function App() {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <FieldsKeeperBucket id="bucket1" label="Bucket 1" />
-            <FieldsKeeperBucket id="bucket2" label="Bucket 2" />
-            <FieldsKeeperBucket id="bucket3" label="Bucket 3" />
+            <FieldsKeeperBucket id="bucket1" label="Bucket 1" allowRemoveFields />
+            <FieldsKeeperBucket id="bucket2" label="Bucket 2" allowRemoveFields />
+            <FieldsKeeperBucket id="bucket3" label="Bucket 3" allowRemoveFields />
           </div>
           <div>
             <FieldsKeeperRootBucket label="Root Bucket" />

@@ -116,18 +116,18 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
               <div className="column-as-measure-mapping-content-input-filled-value">
                 {item.label}
               </div>
-              {allowRemoveFields && suffixNode !== undefined && (
-                <div
-                  className={cn(
-                    "column-as-measure-mapping-content-input-filled-close"
-                  )}
-                  role="button"
-                  onClick={onFieldItemRemove(item)}
-                >
-                  <span className="ms-Icon ms-Icon--ChromeClose" />
-                </div>
-              )}
-              {suffixNode}
+              {allowRemoveFields &&
+                (suffixNode || (
+                  <div
+                    className={cn(
+                      "column-as-measure-mapping-content-input-filled-close"
+                    )}
+                    role="button"
+                    onClick={onFieldItemRemove(item)}
+                  >
+                    <span className="ms-Icon ms-Icon--ChromeClose" />
+                  </div>
+                ))}
             </div>
           ))
         ) : (

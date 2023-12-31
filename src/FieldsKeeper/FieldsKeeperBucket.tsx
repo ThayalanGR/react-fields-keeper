@@ -36,8 +36,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     return getGroupedItems(bucket.items);
   }, [buckets, id]);
 
-  console.log(groupedItems);
-
   // actions
   const assignFieldItem = (
     fieldItems: IFieldsKeeperItem[],
@@ -79,9 +77,11 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
   };
 
   const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
-    const fieldItemId = e.dataTransfer.getData(instanceId);
-    const fieldItem = allItems.find((item) => item.id === fieldItemId);
-    if (fieldItem) assignFieldItem([fieldItem]);
+    const fieldItemIds = (e.dataTransfer.getData(instanceId) ?? "").split(",");
+    const fieldItems = allItems.filter((item) =>
+      fieldItemIds.some((fieldItemId) => item.id === fieldItemId)
+    );
+    if (fieldItems.length) assignFieldItem(fieldItems);
     onDragLeaveHandler();
   };
 
@@ -151,8 +151,12 @@ const GroupedItemRenderer = (
   // handlers
   // event handlers
   const onDragStartHandler =
-    (fieldItem: IFieldsKeeperItem) => (e: React.DragEvent<HTMLDivElement>) => {
-      e.dataTransfer.setData(instanceId, fieldItem.id);
+    (...fieldItems: IFieldsKeeperItem[]) =>
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.dataTransfer.setData(
+        instanceId,
+        fieldItems.map((item) => item.id).join(",")
+      );
     };
 
   // paint
@@ -189,7 +193,9 @@ const GroupedItemRenderer = (
           )}
           style={itemStyle}
           draggable
-          onDragStart={onDragStartHandler(item)}
+          onDragStart={onDragStartHandler(
+            ...(isGroupHeader ? groupHeader.groupItems : [item])
+          )}
           onDragOver={onDragOverHandler}
         >
           <div className="react-fields-keeper-mapping-content-input-filled-value">

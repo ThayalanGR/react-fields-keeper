@@ -157,8 +157,12 @@ const RootBucketGroupedItemRenderer = (props: {
 
   // event handlers
   const onDragStartHandler =
-    (fieldItem: IFieldsKeeperItem) => (e: React.DragEvent<HTMLDivElement>) => {
-      e.dataTransfer.setData(instanceId, fieldItem.id);
+    (...fieldItems: IFieldsKeeperItem[]) =>
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.dataTransfer.setData(
+        instanceId,
+        fieldItems.map((item) => item.id).join(",")
+      );
     };
 
   // handlers
@@ -263,7 +267,9 @@ const RootBucketGroupedItemRenderer = (props: {
           })}
           style={itemStyle}
           draggable={!isFieldItemAssigned}
-          onDragStart={onDragStartHandler(fieldItem)}
+          onDragStart={onDragStartHandler(
+            ...(isGroupHeader ? groupHeader.groupItems : [fieldItem])
+          )}
         >
           <div className="react-fields-keeper-mapping-column-content-checkbox">
             <input

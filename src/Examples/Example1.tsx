@@ -27,7 +27,7 @@ export default function Example1() {
   // paint
   return (
     <div className="example-container">
-      <div className="example-container-title">Sample use case</div>
+      <div className="example-container-title">Sample use-case</div>
       <FieldsKeeperProvider
         allItems={allItems}
         buckets={buckets}

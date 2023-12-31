@@ -1,5 +1,5 @@
 // imports
-import { useContext, useMemo, useRef, useState } from "react";
+import { CSSProperties, useContext, useMemo, useRef, useState } from "react";
 import FuzzySearch from "fuzzy-search";
 import classNames from "classnames";
 
@@ -11,11 +11,42 @@ import {
 } from "./FieldsKeeper.types";
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
 
-interface IGroupedFieldsKeeperItem {
+export interface IGroupedFieldsKeeperItem {
   group: string;
   groupLabel: string;
   items: IFieldsKeeperItem[];
 }
+
+export interface IGroupedItemRenderer {
+  fieldItems: IFieldsKeeperItem[];
+  isGroupItem?: boolean;
+
+  groupHeader?: {
+    groupItems: IFieldsKeeperItem[];
+    isGroupCollapsed: boolean;
+    onGroupHeaderToggle: () => void;
+    isGroupHeaderSelected?: boolean;
+  };
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const getGroupedItems = (
+  currentItems: IFieldsKeeperItem[]
+): IGroupedFieldsKeeperItem[] => {
+  return currentItems.reduce<IGroupedFieldsKeeperItem[]>((acc, item) => {
+    const foundGroup = acc.find((group) => group.group === item.group);
+    if (foundGroup) {
+      foundGroup.items.push(item);
+    } else {
+      acc.push({
+        group: item.group ?? "NO_GROUP",
+        groupLabel: item.groupLabel ?? "NO_GROUP",
+        items: [item],
+      });
+    }
+    return acc;
+  }, []);
+};
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
   // props
@@ -30,25 +61,10 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
   const filteredGroupedItems = useMemo<IGroupedFieldsKeeperItem[]>(() => {
     const searcher = new FuzzySearch(allItems, ["label", "id"], { sort: true });
-    const totalItems = searcher.search(searchQuery);
-
+    const currentItems = searcher.search(searchQuery);
     // group items
-    return totalItems.reduce<IGroupedFieldsKeeperItem[]>((acc, item) => {
-      const foundGroup = acc.find((group) => group.group === item.group);
-      if (foundGroup) {
-        foundGroup.items.push(item);
-      } else {
-        acc.push({
-          group: item.group ?? "NO_GROUP",
-          groupLabel: item.groupLabel ?? "NO_GROUP",
-          items: [item],
-        });
-      }
-      return acc;
-    }, []);
+    return getGroupedItems(currentItems);
   }, [searchQuery, allItems]);
-
-  console.log(filteredGroupedItems);
 
   // actions
   const onSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +114,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
       <div className="react-fields-keeper-mapping-content-scrollable-container react-fields-keeper-mapping-content-scrollable-container-columns">
         {filteredGroupedItems.length > 0 ? (
           filteredGroupedItems.map((filteredGroupedItem, index) => (
-            <FilteredGroupedItem
+            <RootBucketGroupedItemRenderer
               key={index}
               filteredGroupedItem={filteredGroupedItem}
             />
@@ -124,7 +140,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
   );
 };
 
-const FilteredGroupedItem = (props: {
+const RootBucketGroupedItemRenderer = (props: {
   filteredGroupedItem: IGroupedFieldsKeeperItem;
 }) => {
   // props
@@ -219,37 +235,38 @@ const FilteredGroupedItem = (props: {
     fieldItems,
     isGroupItem,
     groupHeader,
-  }: {
-    fieldItems: IFieldsKeeperItem[];
-    isGroupItem?: boolean;
-
-    groupHeader?: {
-      isGroupHeaderSelected: boolean;
-      groupItems: IFieldsKeeperItem[];
-      isGroupCollapsed: boolean;
-      onGroupHeaderToggle: () => void;
-    };
-  }) => {
+  }: IGroupedItemRenderer) => {
+    // compute
     const isGroupHeader = groupHeader !== undefined;
 
+    // styles
+    const itemStyle = (
+      isGroupHeader
+        ? {
+            "--root-bucket-group-items-count":
+              groupHeader.groupItems.length + 1,
+          }
+        : {}
+    ) as CSSProperties;
+
+    // paint
     return fieldItems.map((fieldItem) => {
       const isFieldItemAssigned = isGroupHeader
         ? groupHeader?.isGroupHeaderSelected
         : checkIsFieldItemAssigned(fieldItem);
       return (
         <div
-          key={fieldItem.id}
           className={classNames("react-fields-keeper-mapping-column-content", {
             "react-fields-keeper-mapping-column-content-offset": isGroupItem,
+            "react-fields-keeper-mapping-column-content-group-header":
+              isGroupHeader && !groupHeader.isGroupCollapsed,
           })}
+          style={itemStyle}
           draggable={!isFieldItemAssigned}
           onDragStart={onDragStartHandler(fieldItem)}
         >
           <div className="react-fields-keeper-mapping-column-content-checkbox">
             <input
-              // className={classNames({
-              //   "react-fields-keeper-mapping-content-disabled": isDisabled,
-              // })}
               type="checkbox"
               checked={isFieldItemAssigned}
               onChange={

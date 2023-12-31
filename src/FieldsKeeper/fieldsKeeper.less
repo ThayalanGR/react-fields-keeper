@@ -75,13 +75,49 @@
       height: 24px;
       padding: 0 5px 0 8px;
       white-space: nowrap;
-      overflow: hidden;
       border-radius: 2px;
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       align-items: center;
       justify-content: space-between;
+      position: relative;
+      gap: 3px;
+
+      &:hover {
+        background-color: #d8d8d8;
+
+        &.react-fields-keeper-mapping-content-input-filled-group-header {
+          &::after {
+            background-color: #d8d8d8;
+          }
+        }
+      }
+
+      &.react-fields-keeper-mapping-content-input-filled-offset {
+        margin-left: 5px;
+        margin-right: 5px;
+        width: calc(100% - 10px);
+        border: 1px solid rgb(178, 178, 178);
+      }
+
+      &.react-fields-keeper-mapping-content-input-filled-group-header {
+        &::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: calc(
+            (24px * var(--bucket-group-items-count)) +
+              (3px * var(--bucket-group-items-count)) + 2px
+          );
+
+          border-radius: 2px;
+          z-index: -1;
+          background: #dbdbdb;
+        }
+      }
 
       .react-fields-keeper-mapping-content-input-filled-value {
         width: min-content;
@@ -90,20 +126,42 @@
       }
 
       .react-fields-keeper-mapping-content-input-filled-close {
+        margin-left: auto;
         height: 15px;
         width: 15px;
         border-radius: 2px;
         display: grid;
         place-items: center;
         cursor: pointer;
+        user-select: none;
         i {
           font-size: 8px !important;
         }
         &:hover {
-          background-color: #f3f3f3;
+          background-color: #e4e4e4;
         }
       }
     }
+  }
+}
+
+.react-fields-keeper-mapping-column-content-action {
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+
+  &:hover {
+    background-color: #e4e4e4;
+    scale: 1.1;
+  }
+
+  &:active {
+    scale: 1;
+  }
+
+  i {
+    font-size: 8px !important;
   }
 }
 
@@ -182,9 +240,32 @@
     cursor: pointer;
     padding: 6px 4px;
     user-select: none;
+    position: relative;
 
     &:hover {
       background-color: #f3f3f3;
+      &.react-fields-keeper-mapping-column-content-group-header {
+        &::after {
+          background-color: #f3f3f3;
+        }
+      }
+    }
+
+    &.react-fields-keeper-mapping-column-content-group-header {
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: calc(
+          (24px * var(--root-bucket-group-items-count)) +
+            (2px * var(--root-bucket-group-items-count)) + 2px
+        );
+
+        border-radius: 2px;
+        z-index: -1;
+      }
     }
 
     &.react-fields-keeper-mapping-column-content-offset {
@@ -211,26 +292,6 @@
       .react-fields-keeper-mapping-column-content-label {
         font-size: 12px;
         font-weight: normal;
-      }
-
-      .react-fields-keeper-mapping-column-content-action {
-        width: 15px;
-        height: 15px;
-        display: grid;
-        place-items: center;
-
-        &:hover {
-          background-color: #d8d8d8;
-          scale: 1.1;
-        }
-
-        &:active {
-          scale: 1;
-        }
-
-        i {
-          font-size: 8px !important;
-        }
       }
     }
   }

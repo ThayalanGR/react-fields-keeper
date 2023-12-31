@@ -1,62 +1,19 @@
-import {
-  FieldsKeeperProvider,
-  FieldsKeeperBucket,
-  FieldsKeeperRootBucket,
-} from "./FieldsKeeper/FieldsKeeper";
+import Example1 from "./Examples/Example1";
+import Example2 from "./Examples/Example2";
+import Example3 from "./Examples/Example3";
 
 export default function App() {
   return (
-    <div className="App">
+    <div className="app-wrapper">
       <h1>React Fields Keeper</h1>
 
-      <FieldsKeeperProvider
-        allItems={[
-          { id: "a", label: "a" },
-          {
-            id: "b",
-            label: "b",
-            activeNodeClassName: "active-node-class-name",
-          },
-          { id: "c", label: "c" },
-          { id: "d", label: "d" },
-        ]}
-        buckets={[
-          { id: "bucket1", items: [{ id: "a", label: "a" }] },
-          {
-            id: "bucket2",
-            items: [
-              {
-                id: "b",
-                label: "b",
-                activeNodeClassName: "active-node-class-name",
-              },
-              { id: "c", label: "c" },
-            ],
-          },
-          { id: "bucket3", items: [] },
-        ]}
-        onUpdate={(state) => {
-          console.log(state);
-        }}
-      >
-        <div
-          style={{
-            width: 400,
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <FieldsKeeperBucket id="bucket1" label="Bucket 1" allowRemoveFields />
-            <FieldsKeeperBucket id="bucket2" label="Bucket 2" allowRemoveFields />
-            <FieldsKeeperBucket id="bucket3" label="Bucket 3" allowRemoveFields />
-          </div>
-          <div>
-            <FieldsKeeperRootBucket label="Root Bucket" />
-          </div>
-        </div>
-      </FieldsKeeperProvider>
+      <h3>Examples</h3>
+
+      <Example1 />
+
+      <Example2 />
+
+      <Example3 />
     </div>
   );
 }

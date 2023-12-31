@@ -1,19 +1,19 @@
-.column-as-measure-mapping-content {
+.react-fields-keeper-mapping-content {
   display: flex;
   flex-direction: column;
   gap: 5px;
   align-items: flex-start;
   width: 100%;
   :hover {
-    .column-as-measure-edit {
+    .react-fields-keeper-edit {
       visibility: visible;
     }
   }
-  .column-as-measure-edit {
+  .react-fields-keeper-edit {
     cursor: pointer;
     visibility: hidden;
   }
-  .column-as-measure-mapping-content-title {
+  .react-fields-keeper-mapping-content-title {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -27,9 +27,10 @@
     .icons {
       padding: 5px;
       cursor: pointer;
+
       &:hover {
         background: #80808030;
-        border-radius: 50%;
+        border-radius: 2px;
       }
     }
     .ms-Icon--ChromeClose {
@@ -37,11 +38,11 @@
     }
   }
 
-  .column-as-measure-mapping-content-input {
+  .react-fields-keeper-mapping-content-input {
     width: 100%;
     overflow: hidden;
     border: 1px dashed gray;
-    border-radius: 3px;
+    border-radius: 2px;
     padding: 6px 5px;
     text-align: left;
     font-size: 12px;
@@ -51,12 +52,12 @@
     gap: 3px;
     cursor: pointer;
 
-    &.column-as-measure-mapping-content-input-active {
+    &.react-fields-keeper-mapping-content-input-active {
       border-color: black;
       background-color: rgb(240, 240, 240);
     }
 
-    .column-as-measure-mapping-content-input-placeholder {
+    .react-fields-keeper-mapping-content-input-placeholder {
       padding: 0px 4px;
       height: 24px;
       display: flex;
@@ -64,11 +65,11 @@
       pointer-events: none;
     }
 
-    &.column-as-measure-mapping-content-multi-input {
+    &.react-fields-keeper-mapping-content-multi-input {
       padding-bottom: 10px;
     }
 
-    .column-as-measure-mapping-content-input-filled {
+    .react-fields-keeper-mapping-content-input-filled {
       background: #dbdbdb;
       width: 100%;
       height: 24px;
@@ -82,20 +83,20 @@
       align-items: center;
       justify-content: space-between;
 
-      .column-as-measure-mapping-content-input-filled-value {
+      .react-fields-keeper-mapping-content-input-filled-value {
         width: min-content;
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
-      .column-as-measure-mapping-content-input-filled-close {
+      .react-fields-keeper-mapping-content-input-filled-close {
         height: 15px;
         width: 15px;
-        border-radius: 50%;
+        border-radius: 2px;
         display: grid;
         place-items: center;
         cursor: pointer;
-        span {
+        i {
           font-size: 8px !important;
         }
         &:hover {
@@ -106,7 +107,7 @@
   }
 }
 
-.column-as-measure-mapping-container {
+.react-fields-keeper-mapping-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -114,7 +115,11 @@
   gap: 6px;
   overflow: hidden;
 
-  .column-as-measure-mapping-column-searcher {
+  .react-fields-keeper-mapping-subtitle {
+    font-size: 12px;
+  }
+
+  .react-fields-keeper-mapping-column-searcher {
     width: 100%;
     overflow: hidden;
     position: relative;
@@ -126,14 +131,14 @@
       padding-right: 20px;
     }
 
-    .column-as-measure-mapping-column-searcher-clear {
+    .react-fields-keeper-mapping-column-searcher-clear {
       position: absolute;
       top: 50%;
       right: 5px;
       transform: translateY(-50%);
       width: 18px;
       height: 18px;
-      border-radius: 50%;
+      border-radius: 2px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -152,7 +157,7 @@
     }
   }
 
-  .column-as-measure-mapping-content-scrollable-container {
+  .react-fields-keeper-mapping-content-scrollable-container {
     width: 100%;
     height: auto;
     max-height: 335px;
@@ -162,13 +167,13 @@
     gap: 10px;
     padding-right: 5px;
 
-    &.column-as-measure-mapping-content-scrollable-container-columns {
+    &.react-fields-keeper-mapping-content-scrollable-container-columns {
       max-height: 300px;
       gap: 0px;
     }
   }
 
-  .column-as-measure-mapping-column-content {
+  .react-fields-keeper-mapping-column-content {
     display: flex;
     flex-direction: row;
     width: 100%;
@@ -176,22 +181,61 @@
     align-items: center;
     cursor: pointer;
     padding: 6px 4px;
+    user-select: none;
 
     &:hover {
       background-color: #f3f3f3;
     }
 
-    .column-as-measure-mapping-column-content-checkbox {
-      display: block;
+    &.react-fields-keeper-mapping-column-content-offset {
+      padding-left: 20px;
     }
 
-    .column-as-measure-mapping-column-content-label {
-      font-size: 12px;
-      font-weight: normal;
+    .react-fields-keeper-mapping-column-content-checkbox {
+      display: block;
+      height: 100%;
+      display: grid;
+      place-items: center;
+
+      input {
+        cursor: pointer;
+      }
+    }
+
+    .react-fields-keeper-mapping-column-content-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      .react-fields-keeper-mapping-column-content-label {
+        font-size: 12px;
+        font-weight: normal;
+      }
+
+      .react-fields-keeper-mapping-column-content-action {
+        width: 15px;
+        height: 15px;
+        display: grid;
+        place-items: center;
+
+        &:hover {
+          background-color: #d8d8d8;
+          scale: 1.1;
+        }
+
+        &:active {
+          scale: 1;
+        }
+
+        i {
+          font-size: 8px !important;
+        }
+      }
     }
   }
 
-  .column-as-measure-mapping-no-search-items-found {
+  .react-fields-keeper-mapping-no-search-items-found {
     width: 100%;
     text-align: center;
     display: grid;
@@ -199,7 +243,7 @@
     font-size: 13px;
     font-weight: normal;
 
-    .column-as-measure-mapping-clear-search-link {
+    .react-fields-keeper-mapping-clear-search-link {
       margin-top: 5px;
       border-bottom: 1px solid rgb(92, 92, 209);
       color: rgb(92, 92, 209);
@@ -214,7 +258,38 @@
   }
 }
 
-.column-as-measure-mapping-content-disabled {
+.react-fields-keeper-mapping-content-disabled {
   opacity: 0.6;
   pointer-events: none;
+}
+
+// icons
+@font-face {
+  font-family: "FabricMDL2Icons_fields_keeper";
+  src: url("../assets/fabric-icons-76208206.woff") format("woff");
+}
+
+.fk-ms-Icon {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-family: "FabricMDL2Icons_fields_keeper";
+  font-style: normal;
+  font-weight: normal;
+}
+
+.fk-ms-Icon--ChevronDown:before {
+  content: "\E70D";
+}
+.fk-ms-Icon--ChevronRight:before {
+  content: "\E76C";
+}
+.fk-ms-Icon--ChromeClose:before {
+  content: "\E8BB";
+}
+.fk-ms-Icon--GripperDotsVertical:before {
+  content: "\F772";
+}
+.fk-ms-Icon--Info12:before {
+  content: "\E55A";
 }

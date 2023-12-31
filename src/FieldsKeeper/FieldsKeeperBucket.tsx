@@ -86,15 +86,15 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
   // paint
   return (
-    <div className="column-as-measure-mapping-content">
-      <div className="column-as-measure-mapping-content-title">{label}</div>
+    <div className="react-fields-keeper-mapping-content">
+      <div className="react-fields-keeper-mapping-content-title">{label}</div>
       <div
-        className={cn("column-as-measure-mapping-content-input", {
-          "column-as-measure-mapping-content-multi-input":
+        className={cn("react-fields-keeper-mapping-content-input", {
+          "react-fields-keeper-mapping-content-multi-input":
             hasRoomForFieldAssignment,
-          "column-as-measure-mapping-content-input-active":
+          "react-fields-keeper-mapping-content-input-active":
             isCurrentFieldActive,
-          "column-as-measure-mapping-content-disabled": disabled,
+          "react-fields-keeper-mapping-content-disabled": disabled,
         })}
         onDrop={onDropHandler}
         onDragOver={onDragOverHandler}
@@ -106,32 +106,32 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             <div
               key={item.id}
               className={cn(
-                "column-as-measure-mapping-content-input-filled",
+                "react-fields-keeper-mapping-content-input-filled",
                 item.activeNodeClassName
               )}
               draggable
               onDragStart={onDragStartHandler(item)}
               onDragOver={onDragOverHandler}
             >
-              <div className="column-as-measure-mapping-content-input-filled-value">
+              <div className="react-fields-keeper-mapping-content-input-filled-value">
                 {item.label}
               </div>
               {suffixNode ||
                 (allowRemoveFields && (
                   <div
                     className={cn(
-                      "column-as-measure-mapping-content-input-filled-close"
+                      "react-fields-keeper-mapping-content-input-filled-close"
                     )}
                     role="button"
                     onClick={onFieldItemRemove(item)}
                   >
-                    <span className="ms-Icon ms-Icon--ChromeClose" />
+                    <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                   </div>
                 ))}
             </div>
           ))
         ) : (
-          <div className="column-as-measure-mapping-content-input-placeholder">
+          <div className="react-fields-keeper-mapping-content-input-placeholder">
             {emptyFieldPlaceholder}
           </div>
         )}

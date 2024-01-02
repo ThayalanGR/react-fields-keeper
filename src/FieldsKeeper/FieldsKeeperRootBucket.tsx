@@ -51,7 +51,9 @@ export const getGroupedItems = (
     []
   );
 
-  groupedItems.forEach(({ items }) => sortBucketItemsBasedOnGroupOrder(items));
+  groupedItems.forEach((groupedItem) => {
+    groupedItem.items = sortBucketItemsBasedOnGroupOrder(groupedItem.items);
+  });
 
   return groupedItems;
 };

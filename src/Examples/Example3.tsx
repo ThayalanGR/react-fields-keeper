@@ -10,18 +10,18 @@ export default function Example1() {
   // compute
   const allItems: IFieldsKeeperItem[] = [
     {
-      id: "date.year",
-      label: "Year",
-      group: "date",
-      groupLabel: "Date",
-      groupOrder: 0,
-    },
-    {
       id: "date.quarter",
       label: "Quarter",
       group: "date",
       groupLabel: "Date",
       groupOrder: 1,
+    },
+    {
+      id: "date.year",
+      label: "Year",
+      group: "date",
+      groupLabel: "Date",
+      groupOrder: 0,
     },
     {
       id: "date.month",

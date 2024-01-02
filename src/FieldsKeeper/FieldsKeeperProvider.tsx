@@ -1,14 +1,12 @@
 // imports
-import {
-  useEffect,
-  useMemo,
-  useState
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./fieldsKeeper.less";
-import { IFieldsKeeperProviderProps, IFieldsKeeperState } from "./FieldsKeeper.types";
+import {
+  IFieldsKeeperProviderProps,
+  IFieldsKeeperState,
+} from "./FieldsKeeper.types";
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
-import isEqual from 'lodash.isequal';
-
+import isEqual from "lodash.isequal";
 
 // components
 export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
@@ -18,30 +16,35 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
   // state
   const [state, updateState] = useState<IFieldsKeeperState>({
     allItems,
-    buckets
+    buckets,
   });
 
   // compute
-  const instanceId = useMemo(() => (new Date()).getTime().toString(), []);
+  const instanceId = useMemo(() => new Date().getTime().toString(), []);
 
   // actions
   const tapUpdateState = (newState: Partial<IFieldsKeeperState>) => {
-    const requriedState = { ...state, ...newState };
-    updateState(requriedState);
+    const requiredState = { ...state, ...newState };
+    updateState(requiredState);
 
-    // intorduce delayed upates later
+    // introduce delayed updates later
     onUpdate?.({
-      allItems: requriedState.allItems,
-      buckets: requriedState.buckets
+      allItems: requiredState.allItems,
+      buckets: requiredState.buckets,
     });
   };
 
   // effects
   useEffect(() => {
-    if (!isEqual({ allItems, buckets }, { allItems: state.allItems, buckets: state.buckets }))
-      updateState({ allItems, buckets })
+    if (
+      !isEqual(
+        { allItems, buckets },
+        { allItems: state.allItems, buckets: state.buckets }
+      )
+    )
+      updateState({ allItems, buckets });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allItems, buckets])
+  }, [allItems, buckets]);
 
   // paint
   return (
@@ -52,4 +55,3 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
     </FieldsKeeperContext.Provider>
   );
 };
-

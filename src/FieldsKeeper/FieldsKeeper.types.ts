@@ -6,6 +6,8 @@ export interface IFieldsKeeperItem<T = string> {
   id: string;
   value?: T;
   activeNodeClassName?: string;
+  group?: string;
+  groupLabel?: string;
 }
 
 export interface IFieldsKeeperBucket<T = string> {
@@ -15,6 +17,7 @@ export interface IFieldsKeeperBucket<T = string> {
 
 export interface IFieldsKeeperRootBucketProps {
   label?: string;
+  labelClassName?: string
   isDisabled?: boolean;
 }
 

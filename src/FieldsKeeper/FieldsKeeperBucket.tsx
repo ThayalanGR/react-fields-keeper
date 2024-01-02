@@ -181,6 +181,7 @@ const GroupedItemRenderer = (
     return fieldItems.map((item) => {
       return (
         <div
+          key={item.id}
           className={classNames(
             "react-fields-keeper-mapping-content-input-filled",
             item.activeNodeClassName,

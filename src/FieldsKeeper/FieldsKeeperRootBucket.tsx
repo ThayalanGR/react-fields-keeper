@@ -260,6 +260,7 @@ const RootBucketGroupedItemRenderer = (props: {
         : checkIsFieldItemAssigned(fieldItem);
       return (
         <div
+          key={fieldItem.id}
           className={classNames("react-fields-keeper-mapping-column-content", {
             "react-fields-keeper-mapping-column-content-offset": isGroupItem,
             "react-fields-keeper-mapping-column-content-group-header":

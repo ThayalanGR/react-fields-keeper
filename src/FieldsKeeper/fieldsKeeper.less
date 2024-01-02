@@ -84,6 +84,10 @@
       position: relative;
       gap: 3px;
 
+      .react-fields-keeper-mapping-column-content-action {
+        margin-left: auto;
+      }
+
       &:hover {
         background-color: #d8d8d8;
 
@@ -102,6 +106,16 @@
       }
 
       &.react-fields-keeper-mapping-content-input-filled-group-header {
+        .react-fields-keeper-mapping-content-input-filled-close {
+          margin-left: unset;
+        }
+      }
+
+      &.react-fields-keeper-mapping-content-input-filled-group-header-after {
+        .react-fields-keeper-mapping-content-input-filled-close {
+          margin-left: unset;
+        }
+
         &::after {
           content: "";
           position: absolute;

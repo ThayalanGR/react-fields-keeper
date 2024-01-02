@@ -189,6 +189,8 @@ const GroupedItemRenderer = (
               "react-fields-keeper-mapping-content-input-filled-offset":
                 isGroupItem,
               "react-fields-keeper-mapping-content-input-filled-group-header":
+                isGroupHeader,
+              "react-fields-keeper-mapping-content-input-filled-group-header-after":
                 isGroupHeader && !groupHeader.isGroupCollapsed,
             }
           )}
@@ -202,21 +204,6 @@ const GroupedItemRenderer = (
           <div className="react-fields-keeper-mapping-content-input-filled-value">
             {item.label}
           </div>
-          {suffixNode ||
-            (allowRemoveFields && (
-              <div
-                className={classNames(
-                  "react-fields-keeper-mapping-content-input-filled-close"
-                )}
-                role="button"
-                onClick={onFieldItemRemove(
-                  ...(isGroupHeader ? groupHeader.groupItems : [item])
-                )}
-              >
-                <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
-              </div>
-            ))}
-
           {isGroupHeader && (
             <div
               className={classNames(
@@ -232,6 +219,20 @@ const GroupedItemRenderer = (
               )}
             </div>
           )}
+          {suffixNode ||
+            (allowRemoveFields && (
+              <div
+                className={classNames(
+                  "react-fields-keeper-mapping-content-input-filled-close"
+                )}
+                role="button"
+                onClick={onFieldItemRemove(
+                  ...(isGroupHeader ? groupHeader.groupItems : [item])
+                )}
+              >
+                <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
+              </div>
+            ))}
         </div>
       );
     });

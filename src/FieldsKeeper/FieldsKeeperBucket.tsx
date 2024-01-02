@@ -3,8 +3,10 @@ import classNames from "classnames";
 
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
 import {
+  IFieldsKeeperBucket,
   IFieldsKeeperBucketProps,
   IFieldsKeeperItem,
+  IFieldsKeeperState,
 } from "./FieldsKeeper.types";
 import {
   IGroupedFieldsKeeperItem,
@@ -20,6 +22,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     maxItems = Number.MAX_SAFE_INTEGER,
     disabled = false,
     emptyFieldPlaceholder = "Add data fields here",
+    sortGroupOrderWiseOnAssignment = true,
   } = props;
 
   // state
@@ -36,31 +39,18 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     return getGroupedItems(bucket.items);
   }, [buckets, id]);
 
-  // actions
-  const assignFieldItem = (
-    fieldItems: IFieldsKeeperItem[],
-    removeOnly?: boolean
-  ) => {
-    const newBuckets = [...buckets];
-    newBuckets.forEach((bucket) => {
-      // removes item from old bucket
-      bucket.items = bucket.items.filter(
-        (item) =>
-          fieldItems.some((fieldItem) => fieldItem.id === item.id) === false
-      );
-
-      // insert new item into bucket
-      if (!removeOnly && bucket.id === id) bucket.items.push(...fieldItems);
-    });
-
-    // update context
-    updateState({ buckets: newBuckets });
-  };
-
   const onFieldItemRemove =
     (...fieldItems: IFieldsKeeperItem[]) =>
     () =>
-      assignFieldItem(fieldItems, true);
+      assignFieldItems({
+        bucketId: id,
+        buckets,
+        fieldItems,
+        sortGroupOrderWiseOnAssignment,
+        updateState,
+
+        removeOnly: true,
+      });
 
   // event handlers
   const onDragLeaveHandler = () => {
@@ -81,7 +71,14 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const fieldItems = allItems.filter((item) =>
       fieldItemIds.some((fieldItemId) => item.id === fieldItemId)
     );
-    if (fieldItems.length) assignFieldItem(fieldItems);
+    if (fieldItems.length)
+      assignFieldItems({
+        bucketId: id,
+        buckets,
+        sortGroupOrderWiseOnAssignment,
+        fieldItems,
+        updateState,
+      });
     onDragLeaveHandler();
   };
 
@@ -259,3 +256,81 @@ const GroupedItemRenderer = (
   }
   return <>{renderFieldItems({ fieldItems: items })}</>;
 };
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function assignFieldItems(props: {
+  bucketId: string | null;
+  buckets: IFieldsKeeperBucket[];
+  fieldItems: IFieldsKeeperItem[];
+  updateState: (state: Partial<IFieldsKeeperState>) => void;
+  removeOnly?: boolean;
+  sortGroupOrderWiseOnAssignment?: boolean;
+}) {
+  // props
+  const {
+    bucketId,
+    buckets,
+    fieldItems,
+    updateState,
+    removeOnly = false,
+    sortGroupOrderWiseOnAssignment = false,
+  } = props;
+
+  // compute
+  const newBuckets = [...buckets];
+  newBuckets.forEach((bucket) => {
+    // removes item from old bucket
+    bucket.items = bucket.items.filter(
+      (item) =>
+        fieldItems.some((fieldItem) => fieldItem.id === item.id) === false
+    );
+
+    // insert new item into bucket
+    if (!removeOnly && bucket.id === bucketId) bucket.items.push(...fieldItems);
+
+    // sort the same group items based on the group order
+    if (sortGroupOrderWiseOnAssignment) {
+      // grouping based on the group property
+      const chunkGroups = bucket.items.reduce<
+        { group: string; items: IFieldsKeeperItem[] }[]
+      >((result, current, index) => {
+        let groupBucket = result.find(
+          (item) => item.group === (current.group ?? index.toString())
+        );
+        if (!groupBucket) {
+          groupBucket = {
+            group: current.group ?? index.toString(),
+            items: [],
+          };
+          result.push(groupBucket);
+        }
+        groupBucket.items.push(current);
+        return result;
+      }, []);
+
+      // sorting if found valid groups
+      bucket.items = chunkGroups.reduce<IFieldsKeeperItem[]>(
+        (result, current) => {
+          if (current.items.length > 1) {
+            // sort the groups based on group order
+            current.items.sort((itemA, itemB) => {
+              if (
+                itemA.groupOrder !== undefined &&
+                itemB.groupOrder !== undefined
+              ) {
+                return itemA.groupOrder - itemB.groupOrder;
+              }
+              return 0;
+            });
+          }
+          result.push(...current.items);
+          return result;
+        },
+        []
+      );
+    }
+  });
+
+  // update context
+  updateState({ buckets: newBuckets });
+}

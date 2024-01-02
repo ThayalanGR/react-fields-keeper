@@ -10,6 +10,7 @@ import {
   IFieldsKeeperRootBucketProps,
 } from "./FieldsKeeper.types";
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
+import { assignFieldItems } from "..";
 
 export interface IGroupedFieldsKeeperItem {
   group: string;
@@ -50,7 +51,12 @@ export const getGroupedItems = (
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
   // props
-  const { label, isDisabled, labelClassName } = props;
+  const {
+    label,
+    isDisabled,
+    labelClassName,
+    sortGroupOrderWiseOnAssignment = true,
+  } = props;
 
   // refs
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -117,6 +123,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
             <RootBucketGroupedItemRenderer
               key={index}
               filteredGroupedItem={filteredGroupedItem}
+              sortGroupOrderWiseOnAssignment={sortGroupOrderWiseOnAssignment}
             />
           ))
         ) : (
@@ -142,10 +149,12 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
 const RootBucketGroupedItemRenderer = (props: {
   filteredGroupedItem: IGroupedFieldsKeeperItem;
+  sortGroupOrderWiseOnAssignment: boolean;
 }) => {
   // props
   const {
     filteredGroupedItem: { group, groupLabel, items: filteredItems },
+    sortGroupOrderWiseOnAssignment,
   } = props;
 
   // state
@@ -189,65 +198,20 @@ const RootBucketGroupedItemRenderer = (props: {
   };
 
   const onFieldItemClick =
-    (fieldItem: IFieldsKeeperItem, remove = false) =>
+    (fieldItems: IFieldsKeeperItem[], remove = false) =>
     () => {
-      const newBuckets = [...buckets];
-
-      if (remove) {
-        newBuckets.some((bucket) => {
-          // removes item from old bucket
-          const foundOldItemIndex = bucket.items.findIndex(
-            (item) => item.id === fieldItem.id
-          );
-          if (foundOldItemIndex !== -1) {
-            bucket.items.splice(foundOldItemIndex, 1);
-            return true;
-          }
-          return false;
-        });
-      } else {
-        // fill based on priority
-        const bucketToFill = getPriorityTargetBucketToFill(
-          newBuckets,
-          fieldItem.group
-        );
-        bucketToFill.items.push(fieldItem);
-      }
-
-      // update context
-      updateState({ buckets: newBuckets });
-    };
-
-  const onGroupHeaderItemClick =
-    (groupItems: IFieldsKeeperItem[], remove = false) =>
-    () => {
-      const newBuckets = [...buckets];
-
-      if (remove) {
-        groupItems.find((fieldItem) => {
-          newBuckets.some((bucket) => {
-            // removes item from old bucket
-            const foundOldItemIndex = bucket.items.findIndex(
-              (item) => item.id === fieldItem.id
-            );
-            if (foundOldItemIndex !== -1) {
-              bucket.items.splice(foundOldItemIndex, 1);
-              return true;
-            }
-            return false;
-          });
-        });
-      } else {
-        // fill based on priority
-        const bucketToFill = getPriorityTargetBucketToFill(
-          newBuckets,
-          groupItems[0].group
-        );
-        bucketToFill.items.push(...groupItems);
-      }
-
-      // update context
-      updateState({ buckets: newBuckets });
+      const bucketToFill = getPriorityTargetBucketToFill(
+        buckets,
+        fieldItems[0].group
+      );
+      assignFieldItems({
+        bucketId: bucketToFill.id,
+        fieldItems,
+        buckets,
+        removeOnly: remove,
+        sortGroupOrderWiseOnAssignment,
+        updateState,
+      });
     };
 
   // paint
@@ -292,14 +256,10 @@ const RootBucketGroupedItemRenderer = (props: {
             <input
               type="checkbox"
               checked={isFieldItemAssigned}
-              onChange={
-                isGroupHeader
-                  ? onGroupHeaderItemClick(
-                      groupHeader.groupItems,
-                      isFieldItemAssigned
-                    )
-                  : onFieldItemClick(fieldItem, isFieldItemAssigned)
-              }
+              onChange={onFieldItemClick(
+                isGroupHeader ? groupHeader.groupItems : [fieldItem],
+                isFieldItemAssigned
+              )}
             />
           </div>
           <div className="react-fields-keeper-mapping-column-content-wrapper">

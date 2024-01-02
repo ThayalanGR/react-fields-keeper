@@ -8,6 +8,7 @@ export interface IFieldsKeeperItem<T = string> {
   activeNodeClassName?: string;
   group?: string;
   groupLabel?: string;
+  groupOrder?: number;
 }
 
 export interface IFieldsKeeperBucket<T = string> {
@@ -19,6 +20,7 @@ export interface IFieldsKeeperRootBucketProps {
   label?: string;
   labelClassName?: string
   isDisabled?: boolean;
+  sortGroupOrderWiseOnAssignment?: boolean;
 }
 
 export interface IFieldsKeeperState {
@@ -59,4 +61,9 @@ export interface IFieldsKeeperBucketProps {
    */
   suffixNode?: ReactNode;
   emptyFieldPlaceholder?: string;
+
+  /**
+   * default - true
+   */
+  sortGroupOrderWiseOnAssignment?: boolean;
 }

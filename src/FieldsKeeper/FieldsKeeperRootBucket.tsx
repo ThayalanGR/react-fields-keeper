@@ -172,10 +172,20 @@ const RootBucketGroupedItemRenderer = (props: {
     );
   };
 
-  const getPriorityTargetBucketToFill = (buckets: IFieldsKeeperBucket[]) => {
-    return [...buckets].sort(
+  const getPriorityTargetBucketToFill = (
+    buckets: IFieldsKeeperBucket[],
+    priorityGroup?: string
+  ) => {
+    if (priorityGroup) {
+      const priorityGroupBucket = buckets.find((bucket) => {
+        return bucket.items.some((item) => item.group === priorityGroup);
+      });
+      if (priorityGroupBucket) return priorityGroupBucket;
+    }
+    const leastFilledOrderedBuckets = [...buckets].sort(
       (bucketA, bucketB) => bucketA.items.length - bucketB.items.length
-    )[0];
+    );
+    return leastFilledOrderedBuckets[0];
   };
 
   const onFieldItemClick =
@@ -197,7 +207,10 @@ const RootBucketGroupedItemRenderer = (props: {
         });
       } else {
         // fill based on priority
-        const bucketToFill = getPriorityTargetBucketToFill(newBuckets);
+        const bucketToFill = getPriorityTargetBucketToFill(
+          newBuckets,
+          fieldItem.group
+        );
         bucketToFill.items.push(fieldItem);
       }
 
@@ -226,7 +239,10 @@ const RootBucketGroupedItemRenderer = (props: {
         });
       } else {
         // fill based on priority
-        const bucketToFill = getPriorityTargetBucketToFill(newBuckets);
+        const bucketToFill = getPriorityTargetBucketToFill(
+          newBuckets,
+          groupItems[0].group
+        );
         bucketToFill.items.push(...groupItems);
       }
 

@@ -289,48 +289,56 @@ export function assignFieldItems(props: {
     if (!removeOnly && bucket.id === bucketId) bucket.items.push(...fieldItems);
 
     // sort the same group items based on the group order
-    if (sortGroupOrderWiseOnAssignment) {
-      // grouping based on the group property
-      const chunkGroups = bucket.items.reduce<
-        { group: string; items: IFieldsKeeperItem[] }[]
-      >((result, current, index) => {
-        let groupBucket = result.find(
-          (item) => item.group === (current.group ?? index.toString())
-        );
-        if (!groupBucket) {
-          groupBucket = {
-            group: current.group ?? index.toString(),
-            items: [],
-          };
-          result.push(groupBucket);
-        }
-        groupBucket.items.push(current);
-        return result;
-      }, []);
-
-      // sorting if found valid groups
-      bucket.items = chunkGroups.reduce<IFieldsKeeperItem[]>(
-        (result, current) => {
-          if (current.items.length > 1) {
-            // sort the groups based on group order
-            current.items.sort((itemA, itemB) => {
-              if (
-                itemA.groupOrder !== undefined &&
-                itemB.groupOrder !== undefined
-              ) {
-                return itemA.groupOrder - itemB.groupOrder;
-              }
-              return 0;
-            });
-          }
-          result.push(...current.items);
-          return result;
-        },
-        []
-      );
-    }
+    if (sortGroupOrderWiseOnAssignment)
+      bucket.items = sortBucketItemsBasedOnGroupOrder(bucket.items);
   });
 
   // update context
   updateState({ buckets: newBuckets });
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function sortBucketItemsBasedOnGroupOrder(
+  items: IFieldsKeeperItem[]
+): IFieldsKeeperItem[] {
+  // grouping based on the group property
+  const chunkGroups = items.reduce<
+    { group: string; items: IFieldsKeeperItem[] }[]
+  >((result, current, index) => {
+    let groupBucket = result.find(
+      (item) => item.group === (current.group ?? index.toString())
+    );
+    if (!groupBucket) {
+      groupBucket = {
+        group: current.group ?? index.toString(),
+        items: [],
+      };
+      result.push(groupBucket);
+    }
+    groupBucket.items.push(current);
+    return result;
+  }, []);
+
+  // sorting if found valid groups
+  const sortedItems = chunkGroups.reduce<IFieldsKeeperItem[]>(
+    (result, current) => {
+      if (current.items.length > 1) {
+        // sort the groups based on group order
+        current.items.sort((itemA, itemB) => {
+          if (
+            itemA.groupOrder !== undefined &&
+            itemB.groupOrder !== undefined
+          ) {
+            return itemA.groupOrder - itemB.groupOrder;
+          }
+          return 0;
+        });
+      }
+      result.push(...current.items);
+      return result;
+    },
+    []
+  );
+
+  return sortedItems;
 }

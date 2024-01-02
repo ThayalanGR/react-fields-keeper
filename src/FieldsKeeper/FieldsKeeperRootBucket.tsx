@@ -10,7 +10,7 @@ import {
   IFieldsKeeperRootBucketProps,
 } from "./FieldsKeeper.types";
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
-import { assignFieldItems } from "..";
+import { assignFieldItems, sortBucketItemsBasedOnGroupOrder } from "..";
 
 export interface IGroupedFieldsKeeperItem {
   group: string;
@@ -34,19 +34,26 @@ export interface IGroupedItemRenderer {
 export const getGroupedItems = (
   currentItems: IFieldsKeeperItem[]
 ): IGroupedFieldsKeeperItem[] => {
-  return currentItems.reduce<IGroupedFieldsKeeperItem[]>((acc, item) => {
-    const foundGroup = acc.find((group) => group.group === item.group);
-    if (foundGroup) {
-      foundGroup.items.push(item);
-    } else {
-      acc.push({
-        group: item.group ?? "NO_GROUP",
-        groupLabel: item.groupLabel ?? "NO_GROUP",
-        items: [item],
-      });
-    }
-    return acc;
-  }, []);
+  const groupedItems = currentItems.reduce<IGroupedFieldsKeeperItem[]>(
+    (acc, item) => {
+      const foundGroup = acc.find((group) => group.group === item.group);
+      if (foundGroup) {
+        foundGroup.items.push(item);
+      } else {
+        acc.push({
+          group: item.group ?? "NO_GROUP",
+          groupLabel: item.groupLabel ?? "NO_GROUP",
+          items: [item],
+        });
+      }
+      return acc;
+    },
+    []
+  );
+
+  groupedItems.forEach(({ items }) => sortBucketItemsBasedOnGroupOrder(items));
+
+  return groupedItems;
 };
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {

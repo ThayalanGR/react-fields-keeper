@@ -69,7 +69,7 @@ export default function Example4() {
 
   // handlers
   const getPriorityTargetBucketToFill: IFieldsKeeperRootBucketProps["getPriorityTargetBucketToFill"] =
-    (buckets) => {
+    ({ buckets }) => {
       if (defaultBucket !== "auto")
         return buckets.find((bucket) => bucket.id === defaultBucket);
     };

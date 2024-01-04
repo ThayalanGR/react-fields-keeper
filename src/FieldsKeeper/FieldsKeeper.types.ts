@@ -16,6 +16,12 @@ export interface IFieldsKeeperBucket<T = string> {
   items: IFieldsKeeperItem<T>[];
 }
 
+export interface IGetPriorityTargetBucketToFillProps {
+  buckets: IFieldsKeeperBucket[],
+  currentFillingItem: IFieldsKeeperItem[];
+  priorityGroup?: string
+}
+
 export interface IFieldsKeeperRootBucketProps {
   label?: string;
   labelClassName?: string
@@ -25,8 +31,7 @@ export interface IFieldsKeeperRootBucketProps {
    * if undefined returned then the default handler will take action
    */
   getPriorityTargetBucketToFill?: (
-    buckets: IFieldsKeeperBucket[],
-    priorityGroup?: string
+    props: IGetPriorityTargetBucketToFillProps
   ) => IFieldsKeeperBucket | undefined;
 }
 

@@ -5,9 +5,9 @@ import classNames from "classnames";
 
 import "./fieldsKeeper.less";
 import {
-  IFieldsKeeperBucket,
   IFieldsKeeperItem,
   IFieldsKeeperRootBucketProps,
+  IGetPriorityTargetBucketToFillProps,
 } from "./FieldsKeeper.types";
 import { FieldsKeeperContext } from "./FieldsKeeper.context";
 import { assignFieldItems, sortBucketItemsBasedOnGroupOrder } from "..";
@@ -201,12 +201,17 @@ const RootBucketGroupedItemRenderer = (
   const customTargetBucketIdentifier =
     getPriorityTargetBucketToFillFromProps ??
     getPriorityTargetBucketToFillFromContext;
-  const getPriorityTargetBucketToFill = (
-    buckets: IFieldsKeeperBucket[],
-    priorityGroup?: string
-  ) => {
+  const getPriorityTargetBucketToFill = ({
+    buckets,
+    currentFillingItem,
+    priorityGroup,
+  }: IGetPriorityTargetBucketToFillProps) => {
     if (customTargetBucketIdentifier) {
-      const response = customTargetBucketIdentifier(buckets, priorityGroup);
+      const response = customTargetBucketIdentifier({
+        buckets,
+        priorityGroup,
+        currentFillingItem,
+      });
       if (response) return response;
     }
 
@@ -225,10 +230,11 @@ const RootBucketGroupedItemRenderer = (
   const onFieldItemClick =
     (fieldItems: IFieldsKeeperItem[], remove = false) =>
     () => {
-      const bucketToFill = getPriorityTargetBucketToFill(
+      const bucketToFill = getPriorityTargetBucketToFill({
         buckets,
-        fieldItems[0].group
-      );
+        priorityGroup: fieldItems[0].group,
+        currentFillingItem: filteredItems,
+      });
       assignFieldItems({
         bucketId: bucketToFill.id,
         fieldItems,

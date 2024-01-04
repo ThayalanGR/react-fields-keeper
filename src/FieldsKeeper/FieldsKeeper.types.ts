@@ -21,10 +21,13 @@ export interface IFieldsKeeperRootBucketProps {
   labelClassName?: string
   isDisabled?: boolean;
   sortGroupOrderWiseOnAssignment?: boolean;
+  /**
+   * if undefined returned then the default handler will take action
+   */
   getPriorityTargetBucketToFill?: (
     buckets: IFieldsKeeperBucket[],
     priorityGroup?: string
-  ) => IFieldsKeeperBucket;
+  ) => IFieldsKeeperBucket | undefined;
 }
 
 export interface IFieldsKeeperState {

@@ -69,26 +69,9 @@ export default function Example4() {
 
   // handlers
   const getPriorityTargetBucketToFill: IFieldsKeeperRootBucketProps["getPriorityTargetBucketToFill"] =
-    (buckets, priorityGroup) => {
-      if (defaultBucket !== "auto") {
-        const foundDefaultBucket = buckets.find(
-          (bucket) => bucket.id === defaultBucket
-        );
-        if (foundDefaultBucket) return foundDefaultBucket;
-      }
-
-      if (priorityGroup) {
-        const priorityGroupBucket = buckets.find((bucket) => {
-          return bucket.items.some((item) => item.group === priorityGroup);
-        });
-        if (priorityGroupBucket) return priorityGroupBucket;
-      }
-
-      const leastFilledOrderedBuckets = [...buckets].sort(
-        (bucketA, bucketB) => bucketA.items.length - bucketB.items.length
-      );
-
-      return leastFilledOrderedBuckets[0];
+    (buckets) => {
+      if (defaultBucket !== "auto")
+        return buckets.find((bucket) => bucket.id === defaultBucket);
     };
 
   // paint

@@ -198,21 +198,29 @@ const RootBucketGroupedItemRenderer = (
     );
   };
 
-  const getPriorityTargetBucketToFill =
+  const customTargetBucketIdentifier =
     getPriorityTargetBucketToFillFromProps ??
-    getPriorityTargetBucketToFillFromContext ??
-    ((buckets: IFieldsKeeperBucket[], priorityGroup?: string) => {
-      if (priorityGroup) {
-        const priorityGroupBucket = buckets.find((bucket) => {
-          return bucket.items.some((item) => item.group === priorityGroup);
-        });
-        if (priorityGroupBucket) return priorityGroupBucket;
-      }
-      const leastFilledOrderedBuckets = [...buckets].sort(
-        (bucketA, bucketB) => bucketA.items.length - bucketB.items.length
-      );
-      return leastFilledOrderedBuckets[0];
-    });
+    getPriorityTargetBucketToFillFromContext;
+  const getPriorityTargetBucketToFill = (
+    buckets: IFieldsKeeperBucket[],
+    priorityGroup?: string
+  ) => {
+    if (customTargetBucketIdentifier) {
+      const response = customTargetBucketIdentifier(buckets, priorityGroup);
+      if (response) return response;
+    }
+
+    if (priorityGroup) {
+      const priorityGroupBucket = buckets.find((bucket) => {
+        return bucket.items.some((item) => item.group === priorityGroup);
+      });
+      if (priorityGroupBucket) return priorityGroupBucket;
+    }
+    const leastFilledOrderedBuckets = [...buckets].sort(
+      (bucketA, bucketB) => bucketA.items.length - bucketB.items.length
+    );
+    return leastFilledOrderedBuckets[0];
+  };
 
   const onFieldItemClick =
     (fieldItems: IFieldsKeeperItem[], remove = false) =>

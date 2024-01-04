@@ -156,18 +156,26 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
   );
 };
 
-const RootBucketGroupedItemRenderer = (props: {
-  filteredGroupedItem: IGroupedFieldsKeeperItem;
-  sortGroupOrderWiseOnAssignment: boolean;
-}) => {
+const RootBucketGroupedItemRenderer = (
+  props: {
+    filteredGroupedItem: IGroupedFieldsKeeperItem;
+    sortGroupOrderWiseOnAssignment: boolean;
+  } & IFieldsKeeperRootBucketProps
+) => {
   // props
   const {
     filteredGroupedItem: { group, groupLabel, items: filteredItems },
     sortGroupOrderWiseOnAssignment,
+    getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromProps,
   } = props;
 
   // state
-  const { instanceId, buckets, updateState } = useContext(FieldsKeeperContext);
+  const {
+    instanceId,
+    buckets,
+    getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
+    updateState,
+  } = useContext(FieldsKeeperContext);
   const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
 
   // compute
@@ -190,21 +198,21 @@ const RootBucketGroupedItemRenderer = (props: {
     );
   };
 
-  const getPriorityTargetBucketToFill = (
-    buckets: IFieldsKeeperBucket[],
-    priorityGroup?: string
-  ) => {
-    if (priorityGroup) {
-      const priorityGroupBucket = buckets.find((bucket) => {
-        return bucket.items.some((item) => item.group === priorityGroup);
-      });
-      if (priorityGroupBucket) return priorityGroupBucket;
-    }
-    const leastFilledOrderedBuckets = [...buckets].sort(
-      (bucketA, bucketB) => bucketA.items.length - bucketB.items.length
-    );
-    return leastFilledOrderedBuckets[0];
-  };
+  const getPriorityTargetBucketToFill =
+    getPriorityTargetBucketToFillFromProps ??
+    getPriorityTargetBucketToFillFromContext ??
+    ((buckets: IFieldsKeeperBucket[], priorityGroup?: string) => {
+      if (priorityGroup) {
+        const priorityGroupBucket = buckets.find((bucket) => {
+          return bucket.items.some((item) => item.group === priorityGroup);
+        });
+        if (priorityGroupBucket) return priorityGroupBucket;
+      }
+      const leastFilledOrderedBuckets = [...buckets].sort(
+        (bucketA, bucketB) => bucketA.items.length - bucketB.items.length
+      );
+      return leastFilledOrderedBuckets[0];
+    });
 
   const onFieldItemClick =
     (fieldItems: IFieldsKeeperItem[], remove = false) =>

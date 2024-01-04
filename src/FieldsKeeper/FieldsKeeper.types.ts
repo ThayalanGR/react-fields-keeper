@@ -21,11 +21,16 @@ export interface IFieldsKeeperRootBucketProps {
   labelClassName?: string
   isDisabled?: boolean;
   sortGroupOrderWiseOnAssignment?: boolean;
+  getPriorityTargetBucketToFill?: (
+    buckets: IFieldsKeeperBucket[],
+    priorityGroup?: string
+  ) => IFieldsKeeperBucket;
 }
 
 export interface IFieldsKeeperState {
   allItems: IFieldsKeeperItem[];
   buckets: IFieldsKeeperBucket[];
+  getPriorityTargetBucketToFill?: IFieldsKeeperRootBucketProps['getPriorityTargetBucketToFill']
 }
 
 export interface IFieldsKeeperStateInternal {

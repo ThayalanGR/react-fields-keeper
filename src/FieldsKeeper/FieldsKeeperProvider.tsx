@@ -11,12 +11,19 @@ import isEqual from "lodash.isequal";
 // components
 export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
   // props
-  const { children, allItems, buckets, onUpdate } = props;
+  const {
+    children,
+    allItems,
+    buckets,
+    getPriorityTargetBucketToFill,
+    onUpdate,
+  } = props;
 
   // state
   const [state, updateState] = useState<IFieldsKeeperState>({
     allItems,
     buckets,
+    getPriorityTargetBucketToFill,
   });
 
   // compute
@@ -42,9 +49,9 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
         { allItems: state.allItems, buckets: state.buckets }
       )
     )
-      updateState({ allItems, buckets });
+      updateState({ allItems, buckets, getPriorityTargetBucketToFill });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allItems, buckets]);
+  }, [allItems, buckets, getPriorityTargetBucketToFill]);
 
   // paint
   return (

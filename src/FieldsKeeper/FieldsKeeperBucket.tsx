@@ -175,61 +175,75 @@ const GroupedItemRenderer = (
     ) as CSSProperties;
 
     // paint
-    return fieldItems.map((item) => {
+    return fieldItems.map((fieldItem) => {
       return (
         <div
-          key={item.id}
-          className={classNames(
-            "react-fields-keeper-mapping-content-input-filled",
-            item.activeNodeClassName,
-            {
-              "react-fields-keeper-mapping-content-input-filled-offset":
-                isGroupItem,
-              "react-fields-keeper-mapping-content-input-filled-group-header":
-                isGroupHeader,
-              "react-fields-keeper-mapping-content-input-filled-group-header-after":
-                isGroupHeader && !groupHeader.isGroupCollapsed,
-            }
-          )}
-          style={itemStyle}
-          draggable
-          onDragStart={onDragStartHandler(
-            ...(isGroupHeader ? groupHeader.groupItems : [item])
-          )}
-          onDragOver={onDragOverHandler}
+          className={classNames("react-fields-keeper-tooltip-wrapper", {
+            "react-fields-keeper-tooltip-disabled-pointer":
+              fieldItem.disabled?.active,
+          })}
+          title={
+            (fieldItem.disabled?.active
+              ? fieldItem.disabled?.message
+              : fieldItem.tooltip) ?? fieldItem.tooltip
+          }
         >
-          <div className="react-fields-keeper-mapping-content-input-filled-value">
-            {item.label}
-          </div>
-          {isGroupHeader && (
-            <div
-              className={classNames(
-                "react-fields-keeper-mapping-column-content-action"
-              )}
-              role="button"
-              onClick={groupHeader.onGroupHeaderToggle}
-            >
-              {groupHeader.isGroupCollapsed ? (
-                <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-              ) : (
-                <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-              )}
+          <div
+            key={fieldItem.id}
+            className={classNames(
+              "react-fields-keeper-mapping-content-input-filled",
+              fieldItem.activeNodeClassName,
+              {
+                "react-fields-keeper-mapping-content-input-filled-offset":
+                  isGroupItem,
+                "react-fields-keeper-mapping-content-input-filled-group-header":
+                  isGroupHeader,
+                "react-fields-keeper-mapping-content-input-filled-group-header-after":
+                  isGroupHeader && !groupHeader.isGroupCollapsed,
+                "react-fields-keeper-mapping-content-input-filled-disabled":
+                  fieldItem.disabled?.active,
+              }
+            )}
+            style={itemStyle}
+            draggable
+            onDragStart={onDragStartHandler(
+              ...(isGroupHeader ? groupHeader.groupItems : [fieldItem])
+            )}
+            onDragOver={onDragOverHandler}
+          >
+            <div className="react-fields-keeper-mapping-content-input-filled-value">
+              {fieldItem.label}
             </div>
-          )}
-          {suffixNode ||
-            (allowRemoveFields && (
+            {isGroupHeader && (
               <div
                 className={classNames(
-                  "react-fields-keeper-mapping-content-input-filled-close"
+                  "react-fields-keeper-mapping-column-content-action"
                 )}
                 role="button"
-                onClick={onFieldItemRemove(
-                  ...(isGroupHeader ? groupHeader.groupItems : [item])
-                )}
+                onClick={groupHeader.onGroupHeaderToggle}
               >
-                <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
+                {groupHeader.isGroupCollapsed ? (
+                  <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                ) : (
+                  <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                )}
               </div>
-            ))}
+            )}
+            {suffixNode ||
+              (allowRemoveFields && (
+                <div
+                  className={classNames(
+                    "react-fields-keeper-mapping-content-input-filled-close"
+                  )}
+                  role="button"
+                  onClick={onFieldItemRemove(
+                    ...(isGroupHeader ? groupHeader.groupItems : [fieldItem])
+                  )}
+                >
+                  <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
+                </div>
+              ))}
+          </div>
         </div>
       );
     });

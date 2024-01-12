@@ -23,7 +23,7 @@ h1 {
   flex-direction: column;
   overflow: auto;
 
-  gap: 20px;
+  gap: 30px;
 
   padding-bottom: 500px;
 }
@@ -41,7 +41,21 @@ h1 {
   align-items: center;
   justify-content: center;
 
+  padding-bottom: 35px;
+
+  border-bottom: 1px solid rgb(185, 185, 185);
+
   gap: 20px;
+
+  position: relative;
+}
+.example-container::after {
+  content: "X";
+  position: absolute;
+  bottom: -10px;
+  color: rgb(191, 191, 191);
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .example-container-title {

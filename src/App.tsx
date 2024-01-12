@@ -2,6 +2,7 @@ import Example1 from "./Examples/Example1";
 import Example2 from "./Examples/Example2";
 import Example3 from "./Examples/Example3";
 import Example4 from "./Examples/Example4";
+import Example5 from "./Examples/Example5";
 
 export default function App() {
   return (
@@ -17,6 +18,8 @@ export default function App() {
       <Example3 />
 
       <Example4 />
+
+      <Example5 />
     </div>
   );
 }

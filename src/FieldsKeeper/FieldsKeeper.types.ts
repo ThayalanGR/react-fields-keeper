@@ -6,6 +6,22 @@ export interface IFieldsKeeperItem<T = string> {
   id: string;
   value?: T;
   activeNodeClassName?: string;
+  rootBucketActiveNodeClassName?: string;
+
+  tooltip?: string;
+
+  rootTooltip?: string;
+
+  disabled?: {
+    active: boolean;
+    message?: string;
+  };
+
+  rootDisabled?: {
+    active: boolean;
+    message?: string;
+  };
+
   group?: string;
   groupLabel?: string;
   groupOrder?: number;

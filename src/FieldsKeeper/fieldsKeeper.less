@@ -98,6 +98,12 @@
         }
       }
 
+      &.react-fields-keeper-mapping-content-input-filled-disabled {
+        pointer-events: none;
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+
       &.react-fields-keeper-mapping-content-input-filled-offset {
         margin-left: 5px;
         margin-right: 5px;
@@ -156,6 +162,15 @@
         }
       }
     }
+  }
+}
+
+.react-fields-keeper-tooltip-wrapper {
+  width: auto;
+  height: auto;
+
+  &.react-fields-keeper-tooltip-disabled-pointer {
+    cursor: not-allowed;
   }
 }
 
@@ -284,6 +299,12 @@
 
     &.react-fields-keeper-mapping-column-content-offset {
       padding-left: 20px;
+    }
+
+    &.react-fields-keeper-mapping-column-content-disabled {
+      pointer-events: none;
+      cursor: not-allowed;
+      opacity: 0.4;
     }
 
     .react-fields-keeper-mapping-column-content-checkbox {

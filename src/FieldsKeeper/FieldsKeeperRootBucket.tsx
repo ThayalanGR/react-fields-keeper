@@ -271,47 +271,66 @@ const RootBucketGroupedItemRenderer = (
         : checkIsFieldItemAssigned(fieldItem);
       return (
         <div
-          key={fieldItem.id}
-          className={classNames("react-fields-keeper-mapping-column-content", {
-            "react-fields-keeper-mapping-column-content-offset": isGroupItem,
-            "react-fields-keeper-mapping-column-content-group-header":
-              isGroupHeader && !groupHeader.isGroupCollapsed,
+          className={classNames("react-fields-keeper-tooltip-wrapper", {
+            "react-fields-keeper-tooltip-disabled-pointer":
+              fieldItem.rootDisabled?.active,
           })}
-          style={itemStyle}
-          draggable={!isFieldItemAssigned}
-          onDragStart={onDragStartHandler(
-            ...(isGroupHeader ? groupHeader.groupItems : [fieldItem])
-          )}
+          title={
+            (fieldItem.rootDisabled?.active
+              ? fieldItem.rootDisabled?.message
+              : fieldItem.rootTooltip) ?? fieldItem.rootTooltip
+          }
         >
-          <div className="react-fields-keeper-mapping-column-content-checkbox">
-            <input
-              type="checkbox"
-              checked={isFieldItemAssigned}
-              onChange={onFieldItemClick(
-                isGroupHeader ? groupHeader.groupItems : [fieldItem],
-                isFieldItemAssigned
-              )}
-            />
-          </div>
-          <div className="react-fields-keeper-mapping-column-content-wrapper">
-            <div className="react-fields-keeper-mapping-column-content-label">
-              {fieldItem.label}
-            </div>
-            {isGroupHeader && (
-              <div
-                className={classNames(
-                  "react-fields-keeper-mapping-column-content-action"
-                )}
-                role="button"
-                onClick={groupHeader.onGroupHeaderToggle}
-              >
-                {groupHeader.isGroupCollapsed ? (
-                  <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                ) : (
-                  <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                )}
-              </div>
+          <div
+            key={fieldItem.id}
+            className={classNames(
+              "react-fields-keeper-mapping-column-content",
+              fieldItem.rootBucketActiveNodeClassName,
+              {
+                "react-fields-keeper-mapping-column-content-offset":
+                  isGroupItem,
+                "react-fields-keeper-mapping-column-content-group-header":
+                  isGroupHeader && !groupHeader.isGroupCollapsed,
+                "react-fields-keeper-mapping-column-content-disabled":
+                  fieldItem.rootDisabled?.active,
+              }
             )}
+            style={itemStyle}
+            draggable={!isFieldItemAssigned}
+            onDragStart={onDragStartHandler(
+              ...(isGroupHeader ? groupHeader.groupItems : [fieldItem])
+            )}
+          >
+            <div className="react-fields-keeper-mapping-column-content-checkbox">
+              <input
+                type="checkbox"
+                checked={isFieldItemAssigned}
+                onChange={onFieldItemClick(
+                  isGroupHeader ? groupHeader.groupItems : [fieldItem],
+                  isFieldItemAssigned
+                )}
+              />
+            </div>
+            <div className="react-fields-keeper-mapping-column-content-wrapper">
+              <div className="react-fields-keeper-mapping-column-content-label">
+                {fieldItem.label}
+              </div>
+              {isGroupHeader && (
+                <div
+                  className={classNames(
+                    "react-fields-keeper-mapping-column-content-action"
+                  )}
+                  role="button"
+                  onClick={groupHeader.onGroupHeaderToggle}
+                >
+                  {groupHeader.isGroupCollapsed ? (
+                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                  ) : (
+                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       );

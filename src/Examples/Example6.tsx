@@ -1,62 +1,55 @@
+import { useState } from 'react';
 import {
     FieldsKeeperProvider,
     FieldsKeeperBucket,
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
+    IFieldsKeeperState,
 } from '..';
 
-export default function Example5() {
+export default function Example6() {
     // compute
     const allItems: IFieldsKeeperItem[] = [
         {
             id: 'a',
             label: 'a',
-            group: 'grp-a',
-            groupLabel: 'A',
-            disabled: { active: true, message: 'Locked data item!' },
-            rootDisabled: { active: true, message: 'Locked data item!' },
         },
-        {
-            id: 'b',
-            label: 'b',
-            tooltip: 'Normal tooltip!',
-            group: 'grp-a',
-            groupLabel: 'A',
-        },
-        { id: 'c', label: 'c', rootTooltip: 'Root tooltip!' },
+        { id: 'b', label: 'b' },
+        { id: 'c', label: 'c' },
         {
             id: 'd',
             label: 'd',
-            rootDisabled: {
-                active: true,
-                message: 'This item is not available right now!',
-            },
         },
     ];
 
-    const buckets: IFieldsKeeperBucket[] = [
+    // state
+    const [buckets, setBuckets] = useState<IFieldsKeeperBucket[]>([
         { id: 'bucket1', items: [allItems[0]] },
         {
             id: 'bucket2',
             items: [allItems[1], allItems[2]],
         },
         { id: 'bucket3', items: [] },
-    ];
+    ]);
+
+    // handlers
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const onItemsChange = (newState: IFieldsKeeperState) => {
+        setBuckets((state) => [state[0], ...newState.buckets.slice(1)]);
+    };
 
     // paint
     return (
         <div className="example-container">
             <div className="example-container-title">
-                Disabling fields / Tooltip provision <br />
-                (on both root and individual buckets)
+                Controlled state handler <br />
+                (Expect at-least one data item to be selected)
             </div>
             <FieldsKeeperProvider
                 allItems={allItems}
-                buckets={buckets}
-                onUpdate={(state) => {
-                    console.log(state);
-                }}
+                buckets={JSON.parse(JSON.stringify(buckets))}
+                onUpdate={onItemsChange}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

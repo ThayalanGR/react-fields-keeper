@@ -14,8 +14,16 @@ export default function Example5() {
             label: 'a',
             group: 'grp-a',
             groupLabel: 'A',
-            disabled: { active: true, message: 'Locked data item!' },
-            rootDisabled: { active: true, message: 'Locked data item!' },
+            disabled: {
+                active: true,
+                message: 'Locked data item!',
+                disableGroupLabel: false,
+            },
+            rootDisabled: {
+                active: true,
+                message: 'Locked data item!',
+                disableGroupLabel: false,
+            },
         },
         {
             id: 'b',
@@ -48,7 +56,7 @@ export default function Example5() {
     return (
         <div className="example-container">
             <div className="example-container-title">
-                Disabling fields / Tooltip provision <br />
+                5. Disabling fields / Tooltip provision <br />
                 (on both root and individual buckets)
             </div>
             <FieldsKeeperProvider

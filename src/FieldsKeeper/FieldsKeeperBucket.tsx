@@ -184,7 +184,7 @@ const GroupedItemRenderer = (
         ) as CSSProperties;
 
         // paint
-        return fieldItems.map((fieldItem) => {
+        return fieldItems.map((fieldItem, fieldIndex) => {
             return (
                 <div
                     key={fieldItem.id}
@@ -208,6 +208,9 @@ const GroupedItemRenderer = (
                             {
                                 'react-fields-keeper-mapping-content-input-filled-offset':
                                     isGroupItem,
+                                'react-fields-keeper-mapping-content-input-filled-bottom-offset':
+                                    isGroupItem &&
+                                    fieldIndex === fieldItems.length - 1,
                                 'react-fields-keeper-mapping-content-input-filled-group-header':
                                     isGroupHeader,
                                 'react-fields-keeper-mapping-content-input-filled-group-header-after':
@@ -267,7 +270,17 @@ const GroupedItemRenderer = (
     };
 
     if (hasGroup) {
-        const disabled = items.find((item) => item.disabled?.active)?.disabled;
+        let disabled = items.find((item) => item.disabled?.active)?.disabled;
+
+        const shouldDisabledGroupLabel =
+            items.length > 1 ? disabled?.disableGroupLabel ?? true : true;
+
+        if (disabled) {
+            disabled = {
+                ...disabled,
+                active: shouldDisabledGroupLabel,
+            };
+        }
 
         return (
             <>
@@ -312,11 +325,15 @@ export function assignFieldItems(props: {
     const {
         bucketId,
         buckets,
-        fieldItems,
+        fieldItems: currentFieldItems,
         updateState,
         removeOnly = false,
         sortGroupOrderWiseOnAssignment = false,
     } = props;
+
+    const requiredFieldItems = currentFieldItems.filter(
+        (item) => (item.rootDisabled ?? item.disabled)?.active !== true,
+    );
 
     // compute
     const newBuckets = [...buckets];
@@ -324,13 +341,14 @@ export function assignFieldItems(props: {
         // removes item from old bucket
         bucket.items = bucket.items.filter(
             (item) =>
-                fieldItems.some((fieldItem) => fieldItem.id === item.id) ===
-                false,
+                requiredFieldItems.some(
+                    (fieldItem) => fieldItem.id === item.id,
+                ) === false,
         );
 
         // insert new item into bucket
         if (!removeOnly && bucket.id === bucketId)
-            bucket.items.push(...fieldItems);
+            bucket.items.push(...requiredFieldItems);
 
         // sort the same group items based on the group order
         if (sortGroupOrderWiseOnAssignment)

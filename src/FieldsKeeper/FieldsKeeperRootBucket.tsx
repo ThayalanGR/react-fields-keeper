@@ -352,9 +352,21 @@ const RootBucketGroupedItemRenderer = (
     };
 
     if (hasGroup) {
-        const rootDisabled = filteredItems.find(
+        let rootDisabled = filteredItems.find(
             (item) => item.rootDisabled?.active,
         )?.rootDisabled;
+
+        const shouldDisabledGroupLabel =
+            filteredItems.length > 1
+                ? rootDisabled?.disableGroupLabel ?? true
+                : true;
+
+        if (rootDisabled) {
+            rootDisabled = {
+                ...rootDisabled,
+                active: shouldDisabledGroupLabel,
+            };
+        }
 
         return (
             <>
@@ -369,8 +381,10 @@ const RootBucketGroupedItemRenderer = (
                         },
                     ],
                     groupHeader: {
-                        isGroupHeaderSelected: filteredItems.some((item) =>
-                            checkIsFieldItemAssigned(item),
+                        isGroupHeaderSelected: filteredItems.some(
+                            (item) =>
+                                item.rootDisabled?.active !== true &&
+                                checkIsFieldItemAssigned(item),
                         ),
                         groupItems: filteredItems,
                         isGroupCollapsed,

@@ -12,19 +12,22 @@ export interface IFieldsKeeperItem<T = string> {
 
   rootTooltip?: string;
 
-  disabled?: {
-    active: boolean;
-    message?: string;
-  };
+  disabled?: IFieldKeeperItemDisabled;
 
-  rootDisabled?: {
-    active: boolean;
-    message?: string;
-  };
+  rootDisabled?: IFieldKeeperItemDisabled;
 
   group?: string;
   groupLabel?: string;
   groupOrder?: number;
+}
+
+export interface IFieldKeeperItemDisabled {
+  active: boolean;
+  /**
+   * default - true
+   */
+  disableGroupLabel?: boolean;
+  message?: string;
 }
 
 export interface IFieldsKeeperBucket<T = string> {

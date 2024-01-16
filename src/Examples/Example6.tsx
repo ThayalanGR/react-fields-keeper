@@ -43,7 +43,7 @@ export default function Example6() {
     return (
         <div className="example-container">
             <div className="example-container-title">
-                Controlled state handler <br />
+                6. Controlled state handler <br />
                 (Expect at-least one data item to be selected)
             </div>
             <FieldsKeeperProvider

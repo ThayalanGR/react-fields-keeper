@@ -1,64 +1,94 @@
 // imports
-import { useEffect, useMemo, useState } from "react";
-import "./fieldsKeeper.less";
+import { useEffect, useMemo } from 'react';
+import './fieldsKeeper.less';
 import {
-  IFieldsKeeperProviderProps,
-  IFieldsKeeperState,
-} from "./FieldsKeeper.types";
-import { FieldsKeeperContext } from "./FieldsKeeper.context";
-import isEqual from "lodash.isequal";
+    IFieldsKeeperProviderProps,
+    IFieldsKeeperState,
+} from './FieldsKeeper.types';
+import {
+    AdditionalContextState,
+    FieldsKeeperContext,
+    useStore,
+} from './FieldsKeeper.context';
+import isEqual from 'lodash.isequal';
+import { getUniqueId } from './utils';
 
 // components
 export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
-  // props
-  const {
-    children,
-    allItems,
-    buckets,
-    getPriorityTargetBucketToFill,
-    onUpdate,
-  } = props;
+    // props
+    const {
+        children,
+        allItems,
+        buckets,
+        instanceId: instanceIdFromProps,
+        getPriorityTargetBucketToFill,
+        onUpdate,
+    } = props;
 
-  // state
-  const [state, updateState] = useState<IFieldsKeeperState>({
-    allItems,
-    buckets,
-    getPriorityTargetBucketToFill,
-  });
+    // state
+    const { setState, deleteState, state } = useStore();
 
-  // compute
-  const instanceId = useMemo(() => new Date().getTime().toString(), []);
+    // compute
+    const instanceId = useMemo(
+        () => instanceIdFromProps ?? getUniqueId(),
+        [instanceIdFromProps],
+    );
+    const keeperCoreState = useMemo(() => {
+        const coreState: IFieldsKeeperState & AdditionalContextState = {
+            allItems,
+            buckets,
+            instanceId: instanceIdFromProps,
+            getPriorityTargetBucketToFill,
+            onStateUpdate: (state) => {
+                // introduce delayed updates later
+                onUpdate?.({
+                    allItems: state.allItems,
+                    buckets: state.buckets,
+                    instanceId: state.instanceId,
+                });
+            },
+        };
 
-  // actions
-  const tapUpdateState = (newState: Partial<IFieldsKeeperState>) => {
-    const requiredState = { ...state, ...newState };
-    updateState(requiredState);
+        state[instanceId] = coreState;
+        return coreState;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        instanceIdFromProps,
+        allItems,
+        buckets,
+        getPriorityTargetBucketToFill,
+        onUpdate,
+    ]);
 
-    // introduce delayed updates later
-    onUpdate?.({
-      allItems: requiredState.allItems,
-      buckets: requiredState.buckets,
-    });
-  };
+    // effects
+    useEffect(() => {
+        let currentState = state[instanceId];
 
-  // effects
-  useEffect(() => {
-    if (
-      !isEqual(
-        { allItems, buckets },
-        { allItems: state.allItems, buckets: state.buckets }
-      )
-    )
-      updateState({ allItems, buckets, getPriorityTargetBucketToFill });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allItems, buckets, getPriorityTargetBucketToFill]);
+        if (!currentState) {
+            currentState = {} as IFieldsKeeperState & AdditionalContextState;
+            state[instanceId] = keeperCoreState;
+        }
 
-  // paint
-  return (
-    <FieldsKeeperContext.Provider
-      value={{ ...state, instanceId, updateState: tapUpdateState }}
-    >
-      {children}
-    </FieldsKeeperContext.Provider>
-  );
+        if (
+            !isEqual(
+                { allItems, buckets },
+                {
+                    allItems: currentState.allItems,
+                    buckets: currentState.buckets,
+                },
+            )
+        )
+            setState(instanceId, keeperCoreState);
+
+        () => deleteState(instanceId);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [keeperCoreState]);
+
+    // paint
+    return (
+        <FieldsKeeperContext.Provider value={{ instanceId }}>
+            {children}
+        </FieldsKeeperContext.Provider>
+    );
 };

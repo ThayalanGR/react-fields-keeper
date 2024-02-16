@@ -1,18 +1,22 @@
-import { useState, useContext, useMemo, CSSProperties } from 'react';
+import { useState, useMemo, CSSProperties, useContext } from 'react';
 import classNames from 'classnames';
 
-import { FieldsKeeperContext } from './FieldsKeeper.context';
 import {
     IFieldsKeeperBucket,
     IFieldsKeeperBucketProps,
     IFieldsKeeperItem,
-    IFieldsKeeperState,
 } from './FieldsKeeper.types';
 import {
     IGroupedFieldsKeeperItem,
     IGroupedItemRenderer,
     getGroupedItems,
 } from '..';
+import {
+    ContextSetState,
+    FieldsKeeperContext,
+    useStore,
+    useStoreState,
+} from './FieldsKeeper.context';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -23,12 +27,17 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         disabled = false,
         emptyFieldPlaceholder = 'Add data fields here',
         sortGroupOrderWiseOnAssignment = true,
+        instanceId: instanceIdFromProps,
     } = props;
 
     // state
     const [isCurrentFieldActive, setIsCurrentFieldActive] = useState(false);
-    const { instanceId, allItems, buckets, updateState } =
+    const updateState = useStore((state) => state.setState);
+    const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
+    const instanceId = instanceIdFromProps ?? instanceIdFromContext;
+
+    const { allItems, buckets } = useStoreState(instanceId);
 
     // compute
     const groupedItems = useMemo<IGroupedFieldsKeeperItem[]>(() => {
@@ -43,6 +52,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         (...fieldItems: IFieldsKeeperItem[]) =>
         () =>
             assignFieldItems({
+                instanceId,
                 bucketId: id,
                 buckets,
                 fieldItems,
@@ -75,6 +85,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         );
         if (fieldItems.length)
             assignFieldItems({
+                instanceId,
                 bucketId: id,
                 buckets,
                 sortGroupOrderWiseOnAssignment,
@@ -113,8 +124,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 {groupedItems.length > 0 ? (
                     groupedItems.map((groupedItem, index) => (
                         <GroupedItemRenderer
-                            key={index}
                             {...props}
+                            key={index}
                             groupedItem={groupedItem}
                             onDragOverHandler={onDragOverHandler}
                             onFieldItemRemove={onFieldItemRemove}
@@ -142,12 +153,15 @@ const GroupedItemRenderer = (
         groupedItem: { items, group, groupLabel },
         allowRemoveFields = false,
         suffixNode,
+        instanceId: instanceIdFromProps,
         onDragOverHandler,
         onFieldItemRemove,
     } = props;
 
     // state
-    const { instanceId } = useContext(FieldsKeeperContext);
+    const { instanceId: instanceIdFromContext } =
+        useContext(FieldsKeeperContext);
+    const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
 
     // compute
@@ -314,15 +328,17 @@ const GroupedItemRenderer = (
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function assignFieldItems(props: {
+    instanceId: string;
     bucketId: string | null;
     buckets: IFieldsKeeperBucket[];
     fieldItems: IFieldsKeeperItem[];
-    updateState: (state: Partial<IFieldsKeeperState>) => void;
+    updateState: ContextSetState;
     removeOnly?: boolean;
     sortGroupOrderWiseOnAssignment?: boolean;
 }) {
     // props
     const {
+        instanceId,
         bucketId,
         buckets,
         fieldItems: currentFieldItems,
@@ -356,7 +372,7 @@ export function assignFieldItems(props: {
     });
 
     // update context
-    updateState({ buckets: newBuckets });
+    updateState(instanceId, { buckets: newBuckets });
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

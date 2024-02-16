@@ -52,16 +52,25 @@ export interface IFieldsKeeperRootBucketProps {
   getPriorityTargetBucketToFill?: (
     props: IGetPriorityTargetBucketToFillProps
   ) => IFieldsKeeperBucket | undefined;
+
+  /**
+   * if not passed - custom instanceId will be created and used internally
+   * 
+   * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
+   */
+  instanceId?: string;
 }
 
 export interface IFieldsKeeperState {
   allItems: IFieldsKeeperItem[];
   buckets: IFieldsKeeperBucket[];
   getPriorityTargetBucketToFill?: IFieldsKeeperRootBucketProps['getPriorityTargetBucketToFill']
-}
-
-export interface IFieldsKeeperStateInternal {
-  instanceId: string;
+  /**
+   * if not passed - custom instanceId will be created and used internally
+   * 
+   * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
+   */
+  instanceId?: string;
 }
 
 export interface IFieldsKeeperActions {
@@ -98,4 +107,11 @@ export interface IFieldsKeeperBucketProps {
    * default - true
    */
   sortGroupOrderWiseOnAssignment?: boolean;
+
+  /**
+   * if not passed - internally created instanceId will be used to trace down the parent provider
+   * 
+   * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
+   */
+  instanceId?: string;
 }

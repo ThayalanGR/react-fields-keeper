@@ -9,8 +9,12 @@ import {
     IFieldsKeeperRootBucketProps,
     IGetPriorityTargetBucketToFillProps,
 } from './FieldsKeeper.types';
-import { FieldsKeeperContext } from './FieldsKeeper.context';
 import { assignFieldItems, sortBucketItemsBasedOnGroupOrder } from '..';
+import {
+    FieldsKeeperContext,
+    useStore,
+    useStoreState,
+} from './FieldsKeeper.context';
 
 export interface IGroupedFieldsKeeperItem {
     group: string;
@@ -65,13 +69,17 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         isDisabled,
         labelClassName,
         sortGroupOrderWiseOnAssignment = true,
+        instanceId: instanceIdFromProps,
     } = props;
 
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // state
-    const { allItems } = useContext(FieldsKeeperContext);
+    const { instanceId: instanceIdFromContext } =
+        useContext(FieldsKeeperContext);
+    const instanceId = instanceIdFromProps ?? instanceIdFromContext;
+    const { allItems } = useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredGroupedItems = useMemo<IGroupedFieldsKeeperItem[]>(() => {
@@ -132,6 +140,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 {filteredGroupedItems.length > 0 ? (
                     filteredGroupedItems.map((filteredGroupedItem, index) => (
                         <RootBucketGroupedItemRenderer
+                            {...props}
                             key={index}
                             filteredGroupedItem={filteredGroupedItem}
                             sortGroupOrderWiseOnAssignment={
@@ -171,15 +180,18 @@ const RootBucketGroupedItemRenderer = (
         filteredGroupedItem: { group, groupLabel, items: filteredItems },
         sortGroupOrderWiseOnAssignment,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromProps,
+        instanceId: instanceIdFromProps,
     } = props;
 
     // state
+    const { instanceId: instanceIdFromContext } =
+        useContext(FieldsKeeperContext);
+    const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const {
-        instanceId,
         buckets,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
-        updateState,
-    } = useContext(FieldsKeeperContext);
+    } = useStoreState(instanceId);
+    const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
 
     // compute
@@ -242,6 +254,7 @@ const RootBucketGroupedItemRenderer = (
                 currentFillingItem: filteredItems,
             });
             assignFieldItems({
+                instanceId,
                 bucketId: bucketToFill.id,
                 fieldItems,
                 buckets,

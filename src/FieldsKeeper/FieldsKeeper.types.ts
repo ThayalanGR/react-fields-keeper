@@ -33,6 +33,7 @@ export interface IFieldKeeperItemDisabled {
 export interface IFieldsKeeperBucket<T = string> {
   id: string;
   items: IFieldsKeeperItem<T>[];
+  customItemRenderer?: (props: { bucketId: string, fieldItem: IFieldsKeeperItem<T>, getDefaultItemRenderer: () => JSX.Element, remove: () => void }) => JSX.Element
 }
 
 export interface IGetPriorityTargetBucketToFillProps {

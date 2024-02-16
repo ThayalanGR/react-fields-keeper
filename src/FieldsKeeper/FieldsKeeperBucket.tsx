@@ -1,4 +1,4 @@
-import { useState, useMemo, CSSProperties, useContext } from 'react';
+import { useState, useMemo, CSSProperties, useContext, Fragment } from 'react';
 import classNames from 'classnames';
 
 import {
@@ -40,12 +40,18 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const { allItems, buckets } = useStoreState(instanceId);
 
     // compute
-    const groupedItems = useMemo<IGroupedFieldsKeeperItem[]>(() => {
+    const { currentBucket, groupedItems } = useMemo<{
+        groupedItems: IGroupedFieldsKeeperItem[];
+        currentBucket: IFieldsKeeperBucket | undefined;
+    }>(() => {
         const bucket = buckets.find((bucket) => bucket.id === id);
-        if (!bucket) return [];
+        if (!bucket) return { groupedItems: [], currentBucket: bucket };
 
         // group items
-        return getGroupedItems(bucket.items);
+        return {
+            groupedItems: getGroupedItems(bucket.items),
+            currentBucket: bucket,
+        };
     }, [buckets, id]);
 
     const onFieldItemRemove =
@@ -99,6 +105,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const hasRoomForFieldAssignment = groupedItems.length < maxItems;
 
     // paint
+    if (!currentBucket) return null;
     return (
         <div className="react-fields-keeper-mapping-content">
             <div className="react-fields-keeper-mapping-content-title">
@@ -127,6 +134,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                             {...props}
                             key={index}
                             groupedItem={groupedItem}
+                            currentBucket={currentBucket}
                             onDragOverHandler={onDragOverHandler}
                             onFieldItemRemove={onFieldItemRemove}
                         />
@@ -143,6 +151,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
 const GroupedItemRenderer = (
     props: {
+        currentBucket: IFieldsKeeperBucket;
         groupedItem: IGroupedFieldsKeeperItem;
         onDragOverHandler: (e: React.DragEvent<HTMLDivElement>) => void;
         onFieldItemRemove: (...fieldItem: IFieldsKeeperItem[]) => () => void;
@@ -154,6 +163,7 @@ const GroupedItemRenderer = (
         allowRemoveFields = false,
         suffixNode,
         instanceId: instanceIdFromProps,
+        currentBucket,
         onDragOverHandler,
         onFieldItemRemove,
     } = props;
@@ -199,6 +209,46 @@ const GroupedItemRenderer = (
 
         // paint
         return fieldItems.map((fieldItem, fieldIndex) => {
+            // handlers
+            const remove = onFieldItemRemove(
+                ...(isGroupHeader ? groupHeader.groupItems : [fieldItem]),
+            );
+            const getDefaultItemRenderer = () => (
+                <Fragment>
+                    <div className="react-fields-keeper-mapping-content-input-filled-value">
+                        {fieldItem.label}
+                    </div>
+                    {isGroupHeader && (
+                        <div
+                            className={classNames(
+                                'react-fields-keeper-mapping-column-content-action',
+                            )}
+                            role="button"
+                            onClick={groupHeader.onGroupHeaderToggle}
+                        >
+                            {groupHeader.isGroupCollapsed ? (
+                                <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                            ) : (
+                                <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                            )}
+                        </div>
+                    )}
+                    {suffixNode ||
+                        (allowRemoveFields && (
+                            <div
+                                className={classNames(
+                                    'react-fields-keeper-mapping-content-input-filled-close',
+                                )}
+                                role="button"
+                                onClick={remove}
+                            >
+                                <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
+                            </div>
+                        ))}
+                </Fragment>
+            );
+
+            // paint
             return (
                 <div
                     key={fieldItem.id}
@@ -243,40 +293,14 @@ const GroupedItemRenderer = (
                         )}
                         onDragOver={onDragOverHandler}
                     >
-                        <div className="react-fields-keeper-mapping-content-input-filled-value">
-                            {fieldItem.label}
-                        </div>
-                        {isGroupHeader && (
-                            <div
-                                className={classNames(
-                                    'react-fields-keeper-mapping-column-content-action',
-                                )}
-                                role="button"
-                                onClick={groupHeader.onGroupHeaderToggle}
-                            >
-                                {groupHeader.isGroupCollapsed ? (
-                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                                ) : (
-                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                                )}
-                            </div>
-                        )}
-                        {suffixNode ||
-                            (allowRemoveFields && (
-                                <div
-                                    className={classNames(
-                                        'react-fields-keeper-mapping-content-input-filled-close',
-                                    )}
-                                    role="button"
-                                    onClick={onFieldItemRemove(
-                                        ...(isGroupHeader
-                                            ? groupHeader.groupItems
-                                            : [fieldItem]),
-                                    )}
-                                >
-                                    <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
-                                </div>
-                            ))}
+                        {currentBucket.customItemRenderer
+                            ? currentBucket.customItemRenderer({
+                                  bucketId: currentBucket.id,
+                                  fieldItem,
+                                  remove,
+                                  getDefaultItemRenderer,
+                              })
+                            : getDefaultItemRenderer()}
                     </div>
                 </div>
             );

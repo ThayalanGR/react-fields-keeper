@@ -28,7 +28,11 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         emptyFieldPlaceholder = 'Add data fields here',
         sortGroupOrderWiseOnAssignment = true,
         instanceId: instanceIdFromProps,
+        showExtendedAssignmentPlaceholder = false,
+        centerAlignPlaceholder = false,
+        placeHolderWrapperClassName,
     } = props;
+    console.log(centerAlignPlaceholder);
 
     // state
     const [isCurrentFieldActive, setIsCurrentFieldActive] = useState(false);
@@ -105,6 +109,17 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const hasRoomForFieldAssignment = groupedItems.length < maxItems;
 
     // paint
+    const emptyFieldPlaceholderElement = (
+        <div
+            className={classNames(
+                'react-fields-keeper-mapping-content-input-placeholder',
+                { 'center-align': centerAlignPlaceholder },
+                placeHolderWrapperClassName,
+            )}
+        >
+            {emptyFieldPlaceholder}
+        </div>
+    );
     if (!currentBucket) return null;
     return (
         <div className="react-fields-keeper-mapping-content">
@@ -128,7 +143,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 onDragEnter={onDragEnterHandler}
                 onDragLeave={onDragLeaveHandler}
             >
-                {groupedItems.length > 0 ? (
+                {groupedItems.length > 0 &&
                     groupedItems.map((groupedItem, index) => (
                         <GroupedItemRenderer
                             {...props}
@@ -138,12 +153,10 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                             onDragOverHandler={onDragOverHandler}
                             onFieldItemRemove={onFieldItemRemove}
                         />
-                    ))
-                ) : (
-                    <div className="react-fields-keeper-mapping-content-input-placeholder">
-                        {emptyFieldPlaceholder}
-                    </div>
-                )}
+                    ))}
+                {(groupedItems.length === 0 ||
+                    showExtendedAssignmentPlaceholder === true) &&
+                    emptyFieldPlaceholderElement}
             </div>
         </div>
     );

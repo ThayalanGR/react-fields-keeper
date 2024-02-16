@@ -60,6 +60,8 @@ export interface IFieldsKeeperRootBucketProps {
    * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
    */
   instanceId?: string;
+
+  ignoreCheckBox?: boolean
 }
 
 export interface IFieldsKeeperState {
@@ -115,4 +117,17 @@ export interface IFieldsKeeperBucketProps {
    * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
    */
   instanceId?: string;
+
+  /**
+   * default - false
+   */
+  showExtendedAssignmentPlaceholder?: boolean
+  /**
+   * default - false
+   */
+  centerAlignPlaceholder?: boolean
+  /**
+   * default - undefined
+   */
+  placeHolderWrapperClassName?: string
 }

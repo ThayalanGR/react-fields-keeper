@@ -59,10 +59,14 @@
 
         .react-fields-keeper-mapping-content-input-placeholder {
             padding: 0px 4px;
-            height: 24px;
+            min-height: 24px;
             display: flex;
             align-items: center;
             pointer-events: none;
+
+            &.center-align {
+                justify-content: center;
+            }
         }
 
         &.react-fields-keeper-mapping-content-multi-input {
@@ -298,11 +302,16 @@
 
                 border-radius: 2px;
                 z-index: -1;
+                top: -1px; // to avoid scroll that caused for hierarchical fields
             }
         }
 
         &.react-fields-keeper-mapping-column-content-offset {
             padding-left: 20px;
+        }
+
+        &.react-fields-keeper-mapping-column-content-without-checkbox {
+            padding-left: 8px;
         }
 
         &.react-fields-keeper-mapping-column-content-disabled {

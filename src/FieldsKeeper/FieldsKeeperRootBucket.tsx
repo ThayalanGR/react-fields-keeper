@@ -181,6 +181,7 @@ const RootBucketGroupedItemRenderer = (
         sortGroupOrderWiseOnAssignment,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromProps,
         instanceId: instanceIdFromProps,
+        ignoreCheckBox = false,
     } = props;
 
     // state
@@ -316,6 +317,8 @@ const RootBucketGroupedItemRenderer = (
                                     !groupHeader.isGroupCollapsed,
                                 'react-fields-keeper-mapping-column-content-disabled':
                                     fieldItem.rootDisabled?.active,
+                                'react-fields-keeper-mapping-column-content-without-checkbox':
+                                    ignoreCheckBox,
                             },
                         )}
                         style={itemStyle}
@@ -326,18 +329,20 @@ const RootBucketGroupedItemRenderer = (
                                 : [fieldItem]),
                         )}
                     >
-                        <div className="react-fields-keeper-mapping-column-content-checkbox">
-                            <input
-                                type="checkbox"
-                                checked={isFieldItemAssigned}
-                                onChange={onFieldItemClick(
-                                    isGroupHeader
-                                        ? groupHeader.groupItems
-                                        : [fieldItem],
-                                    isFieldItemAssigned,
-                                )}
-                            />
-                        </div>
+                        {!ignoreCheckBox && (
+                            <div className="react-fields-keeper-mapping-column-content-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={isFieldItemAssigned}
+                                    onChange={onFieldItemClick(
+                                        isGroupHeader
+                                            ? groupHeader.groupItems
+                                            : [fieldItem],
+                                        isFieldItemAssigned,
+                                    )}
+                                />
+                            </div>
+                        )}
                         <div className="react-fields-keeper-mapping-column-content-wrapper">
                             <div className="react-fields-keeper-mapping-column-content-label">
                                 {fieldItem.label}

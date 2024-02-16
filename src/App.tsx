@@ -1,11 +1,4 @@
-import Example1 from './Examples/Example1';
-import Example2 from './Examples/Example2';
-import Example3 from './Examples/Example3';
-import Example4 from './Examples/Example4';
-import Example5 from './Examples/Example5';
-import Example6 from './Examples/Example6';
-import Example7 from './Examples/Example7';
-import Example8 from './Examples/Example8';
+import { examples } from './Examples';
 
 export default function App() {
     return (
@@ -14,21 +7,11 @@ export default function App() {
 
             <h3>Examples</h3>
 
-            <Example1 />
-
-            <Example2 />
-
-            <Example3 />
-
-            <Example4 />
-
-            <Example5 />
-
-            <Example6 />
-
-            <Example7 />
-
-            <Example8 />
+            <div className="examples-wrapper">
+                {examples.map((Example, key) => (
+                    <Example key={key} />
+                ))}
+            </div>
         </div>
     );
 }

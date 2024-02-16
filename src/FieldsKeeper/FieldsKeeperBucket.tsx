@@ -32,7 +32,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         centerAlignPlaceholder = false,
         placeHolderWrapperClassName,
     } = props;
-    console.log(centerAlignPlaceholder);
 
     // state
     const [isCurrentFieldActive, setIsCurrentFieldActive] = useState(false);

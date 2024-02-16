@@ -20,7 +20,24 @@ export default function Example8() {
             id: 'bucket1',
             items: [allItems[0]],
             customItemRenderer({ fieldItem }) {
-                return <div>{fieldItem.label} via custom renderer</div>;
+                return (
+                    <div
+                        style={{
+                            height: 150,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px dashed gray',
+                        }}
+                    >
+                        <p>
+                            <b>{fieldItem.label}</b>
+                        </p>
+                        <br />
+                        <p>Under Development!</p>
+                    </div>
+                );
             },
         },
         {

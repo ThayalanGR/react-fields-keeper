@@ -295,6 +295,9 @@ const GroupedItemRenderer = (
                                     !groupHeader.isGroupCollapsed,
                                 'react-fields-keeper-mapping-content-input-filled-disabled':
                                     fieldItem.disabled?.active,
+                                'react-fields-keeper-mapping-content-input-filled-custom-renderer':
+                                    currentBucket.customItemRenderer !==
+                                    undefined,
                             },
                         )}
                         style={itemStyle}

@@ -87,3 +87,7 @@ h1 {
     flex-direction: column;
     gap: 10px;
 }
+
+.sample-custom-font-size {
+    font-size: 10px;
+}

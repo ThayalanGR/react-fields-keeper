@@ -4,6 +4,8 @@
     gap: 5px;
     align-items: flex-start;
     width: 100%;
+    font-size: 12px;
+
     :hover {
         .react-fields-keeper-edit {
             visibility: visible;
@@ -17,7 +19,6 @@
         display: flex;
         align-items: center;
         gap: 5px;
-        font-size: 12px;
         white-space: nowrap;
         .link-label {
             color: #2e7fec;
@@ -45,7 +46,6 @@
         border-radius: 2px;
         padding: 6px 5px;
         text-align: left;
-        font-size: 12px;
         white-space: nowrap;
         display: flex;
         flex-direction: column;
@@ -210,15 +210,15 @@
 }
 
 .react-fields-keeper-mapping-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    max-height: 100%;
     width: 100%;
-    gap: 6px;
     overflow: hidden;
+    font-size: 12px;
 
     .react-fields-keeper-mapping-subtitle {
-        font-size: 12px;
+        margin-bottom: 5px;
     }
 
     .react-fields-keeper-mapping-column-searcher {
@@ -226,11 +226,32 @@
         overflow: hidden;
         position: relative;
 
-        input {
+        .react-fields-keeper-mapping-column-searcher-input {
             width: 100%;
             padding: 4px 5px;
             outline: none;
-            padding-right: 20px;
+            padding-right: 1.8em;
+            outline: none;
+            border: none;
+            border-bottom: 1px solid rgb(168, 168, 168);
+            font-size: inherit;
+
+            padding-left: 1.8em;
+
+            &:focus {
+                border-bottom-color: rgb(57, 57, 57);
+            }
+        }
+
+        .react-fields-keeper-mapping-column-searcher-prefix {
+            position: absolute;
+            top: 50%;
+            left: 3px;
+            transform: translateY(-50%);
+
+            span {
+                font-size: 1em !important;
+            }
         }
 
         .react-fields-keeper-mapping-column-searcher-clear {
@@ -261,18 +282,13 @@
 
     .react-fields-keeper-mapping-content-scrollable-container {
         width: 100%;
-        height: auto;
-        max-height: 335px;
+        height: 100%;
+        max-height: 100%;
         overflow: auto;
         display: flex;
         flex-direction: column;
-        gap: 10px;
         padding-right: 5px;
-
-        &.react-fields-keeper-mapping-content-scrollable-container-columns {
-            max-height: 300px;
-            gap: 0px;
-        }
+        margin-top: 2px;
     }
 
     .react-fields-keeper-mapping-column-content {
@@ -345,7 +361,6 @@
             width: 100%;
 
             .react-fields-keeper-mapping-column-content-label {
-                font-size: 12px;
                 font-weight: normal;
             }
         }
@@ -356,8 +371,9 @@
         text-align: center;
         display: grid;
         place-items: center;
-        font-size: 13px;
         font-weight: normal;
+
+        padding: 20px 0px;
 
         .react-fields-keeper-mapping-clear-search-link {
             margin-top: 5px;
@@ -382,7 +398,7 @@
 // icons
 @font-face {
     font-family: 'FabricMDL2Icons_fields_keeper';
-    src: url('../assets/fabric-icons-76208206.woff') format('woff');
+    src: url('../assets/fabric-icons-f55e076e.woff') format('woff');
 }
 
 .fk-ms-Icon {
@@ -408,4 +424,7 @@
 }
 .fk-ms-Icon--Info12:before {
     content: '\E55A';
+}
+.fk-ms-Icon--Search:before {
+    content: '\E721';
 }

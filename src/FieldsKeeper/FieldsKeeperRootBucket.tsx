@@ -70,6 +70,8 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         labelClassName,
         sortGroupOrderWiseOnAssignment = true,
         instanceId: instanceIdFromProps,
+        searchPlaceholder = 'Search',
+        wrapperClassName,
     } = props;
 
     // refs
@@ -104,9 +106,13 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     // paint
     return (
         <div
-            className={classNames('react-fields-keeper-mapping-container', {
-                'react-fields-keeper-mapping-content-disabled': isDisabled,
-            })}
+            className={classNames(
+                'react-fields-keeper-mapping-container',
+                {
+                    'react-fields-keeper-mapping-content-disabled': isDisabled,
+                },
+                wrapperClassName,
+            )}
         >
             {label && (
                 <div
@@ -119,12 +125,16 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 </div>
             )}
             <div className="react-fields-keeper-mapping-column-searcher">
+                <div className="react-fields-keeper-mapping-column-searcher-prefix">
+                    <span className="fk-ms-Icon fk-ms-Icon--Search" />
+                </div>
                 <input
+                    className="react-fields-keeper-mapping-column-searcher-input"
                     type="text"
                     ref={searchInputRef}
                     onChange={onSearchInputChange}
                     value={searchQuery}
-                    placeholder="Search values"
+                    placeholder={searchPlaceholder}
                 />
                 {searchQuery.length > 0 && (
                     <div
@@ -132,11 +142,16 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         role="button"
                         onClick={onClearSearchQuery}
                     >
-                        <span className="ms-Icon ms-Icon--ChromeClose" />
+                        <span className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                     </div>
                 )}
             </div>
-            <div className="react-fields-keeper-mapping-content-scrollable-container react-fields-keeper-mapping-content-scrollable-container-columns">
+            <div
+                className={classNames(
+                    'react-fields-keeper-mapping-content-scrollable-container',
+                    'react-fields-keeper-mapping-content-scrollable-container-columns',
+                )}
+            >
                 {filteredGroupedItems.length > 0 ? (
                     filteredGroupedItems.map((filteredGroupedItem, index) => (
                         <RootBucketGroupedItemRenderer
@@ -151,7 +166,8 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 ) : (
                     <div className="react-fields-keeper-mapping-no-search-items-found">
                         <div>
-                            No items found for <br /> <code>{searchQuery}</code>
+                            No items found for <br />
+                            <code>'{searchQuery}'</code>
                         </div>
                         {allItems.length > 0 && (
                             <div

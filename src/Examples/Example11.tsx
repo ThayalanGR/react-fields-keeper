@@ -6,7 +6,7 @@ import {
     IFieldsKeeperBucket,
 } from '..';
 
-export default function Example8() {
+export default function Example11() {
     // compute
     const allItems: IFieldsKeeperItem[] = [
         { id: 'a', label: 'a' },
@@ -31,7 +31,7 @@ export default function Example8() {
     return (
         <div className="example-container">
             <div className="example-container-title">
-                8. Custom bucket item renderer
+                11. Granular style customization
             </div>
             <FieldsKeeperProvider
                 allItems={allItems}
@@ -46,40 +46,29 @@ export default function Example8() {
                             id="bucket1"
                             label="Bucket 1"
                             allowRemoveFields
-                            customItemRenderer={({ fieldItem }) => {
-                                return (
-                                    <div
-                                        style={{
-                                            height: 150,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            border: '1px dashed gray',
-                                        }}
-                                    >
-                                        <p>
-                                            <b>{fieldItem.label}</b>
-                                        </p>
-                                        <br />
-                                        <p>Under Development!</p>
-                                    </div>
-                                );
-                            }}
+                            wrapperClassName="sample-custom-font-size"
                         />
                         <FieldsKeeperBucket
                             id="bucket2"
                             label="Bucket 2"
                             allowRemoveFields
+                            wrapperClassName="sample-custom-font-size"
                         />
                         <FieldsKeeperBucket
                             id="bucket3"
                             label="Bucket 3"
                             allowRemoveFields
+                            wrapperClassName="sample-custom-font-size"
                         />
                     </div>
-                    <div className="root-bucket-container">
-                        <FieldsKeeperRootBucket label="Root Bucket" />
+                    <div
+                        className="root-bucket-container"
+                        style={{ height: 100 }}
+                    >
+                        <FieldsKeeperRootBucket
+                            label="Root Bucket"
+                            wrapperClassName="sample-custom-font-size"
+                        />
                     </div>
                 </div>
             </FieldsKeeperProvider>

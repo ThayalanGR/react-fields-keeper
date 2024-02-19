@@ -33,7 +33,6 @@ export interface IFieldKeeperItemDisabled {
 export interface IFieldsKeeperBucket<T = string> {
   id: string;
   items: IFieldsKeeperItem<T>[];
-  customItemRenderer?: (props: { bucketId: string, fieldItem: IFieldsKeeperItem<T>, getDefaultItemRenderer: () => JSX.Element, remove: () => void }) => JSX.Element
 }
 
 export interface IGetPriorityTargetBucketToFillProps {
@@ -45,6 +44,7 @@ export interface IGetPriorityTargetBucketToFillProps {
 export interface IFieldsKeeperRootBucketProps {
   label?: string;
   labelClassName?: string
+  wrapperClassName?: string
   isDisabled?: boolean;
   sortGroupOrderWiseOnAssignment?: boolean;
   /**
@@ -62,6 +62,11 @@ export interface IFieldsKeeperRootBucketProps {
   instanceId?: string;
 
   ignoreCheckBox?: boolean
+
+  /**
+   * placeholder for search values
+   */
+  searchPlaceholder?: string
 }
 
 export interface IFieldsKeeperState {
@@ -130,4 +135,16 @@ export interface IFieldsKeeperBucketProps {
    * default - undefined
    */
   placeHolderWrapperClassName?: string
+  /**
+   * default - undefined
+   */
+  wrapperClassName?: string
+
+
+  customItemRenderer?: (props: IFieldItemCustomRendererProps) => JSX.Element
+
+
 }
+
+
+export interface IFieldItemCustomRendererProps { bucketId: string, fieldItem: IFieldsKeeperItem<unknown>, getDefaultItemRenderer: () => JSX.Element, remove: () => void }

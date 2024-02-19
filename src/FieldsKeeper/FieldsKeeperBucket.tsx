@@ -31,6 +31,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         showExtendedAssignmentPlaceholder = false,
         centerAlignPlaceholder = false,
         placeHolderWrapperClassName,
+        wrapperClassName,
     } = props;
 
     // state
@@ -121,7 +122,12 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     );
     if (!currentBucket) return null;
     return (
-        <div className="react-fields-keeper-mapping-content">
+        <div
+            className={classNames(
+                'react-fields-keeper-mapping-content',
+                wrapperClassName,
+            )}
+        >
             <div className="react-fields-keeper-mapping-content-title">
                 {label}
             </div>
@@ -176,6 +182,7 @@ const GroupedItemRenderer = (
         suffixNode,
         instanceId: instanceIdFromProps,
         currentBucket,
+        customItemRenderer,
         onDragOverHandler,
         onFieldItemRemove,
     } = props;
@@ -295,8 +302,7 @@ const GroupedItemRenderer = (
                                 'react-fields-keeper-mapping-content-input-filled-disabled':
                                     fieldItem.disabled?.active,
                                 'react-fields-keeper-mapping-content-input-filled-custom-renderer':
-                                    currentBucket.customItemRenderer !==
-                                    undefined,
+                                    customItemRenderer !== undefined,
                             },
                         )}
                         style={itemStyle}
@@ -308,8 +314,8 @@ const GroupedItemRenderer = (
                         )}
                         onDragOver={onDragOverHandler}
                     >
-                        {currentBucket.customItemRenderer
-                            ? currentBucket.customItemRenderer({
+                        {customItemRenderer !== undefined
+                            ? customItemRenderer({
                                   bucketId: currentBucket.id,
                                   fieldItem,
                                   remove,

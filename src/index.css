@@ -82,10 +82,20 @@ h1 {
     gap: 15px;
 }
 
+.keeper-container-large {
+    width: 500px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 15px;
+}
+
 .buckets-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .sample-custom-font-size {

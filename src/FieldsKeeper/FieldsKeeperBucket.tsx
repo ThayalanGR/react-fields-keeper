@@ -32,6 +32,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         centerAlignPlaceholder = false,
         placeHolderWrapperClassName,
         wrapperClassName,
+        orientation = 'vertical',
+        horizontalFillOverflowType = 'scroll',
     } = props;
 
     // state
@@ -135,8 +137,15 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 className={classNames(
                     'react-fields-keeper-mapping-content-input',
                     {
+                        'react-fields-keeper-content-input-horizontal':
+                            orientation === 'horizontal',
+                        'react-fields-keeper-content-input-horizontal-wrap':
+                            orientation === 'horizontal' &&
+                            horizontalFillOverflowType === 'wrap',
                         'react-fields-keeper-mapping-content-multi-input':
-                            hasRoomForFieldAssignment,
+                            hasRoomForFieldAssignment &&
+                            !showExtendedAssignmentPlaceholder &&
+                            orientation === 'vertical',
                         'react-fields-keeper-mapping-content-input-active':
                             isCurrentFieldActive,
                         'react-fields-keeper-mapping-content-disabled':
@@ -182,6 +191,8 @@ const GroupedItemRenderer = (
         suffixNode,
         instanceId: instanceIdFromProps,
         currentBucket,
+        orientation = 'vertical',
+        horizontalFillOverflowType = 'scroll',
         customItemRenderer,
         onDragOverHandler,
         onFieldItemRemove,
@@ -227,45 +238,49 @@ const GroupedItemRenderer = (
         ) as CSSProperties;
 
         // paint
-        return fieldItems.map((fieldItem, fieldIndex) => {
+        return fieldItems.map((fieldItem) => {
             // handlers
             const remove = onFieldItemRemove(
                 ...(isGroupHeader ? groupHeader.groupItems : [fieldItem]),
             );
-            const getDefaultItemRenderer = () => (
-                <Fragment>
-                    <div className="react-fields-keeper-mapping-content-input-filled-value">
-                        {fieldItem.label}
+            const getDefaultItemRenderer = () => {
+                const groupCollapseButton = isGroupHeader && (
+                    <div
+                        className={classNames(
+                            'react-fields-keeper-mapping-column-content-action',
+                        )}
+                        role="button"
+                        onClick={groupHeader.onGroupHeaderToggle}
+                    >
+                        {groupHeader.isGroupCollapsed ? (
+                            <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                        ) : (
+                            <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                        )}
                     </div>
-                    {isGroupHeader && (
-                        <div
-                            className={classNames(
-                                'react-fields-keeper-mapping-column-content-action',
-                            )}
-                            role="button"
-                            onClick={groupHeader.onGroupHeaderToggle}
-                        >
-                            {groupHeader.isGroupCollapsed ? (
-                                <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                            ) : (
-                                <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                            )}
+                );
+                return (
+                    <Fragment>
+                        <div className="react-fields-keeper-mapping-content-input-filled-value">
+                            {fieldItem.label}
                         </div>
-                    )}
-                    {suffixNode ||
-                        (allowRemoveFields && (
-                            <div
-                                className={classNames(
-                                    'react-fields-keeper-mapping-content-input-filled-close',
-                                )}
-                                role="button"
-                                onClick={remove}
-                            >
-                                <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
-                            </div>
-                        ))}
-                </Fragment>
-            );
+                        {orientation === 'vertical' && groupCollapseButton}
+                        {suffixNode ||
+                            (allowRemoveFields && (
+                                <div
+                                    className={classNames(
+                                        'react-fields-keeper-mapping-content-input-filled-close',
+                                    )}
+                                    role="button"
+                                    onClick={remove}
+                                >
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
+                                </div>
+                            ))}
+                        {orientation === 'horizontal' && groupCollapseButton}
+                    </Fragment>
+                );
+            };
 
             // paint
             return (
@@ -291,14 +306,8 @@ const GroupedItemRenderer = (
                             {
                                 'react-fields-keeper-mapping-content-input-filled-offset':
                                     isGroupItem,
-                                'react-fields-keeper-mapping-content-input-filled-bottom-offset':
-                                    isGroupItem &&
-                                    fieldIndex === fieldItems.length - 1,
                                 'react-fields-keeper-mapping-content-input-filled-group-header':
                                     isGroupHeader,
-                                'react-fields-keeper-mapping-content-input-filled-group-header-after':
-                                    isGroupHeader &&
-                                    !groupHeader.isGroupCollapsed,
                                 'react-fields-keeper-mapping-content-input-filled-disabled':
                                     fieldItem.disabled?.active,
                                 'react-fields-keeper-mapping-content-input-filled-custom-renderer':
@@ -342,7 +351,16 @@ const GroupedItemRenderer = (
         }
 
         return (
-            <>
+            <div
+                className={classNames(
+                    'react-fields-keeper-mapping-content-input-filled-group',
+                    {
+                        'react-fields-keeper-mapping-content-input-filled-group-horizontal':
+                            orientation === 'horizontal',
+                        'group-wrap': horizontalFillOverflowType === 'wrap',
+                    },
+                )}
+            >
                 {renderFieldItems({
                     fieldItems: [
                         {
@@ -365,7 +383,7 @@ const GroupedItemRenderer = (
                         fieldItems: items,
                         isGroupItem: true,
                     })}
-            </>
+            </div>
         );
     }
     return <>{renderFieldItems({ fieldItems: items })}</>;

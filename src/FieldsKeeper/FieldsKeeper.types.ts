@@ -143,8 +143,17 @@ export interface IFieldsKeeperBucketProps {
 
   customItemRenderer?: (props: IFieldItemCustomRendererProps) => JSX.Element
 
+  /**
+   * default - vertical
+   */
+  orientation?: 'vertical' | 'horizontal'
+
+  /**
+   * default - scroll
+   */
+  horizontalFillOverflowType?: 'wrap' | 'scroll'
 
 }
 
 
-export interface IFieldItemCustomRendererProps { bucketId: string, fieldItem: IFieldsKeeperItem<unknown>, getDefaultItemRenderer: () => JSX.Element, remove: () => void }
+export interface IFieldItemCustomRendererProps<T = unknown> { bucketId: string, fieldItem: IFieldsKeeperItem<T>, getDefaultItemRenderer: () => JSX.Element, remove: () => void }

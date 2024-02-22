@@ -85,13 +85,13 @@ export default function Example12() {
                     <div className="buckets-container">
                         <FieldsKeeperBucket
                             id="bucket1"
-                            label="Bucket 1 - wrap style"
+                            label="Bucket 1 - scroll style"
                             allowRemoveFields
                             orientation="horizontal"
                         />
                         <FieldsKeeperBucket
                             id="bucket2"
-                            label="Bucket 2 - scroll style"
+                            label="Bucket 2 - wrap style"
                             allowRemoveFields
                             orientation="horizontal"
                             horizontalFillOverflowType="wrap"

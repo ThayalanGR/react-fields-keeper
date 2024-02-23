@@ -15,7 +15,7 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
-import FieldsKeeperSearcher from './FieldsKeeperSearcher';
+import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
 
 export interface IGroupedFieldsKeeperItem {
     group: string;

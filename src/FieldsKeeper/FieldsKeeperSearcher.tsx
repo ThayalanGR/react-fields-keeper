@@ -8,7 +8,7 @@ export interface IFieldsKeeperSearcherProps {
     onSearchQueryChange: (value: string) => void;
 }
 
-const FieldsKeeperSearcher = forwardRef<
+export const FieldsKeeperSearcher = forwardRef<
     HTMLInputElement,
     IFieldsKeeperSearcherProps
 >((props, ref) => {
@@ -61,5 +61,3 @@ const FieldsKeeperSearcher = forwardRef<
         </div>
     );
 });
-
-export default FieldsKeeperSearcher;

@@ -6,7 +6,7 @@ import {
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
 } from '..';
-import FieldsKeeperSearcher from '../FieldsKeeper/FieldsKeeperSearcher';
+import { FieldsKeeperSearcher } from '../FieldsKeeper/FieldsKeeperSearcher';
 
 export default function Example13() {
     // state

@@ -15,6 +15,7 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
+import FieldsKeeperSearcher from './FieldsKeeperSearcher';
 
 export interface IGroupedFieldsKeeperItem {
     group: string;
@@ -72,6 +73,11 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         instanceId: instanceIdFromProps,
         searchPlaceholder = 'Search',
         wrapperClassName,
+        customSearchQuery = undefined,
+        onClearSearch,
+        showClearSearchLink = true,
+        emptyFilterMessage = undefined,
+        disabledEmptyFilterMessage = false,
     } = props;
 
     // refs
@@ -84,23 +90,22 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const { allItems } = useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
 
+    // compute
+    const hasCustomSearchQuery = customSearchQuery !== undefined;
     const filteredGroupedItems = useMemo<IGroupedFieldsKeeperItem[]>(() => {
         const searcher = new FuzzySearch(allItems, ['label', 'id'], {
             sort: true,
         });
-        const currentItems = searcher.search(searchQuery);
+        const currentItems = searcher.search(customSearchQuery ?? searchQuery);
         // group items
         return getGroupedItems(currentItems);
-    }, [searchQuery, allItems]);
+    }, [customSearchQuery, searchQuery, allItems]);
 
     // actions
-    const onSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value ?? '');
-    };
-
     const onClearSearchQuery = () => {
         setSearchQuery('');
         searchInputRef.current?.focus();
+        onClearSearch?.();
     };
 
     // paint
@@ -114,7 +119,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 wrapperClassName,
             )}
         >
-            {label && (
+            {label ? (
                 <div
                     className={classNames(
                         'react-fields-keeper-mapping-subtitle',
@@ -123,63 +128,61 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 >
                     {label}
                 </div>
+            ) : (
+                // to maintain grid consistency
+                <div />
             )}
-            <div className="react-fields-keeper-mapping-column-searcher">
-                <div className="react-fields-keeper-mapping-column-searcher-prefix">
-                    <span className="fk-ms-Icon fk-ms-Icon--Search" />
-                </div>
-                <input
-                    className="react-fields-keeper-mapping-column-searcher-input"
-                    type="text"
+            {!hasCustomSearchQuery ? (
+                <FieldsKeeperSearcher
                     ref={searchInputRef}
-                    onChange={onSearchInputChange}
-                    value={searchQuery}
-                    placeholder={searchPlaceholder}
+                    searchPlaceholder={searchPlaceholder}
+                    searchQuery={searchQuery}
+                    onSearchQueryChange={setSearchQuery}
                 />
-                {searchQuery.length > 0 && (
-                    <div
-                        className="react-fields-keeper-mapping-column-searcher-clear"
-                        role="button"
-                        onClick={onClearSearchQuery}
-                    >
-                        <span className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
-                    </div>
-                )}
-            </div>
+            ) : (
+                <div />
+            )}
             <div
                 className={classNames(
                     'react-fields-keeper-mapping-content-scrollable-container',
                     'react-fields-keeper-mapping-content-scrollable-container-columns',
                 )}
             >
-                {filteredGroupedItems.length > 0 ? (
-                    filteredGroupedItems.map((filteredGroupedItem, index) => (
-                        <RootBucketGroupedItemRenderer
-                            {...props}
-                            key={index}
-                            filteredGroupedItem={filteredGroupedItem}
-                            sortGroupOrderWiseOnAssignment={
-                                sortGroupOrderWiseOnAssignment
-                            }
-                        />
-                    ))
-                ) : (
-                    <div className="react-fields-keeper-mapping-no-search-items-found">
-                        <div>
-                            No items found for <br />
-                            <code>'{searchQuery}'</code>
-                        </div>
-                        {allItems.length > 0 && (
-                            <div
-                                className="react-fields-keeper-mapping-clear-search-link"
-                                onClick={onClearSearchQuery}
-                                role="button"
-                            >
-                                Clear search
-                            </div>
-                        )}
-                    </div>
-                )}
+                {filteredGroupedItems.length > 0
+                    ? filteredGroupedItems.map((filteredGroupedItem, index) => (
+                          <RootBucketGroupedItemRenderer
+                              {...props}
+                              key={index}
+                              filteredGroupedItem={filteredGroupedItem}
+                              sortGroupOrderWiseOnAssignment={
+                                  sortGroupOrderWiseOnAssignment
+                              }
+                          />
+                      ))
+                    : !disabledEmptyFilterMessage && (
+                          <div className="react-fields-keeper-mapping-no-search-items-found">
+                              {emptyFilterMessage ?? (
+                                  <>
+                                      <div>
+                                          No items found for <br />
+                                          <br />
+                                          <code>'{searchQuery}'</code>
+                                      </div>
+                                      <br />
+                                      {showClearSearchLink &&
+                                          allItems.length > 0 && (
+                                              <div
+                                                  className="react-fields-keeper-mapping-clear-search-link"
+                                                  onClick={onClearSearchQuery}
+                                                  role="button"
+                                              >
+                                                  Clear search
+                                              </div>
+                                          )}
+                                  </>
+                              )}
+                          </div>
+                      )}
             </div>
         </div>
     );

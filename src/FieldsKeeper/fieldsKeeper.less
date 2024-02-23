@@ -261,65 +261,6 @@
         margin-bottom: 5px;
     }
 
-    .react-fields-keeper-mapping-column-searcher {
-        width: 100%;
-        overflow: hidden;
-        position: relative;
-
-        .react-fields-keeper-mapping-column-searcher-input {
-            width: 100%;
-            padding: 4px 5px;
-            outline: none;
-            padding-right: 1.8em;
-            outline: none;
-            border: none;
-            border-bottom: 1px solid rgb(168, 168, 168);
-            font-size: inherit;
-
-            padding-left: 1.8em;
-
-            &:focus {
-                border-bottom-color: rgb(57, 57, 57);
-            }
-        }
-
-        .react-fields-keeper-mapping-column-searcher-prefix {
-            position: absolute;
-            top: 50%;
-            left: 3px;
-            transform: translateY(-50%);
-
-            span {
-                font-size: 1em !important;
-            }
-        }
-
-        .react-fields-keeper-mapping-column-searcher-clear {
-            position: absolute;
-            top: 50%;
-            right: 5px;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            border-radius: 2px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            span {
-                font-size: 8px !important;
-            }
-
-            &:hover {
-                background-color: #c7c7c7;
-            }
-
-            &:active {
-                transform: translateY(-50%) scale(0.9);
-            }
-        }
-    }
-
     .react-fields-keeper-mapping-content-scrollable-container {
         width: 100%;
         height: 100%;
@@ -426,6 +367,66 @@
             &:hover {
                 color: rgb(50, 50, 172);
             }
+        }
+    }
+}
+
+.react-fields-keeper-mapping-column-searcher {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    font-size: 12px;
+
+    .react-fields-keeper-mapping-column-searcher-input {
+        width: 100%;
+        padding: 4px 5px;
+        outline: none;
+        padding-right: 1.8em;
+        outline: none;
+        border: none;
+        border-bottom: 1px solid rgb(168, 168, 168);
+        font-size: inherit;
+
+        padding-left: 1.8em;
+
+        &:focus {
+            border-bottom-color: rgb(57, 57, 57);
+        }
+    }
+
+    .react-fields-keeper-mapping-column-searcher-prefix {
+        position: absolute;
+        top: 50%;
+        left: 3px;
+        transform: translateY(-50%);
+
+        span {
+            font-size: 1em !important;
+        }
+    }
+
+    .react-fields-keeper-mapping-column-searcher-clear {
+        position: absolute;
+        top: 50%;
+        right: 5px;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        span {
+            font-size: 8px !important;
+        }
+
+        &:hover {
+            background-color: #c7c7c7;
+        }
+
+        &:active {
+            transform: translateY(-50%) scale(0.9);
         }
     }
 }

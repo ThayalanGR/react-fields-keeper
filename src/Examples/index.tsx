@@ -10,6 +10,7 @@ import Example9 from './Example9';
 import Example10 from './Example10';
 import Example11 from './Example11';
 import Example12 from './Example12';
+import Example13 from './Example13';
 
 export const examples = [
     Example1,
@@ -24,4 +25,5 @@ export const examples = [
     Example10,
     Example11,
     Example12,
+    Example13,
 ];

@@ -130,9 +130,11 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 wrapperClassName,
             )}
         >
-            <div className="react-fields-keeper-mapping-content-title">
-                {label}
-            </div>
+            {label && (
+                <div className="react-fields-keeper-mapping-content-title">
+                    {label}
+                </div>
+            )}
             <div
                 className={classNames(
                     'react-fields-keeper-mapping-content-input',

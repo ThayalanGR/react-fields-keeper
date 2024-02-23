@@ -63,10 +63,38 @@ export interface IFieldsKeeperRootBucketProps {
 
   ignoreCheckBox?: boolean
 
+
+  /**
+   * if passed internal search feature will be switched off
+   */
+  customSearchQuery?: string;
+
+  /**
+   * only consumed when  customSearchQuery is passed 
+   * default - false
+   */
+  showClearSearchLink?: boolean;
+
+  /**
+   * only consumed when  customSearchQuery is passed 
+   */
+  onClearSearch?: () => void;
+
+
   /**
    * placeholder for search values
    */
-  searchPlaceholder?: string
+  searchPlaceholder?: string;
+
+  /**
+   * if not passed default message will be displayed
+   */
+  emptyFilterMessage?: string;
+
+  /**
+   *  default - false
+   */
+  disabledEmptyFilterMessage?: boolean
 }
 
 export interface IFieldsKeeperState {

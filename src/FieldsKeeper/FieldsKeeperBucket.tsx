@@ -32,6 +32,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         centerAlignPlaceholder = false,
         placeHolderWrapperClassName,
         wrapperClassName,
+
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
     } = props;
@@ -43,7 +44,11 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
 
-    const { allItems, buckets } = useStoreState(instanceId);
+    const {
+        allItems,
+        buckets,
+        receiveFieldItemsFromInstances = [],
+    } = useStoreState(instanceId);
 
     // compute
     const { currentBucket, groupedItems } = useMemo<{
@@ -88,10 +93,27 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         onDragEnterHandler();
     };
 
+    const getFieldItemIds = (e: React.DragEvent<HTMLDivElement>) => {
+        const lookupInstanceIds: string[] = [
+            instanceId,
+            ...receiveFieldItemsFromInstances,
+        ];
+        const foundInstanceId = lookupInstanceIds.find((currentInstanceId) => {
+            const foundId = e.dataTransfer.getData(currentInstanceId);
+            return foundId;
+        });
+
+        const foundInstanceIdChunk = foundInstanceId
+            ? e.dataTransfer.getData(foundInstanceId)
+            : '';
+
+        const fieldItemIds = (foundInstanceIdChunk ?? '').split(',');
+
+        return fieldItemIds;
+    };
+
     const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
-        const fieldItemIds = (e.dataTransfer.getData(instanceId) ?? '').split(
-            ',',
-        );
+        const fieldItemIds = getFieldItemIds(e);
         const fieldItems = allItems.filter((item) =>
             fieldItemIds.some((fieldItemId) => item.id === fieldItemId),
         );

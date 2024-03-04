@@ -107,6 +107,16 @@ export interface IFieldsKeeperState {
    * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
    */
   instanceId?: string;
+
+
+
+  /**
+   * accept fields items from other providers based on the instanceId
+   * 
+   * Note: to use this prop, all the items that you are expecting to 
+   * receive should be mentioned in the current instance as well
+   */
+  receiveFieldItemsFromInstances?: string[]
 }
 
 export interface IFieldsKeeperActions {

@@ -201,6 +201,7 @@ const RootBucketGroupedItemRenderer = (
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromProps,
         instanceId: instanceIdFromProps,
         ignoreCheckBox = false,
+        allowDragAfterAssignment = true,
     } = props;
 
     // state
@@ -341,7 +342,11 @@ const RootBucketGroupedItemRenderer = (
                             },
                         )}
                         style={itemStyle}
-                        draggable={!isFieldItemAssigned}
+                        draggable={
+                            allowDragAfterAssignment
+                                ? true
+                                : !isFieldItemAssigned
+                        }
                         onDragStart={onDragStartHandler(
                             ...(isGroupHeader
                                 ? groupHeader.groupItems

@@ -95,6 +95,14 @@ export interface IFieldsKeeperRootBucketProps {
    *  default - false
    */
   disabledEmptyFilterMessage?: boolean
+
+  /**
+   * allow field item drag after assignment
+   * 
+   * default - true
+   */
+  allowDragAfterAssignment?: boolean
+
 }
 
 export interface IFieldsKeeperState {

@@ -33,6 +33,7 @@ export interface IFieldKeeperItemDisabled {
 export interface IFieldsKeeperBucket<T = string> {
   id: string;
   items: IFieldsKeeperItem<T>[];
+  maxItems?: number;
 }
 
 export interface IGetPriorityTargetBucketToFillProps {
@@ -139,10 +140,6 @@ export interface IFieldsKeeperProviderProps extends IFieldsKeeperState {
 export interface IFieldsKeeperBucketProps {
   id: string;
   label?: ReactNode;
-  /**
-   * @default - Infinite
-   */
-  maxItems?: number;
   /**
    * @default - false
    */

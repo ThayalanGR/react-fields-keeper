@@ -23,7 +23,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const {
         id,
         label,
-        maxItems = Number.MAX_SAFE_INTEGER,
         disabled = false,
         emptyFieldPlaceholder = 'Add data fields here',
         sortGroupOrderWiseOnAssignment = true,
@@ -65,6 +64,9 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         };
     }, [buckets, id]);
 
+    if (!currentBucket) return null;
+    const { maxItems = Number.MAX_SAFE_INTEGER } = currentBucket;
+
     const onFieldItemRemove =
         (...fieldItems: IFieldsKeeperItem[]) =>
         () =>
@@ -75,7 +77,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 fieldItems,
                 sortGroupOrderWiseOnAssignment,
                 updateState,
-
                 removeOnly: true,
             });
 
@@ -434,30 +435,64 @@ export function assignFieldItems(props: {
         sortGroupOrderWiseOnAssignment = false,
     } = props;
 
+    const newBuckets = [...buckets];
+
     const requiredFieldItems = currentFieldItems.filter(
         (item) => (item.rootDisabled ?? item.disabled)?.active !== true,
     );
 
     // compute
-    const newBuckets = [...buckets];
-    newBuckets.forEach((bucket) => {
-        // removes item from old bucket
+    // removes items from bucket
+    const filterItemsFromBucket = (
+        bucket: IFieldsKeeperBucket,
+        restrictedItems: IFieldsKeeperItem[] = [],
+    ) => {
         bucket.items = bucket.items.filter(
             (item) =>
                 requiredFieldItems.some(
                     (fieldItem) => fieldItem.id === item.id,
-                ) === false,
+                ) === false ||
+                restrictedItems.some((fieldItem) => fieldItem.id === item.id),
         );
+    };
 
+    const checkAndMaintainMaxItems = (bucket: IFieldsKeeperBucket) => {
+        const { maxItems = Number.MAX_SAFE_INTEGER } = bucket;
+        const retainedItems = bucket.items.slice(0, maxItems);
+        const restrictedItems = bucket.items.slice(maxItems);
+        bucket.items = retainedItems;
+        return restrictedItems;
+    };
+
+    if (removeOnly) {
+        // only remove the item from bucket
+        newBuckets.forEach((bucket) => {
+            filterItemsFromBucket(bucket);
+            if (sortGroupOrderWiseOnAssignment)
+                sortBucketItemsBasedOnGroupOrder(bucket.items);
+        });
+    } else {
         // insert new item into bucket
-        if (!removeOnly && bucket.id === bucketId)
-            bucket.items.push(...requiredFieldItems);
+        const targetBucket = newBuckets.find(
+            (bucket) => bucket.id === bucketId,
+        );
+        if (!targetBucket) return;
 
-        // sort the same group items based on the group order
+        filterItemsFromBucket(targetBucket);
+        targetBucket.items.push(...requiredFieldItems);
+        const restrictedItems = checkAndMaintainMaxItems(targetBucket);
         if (sortGroupOrderWiseOnAssignment)
-            bucket.items = sortBucketItemsBasedOnGroupOrder(bucket.items);
-    });
+            sortBucketItemsBasedOnGroupOrder(targetBucket.items);
 
+        // remove items if available on other buckets
+        newBuckets.forEach((bucket) => {
+            if (bucket.id !== bucketId) {
+                filterItemsFromBucket(bucket, restrictedItems);
+                if (sortGroupOrderWiseOnAssignment)
+                    sortBucketItemsBasedOnGroupOrder(bucket.items);
+            }
+        });
+    }
     // update context
     updateState(instanceId, { buckets: newBuckets });
 }

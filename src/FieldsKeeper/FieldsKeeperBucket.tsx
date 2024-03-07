@@ -46,6 +46,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const {
         allItems,
         buckets,
+        allowDuplicates,
         receiveFieldItemsFromInstances = [],
     } = useStoreState(instanceId);
 
@@ -73,11 +74,17 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             assignFieldItems({
                 instanceId,
                 bucketId: id,
+                fromBucket: id,
                 buckets,
                 fieldItems,
                 sortGroupOrderWiseOnAssignment,
                 updateState,
                 removeOnly: true,
+                allowDuplicates,
+                removeIndex:
+                    fieldItems.length === 1
+                        ? fieldItems[0].fieldItemIndex
+                        : undefined,
             });
 
     // event handlers
@@ -99,6 +106,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             instanceId,
             ...receiveFieldItemsFromInstances,
         ];
+        const fieldItemIndex = e.dataTransfer.getData('fieldItemIndex');
+        const fromBucket = e.dataTransfer.getData('fromBucket');
         const foundInstanceId = lookupInstanceIds.find((currentInstanceId) => {
             const foundId = e.dataTransfer.getData(currentInstanceId);
             return foundId;
@@ -110,11 +119,11 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
         const fieldItemIds = (foundInstanceIdChunk ?? '').split(',');
 
-        return fieldItemIds;
+        return { fieldItemIds, fromBucket, fieldItemIndex };
     };
 
     const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
-        const fieldItemIds = getFieldItemIds(e);
+        const { fromBucket, fieldItemIds, fieldItemIndex } = getFieldItemIds(e);
         const fieldItems = allItems.filter((item) =>
             fieldItemIds.some((fieldItemId) => item.id === fieldItemId),
         );
@@ -125,6 +134,12 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 buckets,
                 sortGroupOrderWiseOnAssignment,
                 fieldItems,
+                allowDuplicates,
+                fromBucket,
+                removeIndex:
+                    fieldItems.length === 1 && fieldItemIndex
+                        ? +fieldItemIndex
+                        : undefined,
                 updateState,
             });
         onDragLeaveHandler();
@@ -212,10 +227,10 @@ const GroupedItemRenderer = (
     // props
     const {
         groupedItem: { items, group, groupLabel },
-        allowRemoveFields = false,
         suffixNode,
         instanceId: instanceIdFromProps,
         currentBucket,
+        allowRemoveFields = false,
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
         customItemRenderer,
@@ -235,8 +250,14 @@ const GroupedItemRenderer = (
     // handlers
     // event handlers
     const onDragStartHandler =
-        (...fieldItems: IFieldsKeeperItem[]) =>
+        (
+            fieldItemIndex: string,
+            bucketId: string,
+            fieldItems: IFieldsKeeperItem[],
+        ) =>
         (e: React.DragEvent<HTMLDivElement>) => {
+            e.dataTransfer.setData('fieldItemIndex', fieldItemIndex);
+            e.dataTransfer.setData('fromBucket', bucketId);
             e.dataTransfer.setData(
                 instanceId,
                 fieldItems.map((item) => item.id).join(','),
@@ -342,9 +363,11 @@ const GroupedItemRenderer = (
                         style={itemStyle}
                         draggable
                         onDragStart={onDragStartHandler(
-                            ...(isGroupHeader
+                            (fieldItem.fieldItemIndex ?? '') + '',
+                            currentBucket.id,
+                            isGroupHeader
                                 ? groupHeader.groupItems
-                                : [fieldItem]),
+                                : [fieldItem],
                         )}
                         onDragOver={onDragOverHandler}
                     >
@@ -386,6 +409,7 @@ const GroupedItemRenderer = (
                     },
                 )}
             >
+                {/* group header */}
                 {renderFieldItems({
                     fieldItems: [
                         {
@@ -403,6 +427,7 @@ const GroupedItemRenderer = (
                             setIsGroupCollapsed(!isGroupCollapsed),
                     },
                 })}
+                {/* group sub items */}
                 {!isGroupCollapsed &&
                     renderFieldItems({
                         fieldItems: items,
@@ -418,11 +443,14 @@ const GroupedItemRenderer = (
 export function assignFieldItems(props: {
     instanceId: string;
     bucketId: string | null;
+    fromBucket: string;
     buckets: IFieldsKeeperBucket[];
     fieldItems: IFieldsKeeperItem[];
     updateState: ContextSetState;
     removeOnly?: boolean;
     sortGroupOrderWiseOnAssignment?: boolean;
+    allowDuplicates?: boolean;
+    removeIndex?: number;
 }) {
     // props
     const {
@@ -433,6 +461,9 @@ export function assignFieldItems(props: {
         updateState,
         removeOnly = false,
         sortGroupOrderWiseOnAssignment = false,
+        allowDuplicates = false,
+        removeIndex,
+        fromBucket,
     } = props;
 
     const newBuckets = [...buckets];
@@ -447,13 +478,19 @@ export function assignFieldItems(props: {
         bucket: IFieldsKeeperBucket,
         restrictedItems: IFieldsKeeperItem[] = [],
     ) => {
-        bucket.items = bucket.items.filter(
-            (item) =>
-                requiredFieldItems.some(
-                    (fieldItem) => fieldItem.id === item.id,
-                ) === false ||
-                restrictedItems.some((fieldItem) => fieldItem.id === item.id),
-        );
+        if (removeIndex !== undefined) {
+            bucket.items.splice(removeIndex, requiredFieldItems.length);
+        } else {
+            bucket.items = bucket.items.filter(
+                (item) =>
+                    requiredFieldItems.some(
+                        (fieldItem) => fieldItem.id === item.id,
+                    ) === false ||
+                    restrictedItems.some(
+                        (fieldItem) => fieldItem.id === item.id,
+                    ),
+            );
+        }
     };
 
     const checkAndMaintainMaxItems = (bucket: IFieldsKeeperBucket) => {
@@ -478,7 +515,9 @@ export function assignFieldItems(props: {
         );
         if (!targetBucket) return;
 
-        filterItemsFromBucket(targetBucket);
+        const isAssignmentFromSameBucket = fromBucket === targetBucket.id;
+        if (!allowDuplicates || isAssignmentFromSameBucket)
+            filterItemsFromBucket(targetBucket);
         targetBucket.items.push(...requiredFieldItems);
         const restrictedItems = checkAndMaintainMaxItems(targetBucket);
         if (sortGroupOrderWiseOnAssignment)
@@ -487,7 +526,8 @@ export function assignFieldItems(props: {
         // remove items if available on other buckets
         newBuckets.forEach((bucket) => {
             if (bucket.id !== bucketId) {
-                filterItemsFromBucket(bucket, restrictedItems);
+                if (!allowDuplicates)
+                    filterItemsFromBucket(bucket, restrictedItems);
                 if (sortGroupOrderWiseOnAssignment)
                     sortBucketItemsBasedOnGroupOrder(bucket.items);
             }

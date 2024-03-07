@@ -19,6 +19,12 @@ export interface IFieldsKeeperItem<T = string> {
   group?: string;
   groupLabel?: string;
   groupOrder?: number;
+
+
+  /**
+   * for internal use only
+   */
+  fieldItemIndex?: number
 }
 
 export interface IFieldKeeperItemDisabled {
@@ -109,6 +115,10 @@ export interface IFieldsKeeperRootBucketProps {
 export interface IFieldsKeeperState {
   allItems: IFieldsKeeperItem[];
   buckets: IFieldsKeeperBucket[];
+  /**
+   * used to flexibly assign between buckets, 
+   * if not passed assignment will be done based on least bucket items priority
+   */
   getPriorityTargetBucketToFill?: IFieldsKeeperRootBucketProps['getPriorityTargetBucketToFill']
   /**
    * if not passed - custom instanceId will be created and used internally
@@ -126,6 +136,13 @@ export interface IFieldsKeeperState {
    * receive should be mentioned in the current instance as well
    */
   receiveFieldItemsFromInstances?: string[]
+
+  /**
+   * default - false
+   * 
+   * allow duplicate field assignment on all buckets
+   */
+  allowDuplicates?: boolean
 }
 
 export interface IFieldsKeeperActions {

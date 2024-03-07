@@ -40,15 +40,15 @@ export const getGroupedItems = (
     currentItems: IFieldsKeeperItem[],
 ): IGroupedFieldsKeeperItem[] => {
     const groupedItems = currentItems.reduce<IGroupedFieldsKeeperItem[]>(
-        (acc, item) => {
+        (acc, item, fieldItemIndex) => {
             const foundGroup = acc.find((group) => group.group === item.group);
             if (foundGroup) {
-                foundGroup.items.push(item);
+                foundGroup.items.push({ ...item, fieldItemIndex });
             } else {
                 acc.push({
                     group: item.group ?? 'NO_GROUP',
                     groupLabel: item.groupLabel ?? 'NO_GROUP',
-                    items: [item],
+                    items: [{ ...item, fieldItemIndex }],
                 });
             }
             return acc;
@@ -211,6 +211,7 @@ const RootBucketGroupedItemRenderer = (
     const {
         buckets,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
+        allowDuplicates,
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
@@ -277,10 +278,12 @@ const RootBucketGroupedItemRenderer = (
             assignFieldItems({
                 instanceId,
                 bucketId: bucketToFill.id,
+                fromBucket: 'root_bucket',
                 fieldItems,
                 buckets,
                 removeOnly: remove,
                 sortGroupOrderWiseOnAssignment,
+                allowDuplicates,
                 updateState,
             });
         };

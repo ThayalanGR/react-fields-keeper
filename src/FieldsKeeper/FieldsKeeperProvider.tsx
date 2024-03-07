@@ -22,6 +22,7 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
         buckets,
         instanceId: instanceIdFromProps,
         receiveFieldItemsFromInstances,
+        allowDuplicates,
         getPriorityTargetBucketToFill,
         onUpdate,
     } = props;
@@ -40,6 +41,7 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
             buckets,
             instanceId: instanceIdFromProps,
             receiveFieldItemsFromInstances,
+            allowDuplicates,
             getPriorityTargetBucketToFill,
             onStateUpdate: (state) => {
                 // introduce delayed updates later

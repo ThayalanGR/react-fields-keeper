@@ -54,4 +54,13 @@ export const useStoreState = (instanceId: string) => {
   return state as Required<IFieldsKeeperState>;
 }
 
+
+
 export const FieldsKeeperContext = createContext<{ instanceId: string }>({ instanceId: '' })
+
+export const FIELDS_KEEPER_CONSTANTS = {
+  ROOT_BUCKET_ID: 'ROOT_BUCKET',
+  FROM_BUCKET: 'FROM_BUCKET',
+  FIELD_ITEM_INDEX: 'FIELD_ITEM_INDEX',
+  NO_GROUP_ID: 'NO_GROUP'
+}

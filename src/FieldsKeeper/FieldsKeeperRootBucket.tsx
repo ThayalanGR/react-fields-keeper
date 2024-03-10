@@ -11,6 +11,7 @@ import {
 } from './FieldsKeeper.types';
 import { assignFieldItems, sortBucketItemsBasedOnGroupOrder } from '..';
 import {
+    FIELDS_KEEPER_CONSTANTS,
     FieldsKeeperContext,
     useStore,
     useStoreState,
@@ -46,8 +47,9 @@ export const getGroupedItems = (
                 foundGroup.items.push({ ...item, fieldItemIndex });
             } else {
                 acc.push({
-                    group: item.group ?? 'NO_GROUP',
-                    groupLabel: item.groupLabel ?? 'NO_GROUP',
+                    group: item.group ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
+                    groupLabel:
+                        item.groupLabel ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
                     items: [{ ...item, fieldItemIndex }],
                 });
             }
@@ -217,12 +219,16 @@ const RootBucketGroupedItemRenderer = (
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
 
     // compute
-    const hasGroup = group !== 'NO_GROUP';
+    const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
     // event handlers
     const onDragStartHandler =
         (...fieldItems: IFieldsKeeperItem[]) =>
         (e: React.DragEvent<HTMLDivElement>) => {
+            e.dataTransfer.setData(
+                FIELDS_KEEPER_CONSTANTS.FROM_BUCKET,
+                FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
+            );
             e.dataTransfer.setData(
                 instanceId,
                 fieldItems.map((item) => item.id).join(','),
@@ -278,7 +284,7 @@ const RootBucketGroupedItemRenderer = (
             assignFieldItems({
                 instanceId,
                 bucketId: bucketToFill.id,
-                fromBucket: 'root_bucket',
+                fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
                 fieldItems,
                 buckets,
                 removeOnly: remove,

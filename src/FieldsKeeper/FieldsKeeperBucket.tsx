@@ -13,6 +13,7 @@ import {
 } from '..';
 import {
     ContextSetState,
+    FIELDS_KEEPER_CONSTANTS,
     FieldsKeeperContext,
     useStore,
     useStoreState,
@@ -106,8 +107,12 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             instanceId,
             ...receiveFieldItemsFromInstances,
         ];
-        const fieldItemIndex = e.dataTransfer.getData('fieldItemIndex');
-        const fromBucket = e.dataTransfer.getData('fromBucket');
+        const fieldItemIndex = e.dataTransfer.getData(
+            FIELDS_KEEPER_CONSTANTS.FIELD_ITEM_INDEX,
+        );
+        const fromBucket = e.dataTransfer.getData(
+            FIELDS_KEEPER_CONSTANTS.FROM_BUCKET,
+        );
         const foundInstanceId = lookupInstanceIds.find((currentInstanceId) => {
             const foundId = e.dataTransfer.getData(currentInstanceId);
             return foundId;
@@ -245,7 +250,7 @@ const GroupedItemRenderer = (
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
 
     // compute
-    const hasGroup = group !== 'NO_GROUP';
+    const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
     // handlers
     // event handlers
@@ -256,8 +261,14 @@ const GroupedItemRenderer = (
             fieldItems: IFieldsKeeperItem[],
         ) =>
         (e: React.DragEvent<HTMLDivElement>) => {
-            e.dataTransfer.setData('fieldItemIndex', fieldItemIndex);
-            e.dataTransfer.setData('fromBucket', bucketId);
+            e.dataTransfer.setData(
+                FIELDS_KEEPER_CONSTANTS.FIELD_ITEM_INDEX,
+                fieldItemIndex,
+            );
+            e.dataTransfer.setData(
+                FIELDS_KEEPER_CONSTANTS.FROM_BUCKET,
+                bucketId,
+            );
             e.dataTransfer.setData(
                 instanceId,
                 fieldItems.map((item) => item.id).join(','),
@@ -463,7 +474,7 @@ export function assignFieldItems(props: {
         sortGroupOrderWiseOnAssignment = false,
         allowDuplicates = false,
         removeIndex,
-        fromBucket,
+        fromBucket: fromBucketId,
     } = props;
 
     const newBuckets = [...buckets];
@@ -478,7 +489,7 @@ export function assignFieldItems(props: {
         bucket: IFieldsKeeperBucket,
         restrictedItems: IFieldsKeeperItem[] = [],
     ) => {
-        if (removeIndex !== undefined) {
+        if (removeIndex !== undefined && bucket.id === fromBucketId) {
             bucket.items.splice(removeIndex, requiredFieldItems.length);
         } else {
             bucket.items = bucket.items.filter(
@@ -501,37 +512,66 @@ export function assignFieldItems(props: {
         return restrictedItems;
     };
 
+    const targetBucket = newBuckets.find((bucket) => bucket.id === bucketId);
+    const fromBucket = newBuckets.find((bucket) => bucket.id === fromBucketId);
+
     if (removeOnly) {
         // only remove the item from bucket
-        newBuckets.forEach((bucket) => {
-            filterItemsFromBucket(bucket);
-            if (sortGroupOrderWiseOnAssignment)
-                sortBucketItemsBasedOnGroupOrder(bucket.items);
-        });
-    } else {
-        // insert new item into bucket
-        const targetBucket = newBuckets.find(
-            (bucket) => bucket.id === bucketId,
-        );
-        if (!targetBucket) return;
-
-        const isAssignmentFromSameBucket = fromBucket === targetBucket.id;
-        if (!allowDuplicates || isAssignmentFromSameBucket)
-            filterItemsFromBucket(targetBucket);
-        targetBucket.items.push(...requiredFieldItems);
-        const restrictedItems = checkAndMaintainMaxItems(targetBucket);
-        if (sortGroupOrderWiseOnAssignment)
-            sortBucketItemsBasedOnGroupOrder(targetBucket.items);
-
-        // remove items if available on other buckets
-        newBuckets.forEach((bucket) => {
-            if (bucket.id !== bucketId) {
-                if (!allowDuplicates)
-                    filterItemsFromBucket(bucket, restrictedItems);
+        if (fromBucketId === FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID) {
+            newBuckets.forEach((bucket) => {
+                filterItemsFromBucket(bucket);
                 if (sortGroupOrderWiseOnAssignment)
                     sortBucketItemsBasedOnGroupOrder(bucket.items);
+            });
+        } else {
+            if (fromBucket) filterItemsFromBucket(fromBucket);
+        }
+    } else {
+        // insert new item into bucket
+        if (!targetBucket) return;
+
+        if (fromBucketId === FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID) {
+            // assignment from root bucket
+            // clear previously assigned items if any in any of the buckets
+            if (!allowDuplicates)
+                newBuckets.forEach((bucket) => filterItemsFromBucket(bucket));
+
+            targetBucket.items.push(...requiredFieldItems);
+
+            checkAndMaintainMaxItems(targetBucket);
+
+            if (sortGroupOrderWiseOnAssignment)
+                sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+        } else {
+            const isAssignmentFromSameBucket = fromBucketId === targetBucket.id;
+
+            if (isAssignmentFromSameBucket) {
+                if (!allowDuplicates) filterItemsFromBucket(targetBucket);
+
+                targetBucket.items.push(...requiredFieldItems);
+
+                checkAndMaintainMaxItems(targetBucket);
+
+                if (sortGroupOrderWiseOnAssignment)
+                    sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+            } else {
+                // assignment from sibling bucket
+                targetBucket.items.push(...requiredFieldItems);
+
+                const restrictedItems = checkAndMaintainMaxItems(targetBucket);
+
+                if (sortGroupOrderWiseOnAssignment)
+                    sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+
+                // fromBucket cleanup
+                if (fromBucket) {
+                    filterItemsFromBucket(fromBucket, restrictedItems);
+
+                    if (sortGroupOrderWiseOnAssignment)
+                        sortBucketItemsBasedOnGroupOrder(fromBucket.items);
+                }
             }
-        });
+        }
     }
     // update context
     updateState(instanceId, { buckets: newBuckets });

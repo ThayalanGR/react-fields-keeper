@@ -504,12 +504,30 @@ export function assignFieldItems(props: {
         }
     };
 
-    const checkAndMaintainMaxItems = (bucket: IFieldsKeeperBucket) => {
+    const checkAndMaintainMaxItems = (
+        bucket: IFieldsKeeperBucket,
+        previousBucketItemsLength: number,
+    ) => {
         const { maxItems = Number.MAX_SAFE_INTEGER } = bucket;
-        const retainedItems = bucket.items.slice(0, maxItems);
-        const restrictedItems = bucket.items.slice(maxItems);
-        bucket.items = retainedItems;
-        return restrictedItems;
+
+        // check if the bucket has no items, then slice it from from top
+        if (previousBucketItemsLength === 0) {
+            const retainedItems = bucket.items.slice(0, maxItems);
+            const restrictedItems = bucket.items.slice(maxItems);
+            bucket.items = retainedItems;
+            return restrictedItems;
+        } else {
+            // only hold last added item, remove first added items, make sure the lower boundary is not crossed
+            const retainedItems = bucket.items.slice(
+                Math.max(bucket.items.length - maxItems, 0),
+            );
+            const restrictedItems = bucket.items.slice(
+                0,
+                Math.max(bucket.items.length - maxItems, 0),
+            );
+            bucket.items = retainedItems;
+            return restrictedItems;
+        }
     };
 
     const targetBucket = newBuckets.find((bucket) => bucket.id === bucketId);
@@ -529,6 +547,7 @@ export function assignFieldItems(props: {
     } else {
         // insert new item into bucket
         if (!targetBucket) return;
+        const targetBucketItemsPreviousLength = targetBucket.items.length;
 
         if (fromBucketId === FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID) {
             // assignment from root bucket
@@ -538,7 +557,10 @@ export function assignFieldItems(props: {
 
             targetBucket.items.push(...requiredFieldItems);
 
-            checkAndMaintainMaxItems(targetBucket);
+            checkAndMaintainMaxItems(
+                targetBucket,
+                targetBucketItemsPreviousLength,
+            );
 
             if (sortGroupOrderWiseOnAssignment)
                 sortBucketItemsBasedOnGroupOrder(targetBucket.items);
@@ -550,7 +572,10 @@ export function assignFieldItems(props: {
 
                 targetBucket.items.push(...requiredFieldItems);
 
-                checkAndMaintainMaxItems(targetBucket);
+                checkAndMaintainMaxItems(
+                    targetBucket,
+                    targetBucketItemsPreviousLength,
+                );
 
                 if (sortGroupOrderWiseOnAssignment)
                     sortBucketItemsBasedOnGroupOrder(targetBucket.items);
@@ -558,7 +583,10 @@ export function assignFieldItems(props: {
                 // assignment from sibling bucket
                 targetBucket.items.push(...requiredFieldItems);
 
-                const restrictedItems = checkAndMaintainMaxItems(targetBucket);
+                const restrictedItems = checkAndMaintainMaxItems(
+                    targetBucket,
+                    targetBucketItemsPreviousLength,
+                );
 
                 if (sortGroupOrderWiseOnAssignment)
                     sortBucketItemsBasedOnGroupOrder(targetBucket.items);

@@ -204,6 +204,7 @@ const RootBucketGroupedItemRenderer = (
         instanceId: instanceIdFromProps,
         ignoreCheckBox = false,
         allowDragAfterAssignment = true,
+        allowDragging = true,
     } = props;
 
     // state
@@ -352,9 +353,10 @@ const RootBucketGroupedItemRenderer = (
                         )}
                         style={itemStyle}
                         draggable={
-                            allowDragAfterAssignment
+                            allowDragging &&
+                            (allowDragAfterAssignment
                                 ? true
-                                : !isFieldItemAssigned
+                                : !isFieldItemAssigned)
                         }
                         onDragStart={onDragStartHandler(
                             ...(isGroupHeader

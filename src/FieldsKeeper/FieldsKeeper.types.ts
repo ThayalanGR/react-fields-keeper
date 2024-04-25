@@ -110,6 +110,12 @@ export interface IFieldsKeeperRootBucketProps {
    */
   allowDragAfterAssignment?: boolean
 
+  /**
+   * mention whether to allow dragging or not
+   * @default - true
+   */
+  allowDragging?: boolean
+
 }
 
 export interface IFieldsKeeperState {

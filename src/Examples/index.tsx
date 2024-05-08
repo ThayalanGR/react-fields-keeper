@@ -14,6 +14,7 @@ import Example13 from './Example13';
 import Example14 from './Example14';
 import Example15 from './Example15';
 import Example16 from './Example16';
+import Example17 from './Example17_should_render_prop';
 
 export const examples = [
     Example1,
@@ -32,4 +33,5 @@ export const examples = [
     Example14,
     Example15,
     Example16,
+    Example17,
 ];

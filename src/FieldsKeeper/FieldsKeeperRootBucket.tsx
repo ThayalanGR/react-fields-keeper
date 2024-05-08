@@ -80,6 +80,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         showClearSearchLink = true,
         emptyFilterMessage = undefined,
         disabledEmptyFilterMessage = false,
+        shouldRender = () => true,
     } = props;
 
     // refs
@@ -89,8 +90,12 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { allItems } = useStoreState(instanceId);
+    const { allItems: allOriginalItems } = useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
+    const allItems = useMemo(() => {
+        // should render to spot the renderers
+        return allOriginalItems.filter((item) => shouldRender(item));
+    }, [allOriginalItems, shouldRender]);
 
     // compute
     const hasCustomSearchQuery = customSearchQuery !== undefined;
@@ -99,6 +104,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
             sort: true,
         });
         const currentItems = searcher.search(customSearchQuery ?? searchQuery);
+
         // group items
         return getGroupedItems(currentItems);
     }, [customSearchQuery, searchQuery, allItems]);

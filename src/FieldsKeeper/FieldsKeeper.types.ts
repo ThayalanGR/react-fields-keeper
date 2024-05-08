@@ -116,6 +116,11 @@ export interface IFieldsKeeperRootBucketProps {
    */
   allowDragging?: boolean
 
+  /**
+   * shouldRender if passed will be called for each field item render passed in this bucket, if returned true renders or ignores
+   */
+  shouldRender?: <T>(item: IFieldsKeeperItem<T>) => boolean
+
 }
 
 export interface IFieldsKeeperState {

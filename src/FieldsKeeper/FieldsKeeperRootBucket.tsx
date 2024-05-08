@@ -353,8 +353,8 @@ const RootBucketGroupedItemRenderer = (
                                     !groupHeader.isGroupCollapsed,
                                 'react-fields-keeper-mapping-column-content-disabled':
                                     fieldItem.rootDisabled?.active,
-                                'react-fields-keeper-mapping-column-content-without-checkbox':
-                                    ignoreCheckBox,
+                                'react-fields-keeper-mapping-column-content-offset-without-checkbox':
+                                    ignoreCheckBox && isGroupItem,
                             },
                         )}
                         style={itemStyle}

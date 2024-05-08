@@ -1,6 +1,6 @@
 import Example1 from './Example1';
 import Example2 from './Example2';
-import Example3 from './Example3';
+import Example3 from './Example3_grouping_items';
 import Example4 from './Example4';
 import Example5 from './Example5';
 import Example6 from './Example6';

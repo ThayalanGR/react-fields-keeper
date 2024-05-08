@@ -81,7 +81,10 @@ export default function Example1() {
                         />
                     </div>
                     <div className="root-bucket-container">
-                        <FieldsKeeperRootBucket label="Root Bucket" />
+                        <FieldsKeeperRootBucket
+                            label="Root Bucket"
+                            ignoreCheckBox
+                        />
                     </div>
                 </div>
             </FieldsKeeperProvider>

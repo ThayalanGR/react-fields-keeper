@@ -211,6 +211,7 @@ const RootBucketGroupedItemRenderer = (
         ignoreCheckBox = false,
         allowDragAfterAssignment = true,
         allowDragging = true,
+        toggleCheckboxOnLabelClick = false,
     } = props;
 
     // state
@@ -369,6 +370,16 @@ const RootBucketGroupedItemRenderer = (
                                 ? groupHeader.groupItems
                                 : [fieldItem]),
                         )}
+                        onClick={
+                            toggleCheckboxOnLabelClick
+                                ? onFieldItemClick(
+                                      isGroupHeader
+                                          ? groupHeader.groupItems
+                                          : [fieldItem],
+                                      isFieldItemAssigned,
+                                  )
+                                : undefined
+                        }
                     >
                         {!ignoreCheckBox && (
                             <div className="react-fields-keeper-mapping-column-content-checkbox">

@@ -121,6 +121,12 @@ export interface IFieldsKeeperRootBucketProps {
    */
   shouldRender?: <T>(item: IFieldsKeeperItem<T>) => boolean
 
+  /**
+   * toggle checkbox on label click
+   */
+  toggleCheckboxOnLabelClick?: boolean
+
+
 }
 
 export interface IFieldsKeeperState {

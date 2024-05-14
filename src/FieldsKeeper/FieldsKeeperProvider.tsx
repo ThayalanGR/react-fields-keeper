@@ -43,13 +43,16 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
             receiveFieldItemsFromInstances,
             allowDuplicates,
             getPriorityTargetBucketToFill,
-            onStateUpdate: (state) => {
+            onStateUpdate: (state, updateInfo) => {
                 // introduce delayed updates later
-                onUpdate?.({
-                    allItems: state.allItems,
-                    buckets: state.buckets,
-                    instanceId: state.instanceId,
-                });
+                onUpdate?.(
+                    {
+                        allItems: state.allItems,
+                        buckets: state.buckets,
+                        instanceId: state.instanceId,
+                    },
+                    updateInfo,
+                );
             },
         };
 
@@ -82,7 +85,12 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
                 },
             )
         )
-            setState(instanceId, keeperCoreState);
+            setState(instanceId, keeperCoreState, {
+                fieldItems: [],
+                fromBucket: '',
+                targetBucket: '',
+                isRemoved: false,
+            });
 
         () => deleteState(instanceId);
 

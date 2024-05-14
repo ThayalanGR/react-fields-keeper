@@ -15,6 +15,7 @@ import {
     ContextSetState,
     FIELDS_KEEPER_CONSTANTS,
     FieldsKeeperContext,
+    StateUpdateInfo,
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
@@ -451,6 +452,33 @@ const GroupedItemRenderer = (
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
+export function checkAndMaintainMaxItems(
+    bucket: IFieldsKeeperBucket,
+    previousBucketItemsLength: number,
+) {
+    const { maxItems = Number.MAX_SAFE_INTEGER } = bucket;
+
+    // check if the bucket has no items, then slice it from from top
+    if (previousBucketItemsLength === 0) {
+        const retainedItems = bucket.items.slice(0, maxItems);
+        const restrictedItems = bucket.items.slice(maxItems);
+        bucket.items = retainedItems;
+        return restrictedItems;
+    } else {
+        // only hold last added item, remove first added items, make sure the lower boundary is not crossed
+        const retainedItems = bucket.items.slice(
+            Math.max(bucket.items.length - maxItems, 0),
+        );
+        const restrictedItems = bucket.items.slice(
+            0,
+            Math.max(bucket.items.length - maxItems, 0),
+        );
+        bucket.items = retainedItems;
+        return restrictedItems;
+    }
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
 export function assignFieldItems(props: {
     instanceId: string;
     bucketId: string | null;
@@ -501,32 +529,6 @@ export function assignFieldItems(props: {
                         (fieldItem) => fieldItem.id === item.id,
                     ),
             );
-        }
-    };
-
-    const checkAndMaintainMaxItems = (
-        bucket: IFieldsKeeperBucket,
-        previousBucketItemsLength: number,
-    ) => {
-        const { maxItems = Number.MAX_SAFE_INTEGER } = bucket;
-
-        // check if the bucket has no items, then slice it from from top
-        if (previousBucketItemsLength === 0) {
-            const retainedItems = bucket.items.slice(0, maxItems);
-            const restrictedItems = bucket.items.slice(maxItems);
-            bucket.items = retainedItems;
-            return restrictedItems;
-        } else {
-            // only hold last added item, remove first added items, make sure the lower boundary is not crossed
-            const retainedItems = bucket.items.slice(
-                Math.max(bucket.items.length - maxItems, 0),
-            );
-            const restrictedItems = bucket.items.slice(
-                0,
-                Math.max(bucket.items.length - maxItems, 0),
-            );
-            bucket.items = retainedItems;
-            return restrictedItems;
         }
     };
 
@@ -601,8 +603,16 @@ export function assignFieldItems(props: {
             }
         }
     }
+
+    const updateInfo: StateUpdateInfo = {
+        fieldItems: requiredFieldItems,
+        fromBucket: fromBucket?.id,
+        targetBucket: targetBucket?.id,
+        isRemoved: removeOnly,
+    };
+
     // update context
-    updateState(instanceId, { buckets: newBuckets });
+    updateState(instanceId, { buckets: newBuckets }, updateInfo);
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

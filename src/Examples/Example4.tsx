@@ -93,8 +93,8 @@ export default function Example4() {
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
-                onUpdate={(state) => {
-                    console.log(state);
+                onUpdate={(state, updateInfo) => {
+                    console.log({ state, updateInfo });
                 }}
                 getPriorityTargetBucketToFill={getPriorityTargetBucketToFill}
             >

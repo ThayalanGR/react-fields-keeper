@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import {
+  IFieldsKeeperItem,
   IFieldsKeeperState,
 } from "./FieldsKeeper.types";
 import { createContext } from 'react';
@@ -8,9 +9,17 @@ import { createContext } from 'react';
 
 
 type State = IFieldsKeeperState
-export type AdditionalContextState = { onStateUpdate: (state: State) => void }
 
-export type ContextSetState = (instanceId: string, newState: Partial<State & AdditionalContextState>) => void
+export type StateUpdateInfo = {
+  fieldItems: IFieldsKeeperItem[],
+  fromBucket: string | null | undefined;
+  targetBucket: string | null | undefined;
+  isRemoved: boolean;
+}
+
+export type AdditionalContextState = { onStateUpdate: (state: State, updateInfo: StateUpdateInfo) => void }
+
+export type ContextSetState = (instanceId: string, newState: Partial<State & AdditionalContextState>, updateInfo: StateUpdateInfo) => void
 
 interface ContextState {
   state: Record<string, State & AdditionalContextState>;
@@ -21,7 +30,7 @@ interface ContextState {
 
 export const useStore = create<ContextState>()((set, get) => ({
   state: {},
-  setState: (instanceId, newState) => {
+  setState: (instanceId, newState, updateInfo) => {
     const prevState = get().state;
 
     const currentState = prevState[instanceId] ?? {}
@@ -32,7 +41,7 @@ export const useStore = create<ContextState>()((set, get) => ({
         [instanceId]: requiredState
       }
     })
-    currentState.onStateUpdate(requiredState);
+    currentState.onStateUpdate(requiredState, updateInfo);
   },
   deleteState(instanceId) {
     const prevState = { ...get().state };

@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { StateUpdateInfo } from "./FieldsKeeper.context";
 
 // types
 export interface IFieldsKeeperItem<T = string> {
@@ -168,7 +169,7 @@ export interface IFieldsKeeperActions {
 
 export interface IFieldsKeeperProviderProps extends IFieldsKeeperState {
   children?: React.ReactNode;
-  onUpdate?: (state: IFieldsKeeperState) => void;
+  onUpdate?: (state: IFieldsKeeperState, updateInfo: StateUpdateInfo) => void;
 }
 
 export interface IFieldsKeeperBucketProps {

@@ -62,8 +62,8 @@ export default function Example5() {
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
-                onUpdate={(state) => {
-                    console.log(state);
+                onUpdate={(state, updateInfo) => {
+                    console.log({ state, updateInfo });
                 }}
             >
                 <div className="keeper-container">

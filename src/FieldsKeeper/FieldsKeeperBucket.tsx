@@ -297,7 +297,7 @@ const GroupedItemRenderer = (
         ) as CSSProperties;
 
         // paint
-        return fieldItems.map((fieldItem) => {
+        return fieldItems.map((fieldItem, fieldIndex) => {
             // handlers
             const remove = onFieldItemRemove(
                 ...(isGroupHeader ? groupHeader.groupItems : [fieldItem]),
@@ -344,7 +344,7 @@ const GroupedItemRenderer = (
             // paint
             return (
                 <div
-                    key={fieldItem.id}
+                    key={`${fieldItem.id}-${fieldIndex}`}
                     className={classNames(
                         'react-fields-keeper-tooltip-wrapper',
                         {

@@ -1,5 +1,11 @@
 // imports
-import { CSSProperties, useContext, useMemo, useRef, useState } from 'react';
+import React, {
+    CSSProperties,
+    useContext,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import FuzzySearch from 'fuzzy-search';
 import classNames from 'classnames';
 
@@ -386,12 +392,17 @@ const RootBucketGroupedItemRenderer = (
                                 <input
                                     type="checkbox"
                                     checked={isFieldItemAssigned}
-                                    onChange={onFieldItemClick(
-                                        isGroupHeader
-                                            ? groupHeader.groupItems
-                                            : [fieldItem],
-                                        isFieldItemAssigned,
-                                    )}
+                                    onChange={
+                                        toggleCheckboxOnLabelClick
+                                            ? undefined
+                                            : onFieldItemClick(
+                                                  isGroupHeader
+                                                      ? groupHeader.groupItems
+                                                      : [fieldItem],
+                                                  isFieldItemAssigned,
+                                              )
+                                    }
+                                    readOnly={toggleCheckboxOnLabelClick}
                                 />
                             </div>
                         )}

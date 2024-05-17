@@ -239,6 +239,7 @@ const GroupedItemRenderer = (
         allowRemoveFields = false,
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
+        showAllGroupsFlat = false,
         customItemRenderer,
         onDragOverHandler,
         onFieldItemRemove,
@@ -397,7 +398,7 @@ const GroupedItemRenderer = (
         });
     };
 
-    if (hasGroup) {
+    if (hasGroup && !showAllGroupsFlat) {
         let disabled = items.find((item) => item.disabled?.active)?.disabled;
 
         const shouldDisabledGroupLabel =

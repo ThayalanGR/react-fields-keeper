@@ -68,6 +68,7 @@ export default function Example1() {
                             id="bucket1"
                             label="Bucket 1"
                             allowRemoveFields
+                            showAllGroupsFlat
                         />
                         <FieldsKeeperBucket
                             id="bucket2"

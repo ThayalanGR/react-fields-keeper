@@ -231,6 +231,12 @@ export interface IFieldsKeeperBucketProps {
    */
   horizontalFillOverflowType?: 'wrap' | 'scroll'
 
+
+  /**
+   * decides whether to group the passed in group or not
+   */
+  showAllGroupsFlat?: boolean
+
 }
 
 

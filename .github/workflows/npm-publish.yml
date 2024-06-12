@@ -26,7 +26,7 @@ jobs:
       run: yarn build:library
 
     - name: Publish to npm
-      run: yarn npm publish
+      run: yarn publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

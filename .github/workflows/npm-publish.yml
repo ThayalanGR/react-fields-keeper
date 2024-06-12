@@ -24,34 +24,39 @@ jobs:
 
     - name: Extract last commit message
       id: commit_message
-      run: echo "::set-output name=message::$(git log -1 --pretty=%B)"
+      run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
 
     - name: Determine version bump
       id: version_bump
       run: |
-        COMMIT_MESSAGE="${{ steps.commit_message.outputs.message }}"
+        COMMIT_MESSAGE="${{ env.message }}"
         if [[ "$COMMIT_MESSAGE" =~ version\(minor\):(.*) ]]; then
-          echo "::set-output name=type::minor"
-          echo "::set-output name=message::${BASH_REMATCH[1]}"
+          echo "type=minor" >> $GITHUB_ENV
+          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
         elif [[ "$COMMIT_MESSAGE" =~ version\(major\):(.*) ]]; then
-          echo "::set-output name=type::major"
-          echo "::set-output name=message::${BASH_REMATCH[1]}"
+          echo "type=major" >> $GITHUB_ENV
+          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
         elif [[ "$COMMIT_MESSAGE" =~ version\(patch\):(.*) ]]; then
-          echo "::set-output name=type::patch"
-          echo "::set-output name=message::${BASH_REMATCH[1]}"
+          echo "type=patch" >> $GITHUB_ENV
+          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
         else
           echo "No version bump found in commit message."
           exit 0
         fi
 
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
     - name: Bump version
       run: |
-        if [ "${{ steps.version_bump.outputs.type }}" == "minor" ]; then
-          npm version minor -m "Version bump: ${{ steps.version_bump.outputs.message }}"
-        elif [ "${{ steps.version_bump.outputs.type }}" == "major" ]; then
-          npm version major -m "Version bump: ${{ steps.version_bump.outputs.message }}"
-        elif [ "${{ steps.version_bump.outputs.type }}" == "patch" ]; then
-          npm version patch -m "Version bump: ${{ steps.version_bump.outputs.message }}"
+        if [ "${{ env.type }}" == "minor" ]; then
+          npm version minor -m "Version bump: ${{ env.msg }}"
+        elif [ "${{ env.type }}" == "major" ]; then
+          npm version major -m "Version bump: ${{ env.msg }}"
+        elif [ "${{ env.type }}" == "patch" ]; then
+          npm version patch -m "Version bump: ${{ env.msg }}"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -16,7 +16,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '14' # Ensure this matches your desired Node.js version
         cache: 'yarn'
 
     - name: Install dependencies
@@ -46,8 +46,8 @@ jobs:
 
     - name: Configure Git
       run: |
-        git config --global user.name "ThayalanGR"
-        git config --global user.email "grthayalan18@gmail.com"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Bump version
       run: |
@@ -64,26 +64,9 @@ jobs:
     - name: Build the library
       run: yarn build:library
 
-    - name: Install npm with logging
+    - name: Use npm bundled with Node.js for publishing
       run: |
-        npm install -g npm@latest
-        npm --version
-
-    - name: Publish to npm with retries
-      run: |
-        retry_count=0
-        max_retries=5
-        delay=30
-        while [ $retry_count -lt $max_retries ]; do
-          npm publish && break
-          retry_count=$((retry_count+1))
-          echo "Publish failed. Retrying in $delay seconds..."
-          sleep $delay
-        done
-        if [ $retry_count -eq $max_retries ]; then
-          echo "Publish failed after $max_retries attempts."
-          exit 1
-        fi
+        npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

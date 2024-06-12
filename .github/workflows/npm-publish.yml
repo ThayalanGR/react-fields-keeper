@@ -46,8 +46,8 @@ jobs:
 
     - name: Configure Git
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "ThayalanGR"
+        git config --global user.email "grthayalan18@gmail.com"
 
     - name: Bump version
       run: |
@@ -64,11 +64,26 @@ jobs:
     - name: Build the library
       run: yarn build:library
 
+    - name: Install npm with logging
+      run: |
+        npm install -g npm@latest
+        npm --version
+
     - name: Publish to npm with retries
       run: |
-        for i in {1..5}; do
-          npm publish && break || sleep 15
+        retry_count=0
+        max_retries=5
+        delay=30
+        while [ $retry_count -lt $max_retries ]; do
+          npm publish && break
+          retry_count=$((retry_count+1))
+          echo "Publish failed. Retrying in $delay seconds..."
+          sleep $delay
         done
+        if [ $retry_count -eq $max_retries ]; then
+          echo "Publish failed after $max_retries attempts."
+          exit 1
+        fi
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

@@ -64,8 +64,12 @@ jobs:
 
     - name: Commit version changes
       run: |
-        git add .
-        git commit -m "chore: Bump version"
+        if git diff-index --quiet HEAD --; then
+          echo "No changes to commit."
+        else
+          git add .
+          git commit -m "chore: Bump version"
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

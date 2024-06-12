@@ -1,0 +1,70 @@
+name: Build and Publish React Component Library
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+        cache: 'yarn'
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Extract last commit message
+      id: commit_message
+      run: echo "::set-output name=message::$(git log -1 --pretty=%B)"
+
+    - name: Determine version bump
+      id: version_bump
+      run: |
+        COMMIT_MESSAGE="${{ steps.commit_message.outputs.message }}"
+        if [[ "$COMMIT_MESSAGE" =~ version\(minor\):(.*) ]]; then
+          echo "::set-output name=type::minor"
+          echo "::set-output name=message::${BASH_REMATCH[1]}"
+        elif [[ "$COMMIT_MESSAGE" =~ version\(major\):(.*) ]]; then
+          echo "::set-output name=type::major"
+          echo "::set-output name=message::${BASH_REMATCH[1]}"
+        elif [[ "$COMMIT_MESSAGE" =~ version\(patch\):(.*) ]]; then
+          echo "::set-output name=type::patch"
+          echo "::set-output name=message::${BASH_REMATCH[1]}"
+        else
+          echo "No version bump found in commit message."
+          exit 0
+        fi
+
+    - name: Bump version
+      run: |
+        if [ "${{ steps.version_bump.outputs.type }}" == "minor" ]; then
+          npm version minor -m "Version bump: ${{ steps.version_bump.outputs.message }}"
+        elif [ "${{ steps.version_bump.outputs.type }}" == "major" ]; then
+          npm version major -m "Version bump: ${{ steps.version_bump.outputs.message }}"
+        elif [ "${{ steps.version_bump.outputs.type }}" == "patch" ]; then
+          npm version patch -m "Version bump: ${{ steps.version_bump.outputs.message }}"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build the library
+      run: yarn build:library
+
+    - name: Publish to npm
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: Push new tags
+      run: git push --follow-tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -64,8 +64,11 @@ jobs:
     - name: Build the library
       run: yarn build:library
 
-    - name: Publish to npm
-      run: npm publish
+    - name: Publish to npm with retries
+      run: |
+        for i in {1..5}; do
+          npm publish && break || sleep 15
+        done
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

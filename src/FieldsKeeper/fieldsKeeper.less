@@ -440,6 +440,25 @@
     pointer-events: none;
 }
 
+.react-fields-keeper-mapping-column-content-sample-suffix-node{
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    .react-fields-keeper-mapping-column-content-sample-suffix-node-button {
+        height: 18px;
+        width: 18px;
+        border-radius: 2px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        user-select: none;
+    
+        &:hover {
+            background-color: #e4e4e4;
+        }
+    }
+}
+
 // icons
 @font-face {
     font-family: 'FabricMDL2Icons_fields_keeper';
@@ -472,4 +491,10 @@
 }
 .fk-ms-Icon--Search:before {
     content: '\E721';
+}
+.fk-ms-Icon--Delete:before {
+    content: '\E74D';
+}
+.fk-ms-Icon--Edit:before {
+    content: '\E70F';
 }

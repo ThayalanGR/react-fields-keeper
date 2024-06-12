@@ -23,6 +23,9 @@ jobs:
     - name: Install dependencies
       run: yarn install
 
+    - name: Build the library
+      run: yarn build:library
+
     - name: Extract last commit message
       id: commit_message
       run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
@@ -47,8 +50,8 @@ jobs:
 
     - name: Configure Git
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "ThayalanGR"
+        git config --global user.email "grthayalan18@gmail.com"
 
     - name: Bump version
       run: |
@@ -77,9 +80,6 @@ jobs:
       run: git push --follow-tags
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build the library
-      run: yarn build:library
 
     - name: Publish to npm
       run: yarn publish

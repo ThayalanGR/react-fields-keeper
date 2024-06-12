@@ -16,61 +16,17 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14' # Ensure this matches your desired Node.js version
+        node-version: '14'
         cache: 'yarn'
 
     - name: Install dependencies
       run: yarn install
 
-    - name: Extract last commit message
-      id: commit_message
-      run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
-
-    - name: Determine version bump
-      id: version_bump
-      run: |
-        COMMIT_MESSAGE="${{ env.message }}"
-        if [[ "$COMMIT_MESSAGE" =~ version\(minor\):(.*) ]]; then
-          echo "type=minor" >> $GITHUB_ENV
-          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
-        elif [[ "$COMMIT_MESSAGE" =~ version\(major\):(.*) ]]; then
-          echo "type=major" >> $GITHUB_ENV
-          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
-        elif [[ "$COMMIT_MESSAGE" =~ version\(patch\):(.*) ]]; then
-          echo "type=patch" >> $GITHUB_ENV
-          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
-        else
-          echo "No version bump found in commit message."
-          exit 0
-        fi
-
-    - name: Configure Git
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-    - name: Bump version
-      run: |
-        if [ "${{ env.type }}" == "minor" ]; then
-          npm version minor -m "Version bump: ${{ env.msg }}"
-        elif [ "${{ env.type }}" == "major" ]; then
-          npm version major -m "Version bump: ${{ env.msg }}"
-        elif [ "${{ env.type }}" == "patch" ]; then
-          npm version patch -m "Version bump: ${{ env.msg }}"
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Build the library
       run: yarn build:library
 
-    - name: Use npm bundled with Node.js for publishing
-      run: |
-        npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-    - name: Push new tags
-      run: git push --follow-tags
+    - name: Publish
+      uses: mikeal/merge-release@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,8 +1,9 @@
 name: Build and Publish React Component Library
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
 
 jobs:
   build-and-publish:
@@ -22,6 +23,57 @@ jobs:
     - name: Install dependencies
       run: yarn install
 
+    - name: Extract last commit message
+      id: commit_message
+      run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+
+    - name: Determine version bump
+      id: version_bump
+      run: |
+        COMMIT_MESSAGE="${{ env.message }}"
+        if [[ "$COMMIT_MESSAGE" =~ version\(minor\):(.*) ]]; then
+          echo "type=minor" >> $GITHUB_ENV
+          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+        elif [[ "$COMMIT_MESSAGE" =~ version\(major\):(.*) ]]; then
+          echo "type=major" >> $GITHUB_ENV
+          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+        elif [[ "$COMMIT_MESSAGE" =~ version\(patch\):(.*) ]]; then
+          echo "type=patch" >> $GITHUB_ENV
+          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+        else
+          echo "No version bump found in commit message."
+          exit 0
+        fi
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Bump version
+      run: |
+        if [ "${{ env.type }}" == "minor" ]; then
+          npm version minor -m "Version bump: ${{ env.msg }}"
+        elif [ "${{ env.type }}" == "major" ]; then
+          npm version major -m "Version bump: ${{ env.msg }}"
+        elif [ "${{ env.type }}" == "patch" ]; then
+          npm version patch -m "Version bump: ${{ env.msg }}"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Commit version changes
+      run: |
+        git add .
+        git commit -m "chore: Bump version"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Push changes
+      run: git push --follow-tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build the library
       run: yarn build:library
 
@@ -29,8 +81,3 @@ jobs:
       run: yarn publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-    - name: Push new tags
-      run: git push --follow-tags
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

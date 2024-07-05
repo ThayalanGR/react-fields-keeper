@@ -281,9 +281,12 @@ const RootBucketGroupedItemRenderer = (
             });
             if (priorityGroupBucket) return priorityGroupBucket;
         }
-        const leastFilledOrderedBuckets = [...buckets].sort(
-            (bucketA, bucketB) => bucketA.items.length - bucketB.items.length,
-        );
+        const leastFilledOrderedBuckets = [...buckets]
+            .filter((bucket) => !bucket.disabled)
+            .sort(
+                (bucketA, bucketB) =>
+                    bucketA.items.length - bucketB.items.length,
+            );
         return leastFilledOrderedBuckets[0];
     };
 
@@ -429,8 +432,8 @@ const RootBucketGroupedItemRenderer = (
                         {fieldItem.suffixNode && (
                             <div className="react-fields-keeper-mapping-column-content-suffix">
                                 {fieldItem.suffixNode}
-                            </div>)
-                        }
+                            </div>
+                        )}
                     </div>
                 </div>
             );

@@ -21,7 +21,8 @@ export interface IFieldsKeeperItem<T = string> {
     groupLabel?: string;
     groupOrder?: number;
 
-    suffixNode?: ReactNode;
+    bucketSuffixNode?:ReactNode;
+    rootBucketSuffixNode?:ReactNode;
 
     /**
      * for internal use only

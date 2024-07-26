@@ -200,6 +200,16 @@
                 text-overflow: ellipsis;
             }
 
+            .react-fields-keeper-mapping-content-action-buttons{
+                display: flex;
+                flex-direction: row;
+                gap: 3px;
+
+                .react-fields-keeper-mapping-content-action-suffixNode{
+                    height: 100%;
+                }
+            }
+
             .react-fields-keeper-mapping-content-input-filled-close {
                 margin-left: auto;
                 height: 15px;
@@ -445,8 +455,8 @@
     flex-direction: row;
     gap: 3px;
     .react-fields-keeper-mapping-column-content-sample-suffix-node-button {
-        height: 18px;
-        width: 18px;
+        height: 15px;
+        width: 15px;
         border-radius: 2px;
         display: grid;
         place-items: center;
@@ -456,6 +466,12 @@
         &:hover {
             background-color: #e4e4e4;
         }
+    }
+}
+
+.react-fields-keeper-mapping-content-action-suffixNode{
+    i{
+        font-size: 8px;
     }
 }
 

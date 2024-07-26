@@ -323,20 +323,27 @@ const GroupedItemRenderer = (
                         <div className="react-fields-keeper-mapping-content-input-filled-value">
                             {fieldItem.label}
                         </div>
-                        {orientation === 'vertical' && groupCollapseButton}
-                        {suffixNode ||
-                            (allowRemoveFields && (
-                                <div
-                                    className={classNames(
-                                        'react-fields-keeper-mapping-content-input-filled-close',
-                                    )}
-                                    role="button"
-                                    onClick={remove}
-                                >
-                                    <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
-                                </div>
+                        <div className='react-fields-keeper-mapping-content-action-buttons'>
+                            {orientation === 'vertical' && groupCollapseButton}
+                            {fieldItem.bucketSuffixNode && (
+                                <div className="react-fields-keeper-mapping-content-action-suffixNode">
+                                    {fieldItem.bucketSuffixNode}
+                                </div>)
+                            }
+                            {suffixNode ||
+                                (allowRemoveFields && (
+                                    <div
+                                        className={classNames(
+                                            'react-fields-keeper-mapping-content-input-filled-close',
+                                        )}
+                                        role="button"
+                                        onClick={remove}
+                                    >
+                                        <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
+                                    </div>
                             ))}
-                        {orientation === 'horizontal' && groupCollapseButton}
+                            {orientation === 'horizontal' && groupCollapseButton}
+                        </div>
                     </Fragment>
                 );
             };

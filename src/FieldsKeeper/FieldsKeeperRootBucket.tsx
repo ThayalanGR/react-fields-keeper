@@ -429,11 +429,11 @@ const RootBucketGroupedItemRenderer = (
                                 </div>
                             )}
                         </div>
-                        {fieldItem.suffixNode && (
+                        {fieldItem.rootBucketSuffixNode && (
                             <div className="react-fields-keeper-mapping-column-content-suffix">
-                                {fieldItem.suffixNode}
-                            </div>
-                        )}
+                                {fieldItem.rootBucketSuffixNode}
+                            </div>)
+                        }
                     </div>
                 </div>
             );

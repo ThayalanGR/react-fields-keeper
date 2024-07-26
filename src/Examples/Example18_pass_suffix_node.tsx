@@ -11,7 +11,7 @@ export default function Example18() {
 
     const onIconClick = ()=> alert("Icon clicked")
 
-    const suffixNode : ReactNode = (
+    const rootBucketSuffixNode : ReactNode = (
         <div className="react-fields-keeper-mapping-column-content-sample-suffix-node">
             <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
                 <i onClick = {onIconClick} className="fk-ms-Icon fk-ms-Icon--Edit" />
@@ -22,11 +22,19 @@ export default function Example18() {
         </div>
     )
 
+    const bucketSuffixNode : ReactNode = (
+        <div className="react-fields-keeper-mapping-column-content-sample-suffix-node">
+            <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
+                <i onClick = {onIconClick} className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+            </div>
+        </div>
+    )
+
     // compute
     const allItems: IFieldsKeeperItem[] = [
-        { id: 'a', label: 'a' },
-        { id: 'b', label: 'b' },
-        { id: 'c', label: 'c' , suffixNode},
+        { id: 'a', label: 'a', bucketSuffixNode },
+        { id: 'b', label: 'b', bucketSuffixNode },
+        { id: 'c', label: 'c', bucketSuffixNode, rootBucketSuffixNode },
     ];
 
     const buckets: IFieldsKeeperBucket[] = [

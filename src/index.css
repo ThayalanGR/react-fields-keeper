@@ -116,3 +116,97 @@ h1 {
 .sample-custom-font-size {
     font-size: 10px;
 }
+
+.app-wrapper {
+    font-family: Arial, sans-serif;
+    margin: 0 auto;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.header-wrapper {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header-links-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.examples-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.example-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.2s ease-in-out;
+    overflow: hidden;
+    text-align: center;
+}
+
+.example-card:hover {
+    transform: translateY(-5px);
+}
+
+.example-content {
+    margin-bottom: 15px;
+}
+
+.example-links {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.copy-link-button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.copy-link-button:hover {
+    background-color: #0056b3;
+}
+
+.copy-link-button:focus {
+    outline: none;
+}
+
+.copy-link-button:active {
+    background-color: #004085;
+}
+
+.github-code-button {
+    background-color: #333;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.github-code-button:hover {
+    background-color: #555;
+}
+
+.github-code-button:focus {
+    outline: none;
+}
+
+.github-code-button:active {
+    background-color: #222;
+}

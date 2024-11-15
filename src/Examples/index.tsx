@@ -1,8 +1,8 @@
 import Example1 from './Example1';
-import Example2 from './Example2_highlight_targeted_items';
-import Example3 from './Example3_grouping_items';
+import Example2_highlight_targeted_items from './Example2_highlight_targeted_items';
+import Example3_grouping_items from './Example3_grouping_items';
 import Example4 from './Example4';
-import Example5 from './Example5_disabling_fields';
+import Example5_disabling_fields from './Example5_disabling_fields';
 import Example6 from './Example6';
 import Example7 from './Example7';
 import Example8 from './Example8';
@@ -14,17 +14,17 @@ import Example13 from './Example13';
 import Example14 from './Example14';
 import Example15 from './Example15';
 import Example16 from './Example16';
-import Example17 from './Example17_should_render_prop';
-import Example18 from './Example18_pass_suffix_node';
-import Example19 from './Example19_disable_bucket';
-import Example20 from './Example20_folder_scope';
+import Example17_should_render_prop from './Example17_should_render_prop';
+import Example18_pass_suffix_node from './Example18_pass_suffix_node';
+import Example19_disable_bucket from './Example19_disable_bucket';
+import Example20_folder_scope from './Example20_folder_scope';
 
-export const examples = [
+export const examples = {
     Example1,
-    Example2,
-    Example3,
+    Example2_highlight_targeted_items,
+    Example3_grouping_items,
     Example4,
-    Example5,
+    Example5_disabling_fields,
     Example6,
     Example7,
     Example8,
@@ -36,8 +36,8 @@ export const examples = [
     Example14,
     Example15,
     Example16,
-    Example17,
-    Example18,
-    Example19,
-    Example20,
-];
+    Example17_should_render_prop,
+    Example18_pass_suffix_node,
+    Example19_disable_bucket,
+    Example20_folder_scope,
+};

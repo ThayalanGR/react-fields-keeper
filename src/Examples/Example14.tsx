@@ -110,7 +110,7 @@ export default function Example14() {
                                 customSearchQuery={searchQuery}
                                 showClearSearchLink={false}
                                 emptyFilterMessage="No categories found!"
-                                // disabledEmptyFilterMessage
+                                // disableEmptyFilterMessage
                             />
                         </div>
                     </div>

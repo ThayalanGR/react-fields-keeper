@@ -1,241 +1,354 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactNode } from 'react';
 import { StateUpdateInfo } from './FieldsKeeper.context';
 
 // types
-export interface IFieldsKeeperItem<T = string> {
-    label: string;
+/**
+ * Represents an item within a FieldsKeeper structure.
+ */
+export interface IFieldsKeeperItem<T = any> {
+    /** Unique identifier for the item */
     id: string;
+
+    /** Display label for the item */
+    label: string;
+
+    /**
+     * Optional value associated with the item, allowing customization.
+     */
     value?: T;
-    activeNodeClassName?: string;
-    rootBucketActiveNodeClassName?: string;
 
-    tooltip?: string;
+    // Grouping properties
 
-    rootTooltip?: string;
-
-    disabled?: IFieldKeeperItemDisabled;
-
-    rootDisabled?: IFieldKeeperItemDisabled;
-
+    /** Identifier for grouping items */
     group?: string;
+
+    /** Display label for the item's group */
     groupLabel?: string;
+
+    /** Order for grouping; lower numbers appear first */
     groupOrder?: number;
 
-    bucketSuffixNode?:ReactNode;
-    rootBucketSuffixNode?:ReactNode;
+    /**
+     * Scope within folders. Items are displayed based on this scope.
+     * Defaults to a flat view if unspecified.
+     */
+    folderScope?: string;
 
     /**
-     * for internal use only
+     * Display label for the folder scope, used for grouping or categorization.
      */
-    fieldItemIndex?: number;
+    folderScopeLabel?: string;
+
+    // CSS class names
+
+    /** CSS class name for active state */
+    activeNodeClassName?: string;
+
+    /** CSS class name for active state within the root bucket */
+    rootBucketActiveNodeClassName?: string;
+
+    // Tooltip properties
+
+    /** Tooltip text displayed on hover */
+    tooltip?: string;
+
+    /** Tooltip for the root item */
+    rootTooltip?: string;
+
+    // Disabled properties
+
+    /** Controls disabled state */
+    disabled?: IFieldKeeperItemDisabled;
+
+    /** Controls root-level disabled state */
+    rootDisabled?: IFieldKeeperItemDisabled;
+
+    // Suffix node
+
+    /** Node to display as suffix within the item bucket */
+    bucketSuffixNode?: ReactNode;
+
+    /** Node to display as suffix within the root bucket */
+    rootBucketSuffixNode?: ReactNode;
+
+    /**
+     * Internal use only: Index of the field item for internal sorting.
+     */
+    _fieldItemIndex?: number;
 }
 
+/**
+ * Describes the disabled state for a FieldsKeeper item.
+ */
 export interface IFieldKeeperItemDisabled {
+    /** Indicates if the item is actively disabled */
     active: boolean;
+
     /**
-     * default - true
+     * Determines whether the group label is disabled.
+     * Defaults to true.
      */
     disableGroupLabel?: boolean;
+
+    /** Custom message explaining the disabled state */
     message?: string;
 }
 
-export interface IFieldsKeeperBucket<T = string> {
+/**
+ * Represents a bucket containing FieldsKeeper items.
+ */
+export interface IFieldsKeeperBucket<T = any> {
+    /** Unique identifier for the bucket */
     id: string;
+
+    /** List of items within the bucket */
     items: IFieldsKeeperItem<T>[];
+
+    /** Maximum number of items allowed in the bucket */
     maxItems?: number;
+
+    /** Indicates if the bucket is disabled */
     disabled?: boolean;
 }
 
+/**
+ * Properties required to determine the priority target bucket for filling items.
+ */
 export interface IGetPriorityTargetBucketToFillProps {
+    /** Available buckets to fill */
     buckets: IFieldsKeeperBucket[];
+
+    /** The item being filled into a bucket */
     currentFillingItem: IFieldsKeeperItem[];
+
+    /** Optional group to prioritize */
     priorityGroup?: string;
 }
 
+/**
+ * Root properties for configuring a FieldsKeeper bucket.
+ */
 export interface IFieldsKeeperRootBucketProps {
+    /** Label for the root bucket */
     label?: string;
+
+    /** CSS class name for the label */
     labelClassName?: string;
+
+    /** CSS class name for the wrapper */
     wrapperClassName?: string;
+
+    /** Indicates if the root bucket is disabled */
     isDisabled?: boolean;
+
+    /** Sort items based on group order when assigning */
     sortGroupOrderWiseOnAssignment?: boolean;
+
     /**
-     * if undefined returned then the default handler will take action
+     * Function to determine the priority bucket for filling.
+     * If undefined, the default handler is used.
      */
     getPriorityTargetBucketToFill?: (
         props: IGetPriorityTargetBucketToFillProps,
     ) => IFieldsKeeperBucket | undefined;
 
-    /**
-     * if not passed - custom instanceId will be created and used internally
-     *
-     * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
-     */
+    /** Instance ID, useful for nested FieldsKeeperProvider setups */
     instanceId?: string;
 
+    /** If true, ignores checkboxes */
     ignoreCheckBox?: boolean;
 
-    /**
-     * if passed internal search feature will be switched off
-     */
+    /** Custom query for internal search */
     customSearchQuery?: string;
 
-    /**
-     * only consumed when  customSearchQuery is passed
-     * default - false
-     */
+    /** Shows clear link for custom search if true */
     showClearSearchLink?: boolean;
 
-    /**
-     * only consumed when  customSearchQuery is passed
-     */
+    /** Function triggered to clear the search query */
     onClearSearch?: () => void;
 
-    /**
-     * placeholder for search values
-     */
+    /** Placeholder text for the search input */
     searchPlaceholder?: string;
 
-    /**
-     * if not passed default message will be displayed
-     */
+    /** Message to display when the filter yields no results */
     emptyFilterMessage?: string;
 
-    /**
-     *  default - false
-     */
-    disabledEmptyFilterMessage?: boolean;
+    /** If true, disables the empty filter message */
+    disableEmptyFilterMessage?: boolean;
 
-    /**
-     * allow field item drag after assignment
-     *
-     * default - true
-     */
+    /** Allows dragging fields after assignment if true */
     allowDragAfterAssignment?: boolean;
 
     /**
-     * mention whether to allow dragging or not
-     * @default - true
+     * Determines if dragging is allowed
+     * @default true
      */
     allowDragging?: boolean;
 
     /**
-     * shouldRender if passed will be called for each field item render passed in this bucket, if returned true renders or ignores
+     * Function to decide if an item should render within this bucket.
      */
     shouldRender?: <T>(item: IFieldsKeeperItem<T>) => boolean;
 
-    /**
-     * toggle checkbox on label click
-     */
+    /** Toggles checkbox on label click if true */
     toggleCheckboxOnLabelClick?: boolean;
 }
 
+/**
+ * State structure for the FieldsKeeper component.
+ */
 export interface IFieldsKeeperState {
+    /** List of all items managed by FieldsKeeper */
     allItems: IFieldsKeeperItem[];
+
+    /** Buckets for organizing items */
     buckets: IFieldsKeeperBucket[];
+
     /**
-     * used to flexibly assign between buckets,
-     * if not passed assignment will be done based on least bucket items priority
+     * Function to determine the priority bucket for filling.
      */
     getPriorityTargetBucketToFill?: IFieldsKeeperRootBucketProps['getPriorityTargetBucketToFill'];
-    /**
-     * if not passed - custom instanceId will be created and used internally
-     *
-     * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
-     */
+
+    /** Unique instance identifier for nested providers */
     instanceId?: string;
 
     /**
-     * accept fields items from other providers based on the instanceId
-     *
-     * Note: to use this prop, all the items that you are expecting to
-     * receive should be mentioned in the current instance as well
+     * List of instance IDs allowed to share field items.
      */
     receiveFieldItemsFromInstances?: string[];
 
     /**
-     * default - false
-     *
-     * allow duplicate field assignment on all buckets
+     * If true, allows duplicate items across buckets.
+     * @default false
      */
     allowDuplicates?: boolean;
 }
 
+/**
+ * Defines actions available within FieldsKeeper.
+ */
 export interface IFieldsKeeperActions {
+    /**
+     * Updates the FieldsKeeper state
+     * @param state - Partial state to merge with the current state
+     */
     updateState: (state: Partial<IFieldsKeeperState>) => void;
 }
 
+/**
+ * Properties for the FieldsKeeper provider component.
+ */
 export interface IFieldsKeeperProviderProps extends IFieldsKeeperState {
+    /** Children components within the provider */
     children?: React.ReactNode;
+
+    /**
+     * Callback function triggered on state updates
+     * @param state - Current FieldsKeeper state
+     * @param updateInfo - Information about the state update
+     */
     onUpdate?: (state: IFieldsKeeperState, updateInfo: StateUpdateInfo) => void;
 }
 
+/**
+ * Properties for configuring individual FieldsKeeper buckets.
+ */
 export interface IFieldsKeeperBucketProps {
+    /** Unique identifier for the bucket */
     id: string;
+
+    /** Label for the bucket */
     label?: ReactNode;
+
     /**
-     * @default - false
+     * Allows removal of fields within this bucket
+     * @default false
      */
     allowRemoveFields?: boolean;
-    /**
-     * @default - false
-     */
+
+    /** If true, the bucket is disabled */
     disabled?: boolean;
-    /**
-     * suffix node
-     */
+
+    /** Suffix node displayed at the end of the bucket */
     suffixNode?: ReactNode;
+
+    /** Placeholder text when no fields are present */
     emptyFieldPlaceholder?: string;
 
     /**
-     * default - true
+     * Sorts items by group order when assigning
+     * @default true
      */
     sortGroupOrderWiseOnAssignment?: boolean;
 
-    /**
-     * if not passed - internally created instanceId will be used to trace down the parent provider
-     *
-     * instanceId is useful when using nested FieldsKeeperProvider to achieve complex assignment formation
-     */
+    /** Instance ID for nested bucket tracking */
     instanceId?: string;
 
-    /**
-     * default - false
-     */
+    /** Shows extended assignment placeholder if true */
     showExtendedAssignmentPlaceholder?: boolean;
-    /**
-     * default - false
-     */
+
+    /** Centers placeholder text if true */
     centerAlignPlaceholder?: boolean;
-    /**
-     * default - undefined
-     */
+
+    /** CSS class name for placeholder wrapper */
     placeHolderWrapperClassName?: string;
-    /**
-     * default - undefined
-     */
+
+    /** CSS class name for the bucket wrapper */
     wrapperClassName?: string;
 
+    /**
+     * Custom function for rendering field items in this bucket
+     */
     customItemRenderer?: (props: IFieldItemCustomRendererProps) => JSX.Element;
 
-    /**
-     * default - vertical
-     */
+    /** Layout orientation for items within the bucket */
     orientation?: 'vertical' | 'horizontal';
 
-    /**
-     * default - scroll
-     */
+    /** Overflow behavior for horizontal layout */
     horizontalFillOverflowType?: 'wrap' | 'scroll';
 
-    /**
-     * decides whether to group the passed in group or not
-     */
+    /** If true, groups are displayed flat */
     showAllGroupsFlat?: boolean;
 }
 
+/**
+ * Custom renderer properties for field items within a bucket.
+ */
 export interface IFieldItemCustomRendererProps<T = unknown> {
+    /** ID of the bucket containing this item */
     bucketId: string;
+
+    /** The field item being rendered */
     fieldItem: IFieldsKeeperItem<T>;
+
+    /** Function to get the default item renderer */
     getDefaultItemRenderer: () => JSX.Element;
+
+    /** Function to remove the field item from the bucket */
     remove: () => void;
+}
+
+export interface IGroupedFieldsKeeperItem {
+    group: string;
+    groupLabel: string;
+    items: IFieldsKeeperItem[];
+}
+
+export interface IGroupedItemRenderer {
+    fieldItems: IFieldsKeeperItem[];
+    isGroupItem?: boolean;
+
+    groupHeader?: {
+        groupItems: IFieldsKeeperItem[];
+        isGroupCollapsed: boolean;
+        onGroupHeaderToggle: () => void;
+        isGroupHeaderSelected?: boolean;
+    };
+}
+
+export interface IFolderScopedItem<T = IFieldsKeeperItem> {
+    folderScope: string;
+    folderScopeLabel: string;
+    folderScopeItems: T[];
 }

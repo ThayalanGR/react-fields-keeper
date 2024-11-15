@@ -16,7 +16,8 @@ import Example15 from './Example15';
 import Example16 from './Example16';
 import Example17 from './Example17_should_render_prop';
 import Example18 from './Example18_pass_suffix_node';
-import Example19_disable_bucket from './Example19_disable_bucket';
+import Example19 from './Example19_disable_bucket';
+import Example20 from './Example20_folder_scope';
 
 export const examples = [
     Example1,
@@ -37,5 +38,6 @@ export const examples = [
     Example16,
     Example17,
     Example18,
-    Example19_disable_bucket,
+    Example19,
+    Example20,
 ];

@@ -11,6 +11,21 @@ body {
     place-items: center;
 }
 
+.header-wrapper {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.header-links-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
 h1 {
     text-align: center;
 }

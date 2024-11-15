@@ -1,3 +1,10 @@
+import { FIELDS_KEEPER_CONSTANTS } from './FieldsKeeper.context';
+import {
+    IFieldsKeeperItem,
+    IGroupedFieldsKeeperItem,
+} from './FieldsKeeper.types';
+import { sortBucketItemsBasedOnGroupOrder } from './FieldsKeeperBucket';
+
 export function getUniqueId() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
         const r = (Math.random() * 16) | 0;
@@ -8,5 +15,36 @@ export function getUniqueId() {
 }
 
 export function clone(item: unknown) {
-    return JSON.parse(JSON.stringify(item))
+    return JSON.parse(JSON.stringify(item));
+}
+
+export function getGroupedItems(
+    currentItems: IFieldsKeeperItem[],
+): IGroupedFieldsKeeperItem[] {
+    const groupedItems = currentItems.reduce<IGroupedFieldsKeeperItem[]>(
+        (acc, item, fieldItemIndex) => {
+            const foundGroup = acc.find((group) => group.group === item.group);
+            if (foundGroup) {
+                foundGroup.items.push({
+                    ...item,
+                    _fieldItemIndex: fieldItemIndex,
+                });
+            } else {
+                acc.push({
+                    group: item.group ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
+                    groupLabel:
+                        item.groupLabel ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
+                    items: [{ ...item, _fieldItemIndex: fieldItemIndex }],
+                });
+            }
+            return acc;
+        },
+        [],
+    );
+
+    groupedItems.forEach((groupedItem) => {
+        groupedItem.items = sortBucketItemsBasedOnGroupOrder(groupedItem.items);
+    });
+
+    return groupedItems;
 }

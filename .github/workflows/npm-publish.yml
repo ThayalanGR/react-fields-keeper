@@ -49,26 +49,14 @@ jobs:
                     echo "skip=true" >> $GITHUB_ENV
                   fi
 
-            - name: Check for changes
-              id: check_changes
-              run: |
-                  git diff --exit-code
-                  if [ $? -eq 0 ]; then
-                    echo "No changes detected"
-                    echo "changes_detected=false" >> $GITHUB_ENV
-                  else
-                    echo "Changes detected"
-                    echo "changes_detected=true" >> $GITHUB_ENV
-                  fi
-
             - name: Configure Git
-              if: env.skip != 'true' && env.changes_detected == 'true'
+              if: env.skip != 'true'
               run: |
                   git config --global user.name "ThayalanGR"
                   git config --global user.email "grthayalan18@gmail.com"
 
             - name: Bump version
-              if: env.skip != 'true' && env.changes_detected == 'true'
+              if: env.skip != 'true'
               run: |
                   if [ "${{ env.type }}" == "minor" ]; then
                     npm version minor -m "Version bump: ${{ env.msg }}"
@@ -81,7 +69,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Commit version changes
-              if: env.skip != 'true' && env.changes_detected == 'true'
+              if: env.skip != 'true'
               run: |
                   if git diff-index --quiet HEAD --; then
                     echo "No changes to commit."
@@ -93,13 +81,13 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Push changes
-              if: env.skip != 'true' && env.changes_detected == 'true'
+              if: env.skip != 'true'
               run: git push --follow-tags
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Publish to npm
-              if: env.skip != 'true' && env.changes_detected == 'true'
+              if: env.skip != 'true'
               run: yarn publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -212,13 +212,17 @@ function FolderScopeItemRenderer(
 
     // paint
     if (showFlatFolderScope)
-        return folderScopeItems.map((groupedItems, index) => (
-            <GroupedItemRenderer
-                {...rootBucketProps}
-                key={index}
-                groupedItems={groupedItems}
-            />
-        ));
+        return (
+            <>
+                {folderScopeItems.map((groupedItems, index) => (
+                    <GroupedItemRenderer
+                        {...rootBucketProps}
+                        key={index}
+                        groupedItems={groupedItems}
+                    />
+                ))}
+            </>
+        );
 
     return (
         <div

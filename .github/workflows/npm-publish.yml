@@ -1,87 +1,88 @@
 name: Build and Publish React Component Library
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
-  build-and-publish:
-    runs-on: ubuntu-latest
+    build-and-publish:
+        runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'
-        cache: 'yarn'
-        registry-url: 'https://registry.npmjs.org'
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '14'
+                  cache: 'yarn'
+                  registry-url: 'https://registry.npmjs.org'
 
-    - name: Install dependencies
-      run: yarn install
+            - name: Install dependencies
+              run: yarn install
 
-    - name: Build the library
-      run: yarn build:library
+            - name: Build the library
+              run: yarn build:library
 
-    - name: Extract last commit message
-      id: commit_message
-      run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+            - name: Extract last commit message
+              id: commit_message
+              run: |
+                  echo "message=$(git log -1 --pretty=%B | sed ':a;N;$!ba;s/\n/ /g' | sed 's/\"/\\"/g')" >> $GITHUB_ENV
 
-    - name: Determine version bump
-      id: version_bump
-      run: |
-        COMMIT_MESSAGE="${{ env.message }}"
-        if [[ "$COMMIT_MESSAGE" =~ version\(minor\):(.*) ]]; then
-          echo "type=minor" >> $GITHUB_ENV
-          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
-        elif [[ "$COMMIT_MESSAGE" =~ version\(major\):(.*) ]]; then
-          echo "type=major" >> $GITHUB_ENV
-          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
-        elif [[ "$COMMIT_MESSAGE" =~ version\(patch\):(.*) ]]; then
-          echo "type=patch" >> $GITHUB_ENV
-          echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
-        else
-          echo "No version bump found in commit message."
-          exit 0
-        fi
+            - name: Determine version bump
+              id: version_bump
+              run: |
+                  COMMIT_MESSAGE="${{ env.message }}"
+                  if [[ "$COMMIT_MESSAGE" =~ version\(minor\):(.*) ]]; then
+                    echo "type=minor" >> $GITHUB_ENV
+                    echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+                  elif [[ "$COMMIT_MESSAGE" =~ version\(major\):(.*) ]]; then
+                    echo "type=major" >> $GITHUB_ENV
+                    echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+                  elif [[ "$COMMIT_MESSAGE" =~ version\(patch\):(.*) ]]; then
+                    echo "type=patch" >> $GITHUB_ENV
+                    echo "msg=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+                  else
+                    echo "No version bump found in commit message."
+                    exit 0
+                  fi
 
-    - name: Configure Git
-      run: |
-        git config --global user.name "ThayalanGR"
-        git config --global user.email "grthayalan18@gmail.com"
+            - name: Configure Git
+              run: |
+                  git config --global user.name "ThayalanGR"
+                  git config --global user.email "grthayalan18@gmail.com"
 
-    - name: Bump version
-      run: |
-        if [ "${{ env.type }}" == "minor" ]; then
-          npm version minor -m "Version bump: ${{ env.msg }}"
-        elif [ "${{ env.type }}" == "major" ]; then
-          npm version major -m "Version bump: ${{ env.msg }}"
-        elif [ "${{ env.type }}" == "patch" ]; then
-          npm version patch -m "Version bump: ${{ env.msg }}"
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Bump version
+              run: |
+                  if [ "${{ env.type }}" == "minor" ]; then
+                    npm version minor -m "Version bump: ${{ env.msg }}"
+                  elif [ "${{ env.type }}" == "major" ]; then
+                    npm version major -m "Version bump: ${{ env.msg }}"
+                  elif [ "${{ env.type }}" == "patch" ]; then
+                    npm version patch -m "Version bump: ${{ env.msg }}"
+                  fi
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Commit version changes
-      run: |
-        if git diff-index --quiet HEAD --; then
-          echo "No changes to commit."
-        else
-          git add .
-          git commit -m "chore: Bump version"
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Commit version changes
+              run: |
+                  if git diff-index --quiet HEAD --; then
+                    echo "No changes to commit."
+                  else
+                    git add .
+                    git commit -m "chore: Bump version"
+                  fi
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Push changes
-      run: git push --follow-tags
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Push changes
+              run: git push --follow-tags
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Publish to npm
-      run: yarn publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+            - name: Publish to npm
+              run: yarn publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

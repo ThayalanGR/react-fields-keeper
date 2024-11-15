@@ -65,7 +65,7 @@ export default function App() {
 
             <div className="examples-wrapper">
                 {Object.entries(examples).map(([exampleKey, Example], key) => {
-                    const exampleId = `example-${key}`;
+                    const exampleId = `example-${key + 1}`;
                     return (
                         <div key={key} className="example-card" id={exampleId}>
                             <div className="example-content">

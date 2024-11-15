@@ -6,11 +6,7 @@ import {
     IFieldsKeeperBucketProps,
     IFieldsKeeperItem,
 } from './FieldsKeeper.types';
-import {
-    IGroupedFieldsKeeperItem,
-    IGroupedItemRenderer,
-    getGroupedItems,
-} from '..';
+import { IGroupedFieldsKeeperItem, IGroupedItemRenderer } from '..';
 import {
     ContextSetState,
     FIELDS_KEEPER_CONSTANTS,
@@ -19,6 +15,7 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
+import { getGroupedItems } from './utils';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -85,7 +82,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 allowDuplicates,
                 removeIndex:
                     fieldItems.length === 1
-                        ? fieldItems[0].fieldItemIndex
+                        ? fieldItems[0]._fieldItemIndex
                         : undefined,
             });
 
@@ -323,13 +320,13 @@ const GroupedItemRenderer = (
                         <div className="react-fields-keeper-mapping-content-input-filled-value">
                             {fieldItem.label}
                         </div>
-                        <div className='react-fields-keeper-mapping-content-action-buttons'>
+                        <div className="react-fields-keeper-mapping-content-action-buttons">
                             {orientation === 'vertical' && groupCollapseButton}
                             {fieldItem.bucketSuffixNode && (
                                 <div className="react-fields-keeper-mapping-content-action-suffixNode">
                                     {fieldItem.bucketSuffixNode}
-                                </div>)
-                            }
+                                </div>
+                            )}
                             {suffixNode ||
                                 (allowRemoveFields && (
                                     <div
@@ -341,8 +338,9 @@ const GroupedItemRenderer = (
                                     >
                                         <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                                     </div>
-                            ))}
-                            {orientation === 'horizontal' && groupCollapseButton}
+                                ))}
+                            {orientation === 'horizontal' &&
+                                groupCollapseButton}
                         </div>
                     </Fragment>
                 );
@@ -383,7 +381,7 @@ const GroupedItemRenderer = (
                         style={itemStyle}
                         draggable
                         onDragStart={onDragStartHandler(
-                            (fieldItem.fieldItemIndex ?? '') + '',
+                            (fieldItem._fieldItemIndex ?? '') + '',
                             currentBucket.id,
                             isGroupHeader
                                 ? groupHeader.groupItems

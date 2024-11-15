@@ -1,3 +1,5 @@
+@bgHoverColor: #f3f3f3;
+
 .react-fields-keeper-mapping-content {
     display: flex;
     flex-direction: column;
@@ -200,12 +202,12 @@
                 text-overflow: ellipsis;
             }
 
-            .react-fields-keeper-mapping-content-action-buttons{
+            .react-fields-keeper-mapping-content-action-buttons {
                 display: flex;
                 flex-direction: row;
                 gap: 3px;
 
-                .react-fields-keeper-mapping-content-action-suffixNode{
+                .react-fields-keeper-mapping-content-action-suffixNode {
                     height: 100%;
                 }
             }
@@ -280,6 +282,38 @@
         flex-direction: column;
         padding-right: 5px;
         margin-top: 2px;
+
+        .folder-scope-wrapper {
+            .folder-scope-label {
+                cursor: pointer;
+                display: flex;
+                flex-direction: row;
+                gap: 2px;
+                align-items: center;
+                padding: 5px 3px;
+                border-radius: 2px;
+                user-select: none;
+
+                &:hover {
+                    background-color: @bgHoverColor;
+                }
+
+                .folder-scope-label-icon {
+                    display: grid;
+                    place-items: center;
+                }
+
+                // .folder-scope-label-text {
+                // }
+
+                .folder-scope-label-collapse-icon {
+                    margin-left: auto;
+                }
+            }
+            .folder-scope-items {
+                margin-left: 13px;
+            }
+        }
     }
 
     .react-fields-keeper-mapping-column-content {
@@ -294,10 +328,10 @@
         position: relative;
 
         &:hover {
-            background-color: #f3f3f3;
+            background-color: @bgHoverColor;
             &.react-fields-keeper-mapping-column-content-group-header {
                 &::after {
-                    background-color: #f3f3f3;
+                    background-color: @bgHoverColor;
                 }
             }
         }
@@ -356,7 +390,7 @@
             }
         }
 
-        .react-fields-keeper-mapping-column-content-suffix{
+        .react-fields-keeper-mapping-column-content-suffix {
             height: 100%;
         }
     }
@@ -450,7 +484,7 @@
     pointer-events: none;
 }
 
-.react-fields-keeper-mapping-column-content-sample-suffix-node{
+.react-fields-keeper-mapping-column-content-sample-suffix-node {
     display: flex;
     flex-direction: row;
     gap: 3px;
@@ -462,15 +496,15 @@
         place-items: center;
         cursor: pointer;
         user-select: none;
-    
+
         &:hover {
             background-color: #e4e4e4;
         }
     }
 }
 
-.react-fields-keeper-mapping-content-action-suffixNode{
-    i{
+.react-fields-keeper-mapping-content-action-suffixNode {
+    i {
         font-size: 8px;
     }
 }

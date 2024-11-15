@@ -6,15 +6,41 @@ import {
     IFieldsKeeperBucket,
 } from '..';
 
-export default function Example1() {
+export default function Example20() {
     // compute
     const allItems: IFieldsKeeperItem[] = [
+        {
+            id: 'a',
+            label: 'a',
+            folderScope: 'folder_1',
+            folderScopeLabel: 'Folder 1',
+        },
+        {
+            id: 'b',
+            label: 'b',
+            folderScope: 'folder_1',
+            folderScopeLabel: 'Folder 1',
+        },
+        {
+            id: 'c',
+            label: 'c',
+            folderScope: 'folder_2',
+            folderScopeLabel: 'Folder 2',
+        },
+        {
+            id: 'd',
+            label: 'd',
+            folderScope: 'folder_2',
+            folderScopeLabel: 'Folder 2',
+        },
         {
             id: 'date.quarter',
             label: 'Quarter',
             group: 'date',
             groupLabel: 'Date',
             groupOrder: 1,
+            folderScope: 'folder_2',
+            folderScopeLabel: 'Folder 2',
         },
         {
             id: 'date.year',
@@ -22,6 +48,8 @@ export default function Example1() {
             group: 'date',
             groupLabel: 'Date',
             groupOrder: 0,
+            folderScope: 'folder_2',
+            folderScopeLabel: 'Folder 2',
         },
         {
             id: 'date.month',
@@ -29,6 +57,8 @@ export default function Example1() {
             group: 'date',
             groupLabel: 'Date',
             groupOrder: 2,
+            folderScope: 'folder_2',
+            folderScopeLabel: 'Folder 2',
         },
         {
             id: 'date.day',
@@ -36,17 +66,16 @@ export default function Example1() {
             group: 'date',
             groupLabel: 'Date',
             groupOrder: 3,
+            folderScope: 'folder_2',
+            folderScopeLabel: 'Folder 2',
         },
-        { id: 'b', label: 'b' },
-        { id: 'c', label: 'c' },
-        { id: 'd', label: 'd' },
     ];
 
     const buckets: IFieldsKeeperBucket[] = [
-        { id: 'bucket1', items: allItems.slice(0, 4) },
+        { id: 'bucket1', items: [allItems[0]] },
         {
             id: 'bucket2',
-            items: [],
+            items: [allItems[1], allItems[2]],
         },
         { id: 'bucket3', items: [] },
     ];
@@ -54,7 +83,7 @@ export default function Example1() {
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">3. Grouping items</div>
+            <div className="example-container-title">20. Folder Scoping</div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
@@ -68,7 +97,6 @@ export default function Example1() {
                             id="bucket1"
                             label="Bucket 1"
                             allowRemoveFields
-                            // showAllGroupsFlat
                         />
                         <FieldsKeeperBucket
                             id="bucket2"

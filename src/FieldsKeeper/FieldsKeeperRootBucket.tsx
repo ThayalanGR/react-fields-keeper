@@ -9,13 +9,17 @@ import React, {
 import FuzzySearch from 'fuzzy-search';
 import classNames from 'classnames';
 
+import tableIcon from '../assets/icons/tableIcon.svg';
 import './fieldsKeeper.less';
 import {
     IFieldsKeeperItem,
     IFieldsKeeperRootBucketProps,
+    IFolderScopedItem,
     IGetPriorityTargetBucketToFillProps,
+    IGroupedFieldsKeeperItem,
+    IGroupedItemRenderer,
 } from './FieldsKeeper.types';
-import { assignFieldItems, sortBucketItemsBasedOnGroupOrder } from '..';
+import { assignFieldItems } from '..';
 import {
     FIELDS_KEEPER_CONSTANTS,
     FieldsKeeperContext,
@@ -23,53 +27,7 @@ import {
     useStoreState,
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
-
-export interface IGroupedFieldsKeeperItem {
-    group: string;
-    groupLabel: string;
-    items: IFieldsKeeperItem[];
-}
-
-export interface IGroupedItemRenderer {
-    fieldItems: IFieldsKeeperItem[];
-    isGroupItem?: boolean;
-
-    groupHeader?: {
-        groupItems: IFieldsKeeperItem[];
-        isGroupCollapsed: boolean;
-        onGroupHeaderToggle: () => void;
-        isGroupHeaderSelected?: boolean;
-    };
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const getGroupedItems = (
-    currentItems: IFieldsKeeperItem[],
-): IGroupedFieldsKeeperItem[] => {
-    const groupedItems = currentItems.reduce<IGroupedFieldsKeeperItem[]>(
-        (acc, item, fieldItemIndex) => {
-            const foundGroup = acc.find((group) => group.group === item.group);
-            if (foundGroup) {
-                foundGroup.items.push({ ...item, fieldItemIndex });
-            } else {
-                acc.push({
-                    group: item.group ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
-                    groupLabel:
-                        item.groupLabel ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
-                    items: [{ ...item, fieldItemIndex }],
-                });
-            }
-            return acc;
-        },
-        [],
-    );
-
-    groupedItems.forEach((groupedItem) => {
-        groupedItem.items = sortBucketItemsBasedOnGroupOrder(groupedItem.items);
-    });
-
-    return groupedItems;
-};
+import { getGroupedItems } from './utils';
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     // props
@@ -77,7 +35,6 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         label,
         isDisabled,
         labelClassName,
-        sortGroupOrderWiseOnAssignment = true,
         instanceId: instanceIdFromProps,
         searchPlaceholder = 'Search',
         wrapperClassName,
@@ -85,7 +42,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         onClearSearch,
         showClearSearchLink = true,
         emptyFilterMessage = undefined,
-        disabledEmptyFilterMessage = false,
+        disableEmptyFilterMessage = false,
         shouldRender = () => true,
     } = props;
 
@@ -104,16 +61,49 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     }, [allOriginalItems, shouldRender]);
 
     // compute
+    const defaultFolderScope = '___DEFAULT';
     const hasCustomSearchQuery = customSearchQuery !== undefined;
-    const filteredGroupedItems = useMemo<IGroupedFieldsKeeperItem[]>(() => {
+    const folderScopedItems = useMemo<
+        IFolderScopedItem<IGroupedFieldsKeeperItem>[]
+    >(() => {
         const searcher = new FuzzySearch(allItems, ['label', 'id'], {
             sort: true,
         });
         const currentItems = searcher.search(customSearchQuery ?? searchQuery);
 
-        // group items
-        return getGroupedItems(currentItems);
+        console.log('current', currentItems);
+
+        const newFolderScopedItemsMapping = currentItems.reduce((acc, curr) => {
+            const folderScope = curr.folderScope ?? defaultFolderScope;
+            const folderScopeLabel = curr.folderScopeLabel ?? 'Default';
+            if (!acc.has(folderScope)) {
+                acc.set(folderScope, {
+                    folderScope,
+                    folderScopeLabel,
+                    folderScopeItems: [],
+                });
+            }
+            acc.get(folderScope)?.folderScopeItems.push(curr);
+            return acc;
+        }, new Map<string, IFolderScopedItem>());
+
+        // folder scoped grouped items
+        const newFolderScopedItems = Array.from(
+            newFolderScopedItemsMapping.values(),
+        ).map(({ folderScope, folderScopeItems, folderScopeLabel }) => {
+            return {
+                folderScope,
+                folderScopeLabel,
+                folderScopeItems: getGroupedItems(folderScopeItems),
+            } satisfies IFolderScopedItem<IGroupedFieldsKeeperItem>;
+        });
+
+        return newFolderScopedItems;
     }, [customSearchQuery, searchQuery, allItems]);
+
+    const showFlatFolderScope =
+        folderScopedItems.length === 1 &&
+        folderScopedItems[0].folderScope === defaultFolderScope;
 
     // actions
     const onClearSearchQuery = () => {
@@ -162,18 +152,16 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                     'react-fields-keeper-mapping-content-scrollable-container-columns',
                 )}
             >
-                {filteredGroupedItems.length > 0
-                    ? filteredGroupedItems.map((filteredGroupedItem, index) => (
-                          <RootBucketGroupedItemRenderer
+                {folderScopedItems.length > 0
+                    ? folderScopedItems.map((folderScopedItem, index) => (
+                          <FolderScopeItemRenderer
                               {...props}
                               key={index}
-                              filteredGroupedItem={filteredGroupedItem}
-                              sortGroupOrderWiseOnAssignment={
-                                  sortGroupOrderWiseOnAssignment
-                              }
+                              folderScopedItem={folderScopedItem}
+                              showFlatFolderScope={showFlatFolderScope}
                           />
                       ))
-                    : !disabledEmptyFilterMessage && (
+                    : !disableEmptyFilterMessage && (
                           <div className="react-fields-keeper-mapping-no-search-items-found">
                               {emptyFilterMessage ?? (
                                   <>
@@ -202,16 +190,85 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     );
 };
 
-const RootBucketGroupedItemRenderer = (
-    props: {
-        filteredGroupedItem: IGroupedFieldsKeeperItem;
-        sortGroupOrderWiseOnAssignment: boolean;
-    } & IFieldsKeeperRootBucketProps,
-) => {
+function FolderScopeItemRenderer(
+    props: IFieldsKeeperRootBucketProps & {
+        folderScopedItem: IFolderScopedItem<IGroupedFieldsKeeperItem>;
+        showFlatFolderScope: boolean;
+    },
+) {
     // props
     const {
-        filteredGroupedItem: { group, groupLabel, items: filteredItems },
-        sortGroupOrderWiseOnAssignment,
+        folderScopedItem: { folderScope, folderScopeItems, folderScopeLabel },
+        showFlatFolderScope,
+        ...rootBucketProps
+    } = props;
+
+    // state
+    const [isFolderCollapsed, setIsFolderCollapsed] = useState(false);
+
+    // handlers
+    const toggleFolderCollapse = () =>
+        setIsFolderCollapsed((collapsed) => !collapsed);
+
+    // paint
+    if (showFlatFolderScope)
+        return folderScopeItems.map((groupedItems, index) => (
+            <GroupedItemRenderer
+                {...rootBucketProps}
+                key={index}
+                groupedItems={groupedItems}
+            />
+        ));
+
+    return (
+        <div
+            className="folder-scope-wrapper"
+            id={`folder-scope-${folderScope}`}
+        >
+            <div className="folder-scope-label">
+                <div className="folder-scope-label-icon">
+                    <img src={tableIcon} />
+                </div>
+                <div className="folder-scope-label-text">
+                    {folderScopeLabel}
+                </div>
+
+                <div
+                    className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
+                    role="button"
+                    onClick={toggleFolderCollapse}
+                >
+                    {isFolderCollapsed ? (
+                        <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                    ) : (
+                        <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                    )}
+                </div>
+            </div>
+            {!isFolderCollapsed && (
+                <div className="folder-scope-items">
+                    {folderScopeItems.map((groupedItems, index) => (
+                        <GroupedItemRenderer
+                            {...rootBucketProps}
+                            key={index}
+                            groupedItems={groupedItems}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function GroupedItemRenderer(
+    props: {
+        groupedItems: IGroupedFieldsKeeperItem;
+    } & IFieldsKeeperRootBucketProps,
+) {
+    // props
+    const {
+        groupedItems: { group, groupLabel, items: filteredItems },
+        sortGroupOrderWiseOnAssignment = true,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromProps,
         instanceId: instanceIdFromProps,
         ignoreCheckBox = false,
@@ -432,8 +489,8 @@ const RootBucketGroupedItemRenderer = (
                         {fieldItem.rootBucketSuffixNode && (
                             <div className="react-fields-keeper-mapping-column-content-suffix">
                                 {fieldItem.rootBucketSuffixNode}
-                            </div>)
-                        }
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -490,4 +547,4 @@ const RootBucketGroupedItemRenderer = (
         );
     }
     return <>{renderFieldItems({ fieldItems: filteredItems })}</>;
-};
+}

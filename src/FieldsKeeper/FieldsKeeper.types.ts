@@ -193,6 +193,13 @@ export interface IFieldsKeeperRootBucketProps {
 
     /** Toggles checkbox on label click if true */
     toggleCheckboxOnLabelClick?: boolean;
+
+    /**
+     * Auto collapse folders on mount
+     *
+     * default - true
+     */
+    collapseFoldersOnMount?: boolean;
 }
 
 /**

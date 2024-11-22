@@ -63,6 +63,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     // compute
     const defaultFolderScope = '___DEFAULT';
     const hasCustomSearchQuery = customSearchQuery !== undefined;
+    const hasSearchQuery = (customSearchQuery ?? searchQuery) !== '';
     const folderScopedItems = useMemo<
         IFolderScopedItem<IGroupedFieldsKeeperItem>[]
     >(() => {
@@ -70,8 +71,6 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
             sort: true,
         });
         const currentItems = searcher.search(customSearchQuery ?? searchQuery);
-
-        console.log('current', currentItems);
 
         const newFolderScopedItemsMapping = currentItems.reduce((acc, curr) => {
             const folderScope = curr.folderScope ?? defaultFolderScope;
@@ -159,6 +158,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                               key={index}
                               folderScopedItem={folderScopedItem}
                               showFlatFolderScope={showFlatFolderScope}
+                              hasSearchQuery={hasSearchQuery}
                           />
                       ))
                     : !disableEmptyFilterMessage && (
@@ -194,17 +194,22 @@ function FolderScopeItemRenderer(
     props: IFieldsKeeperRootBucketProps & {
         folderScopedItem: IFolderScopedItem<IGroupedFieldsKeeperItem>;
         showFlatFolderScope: boolean;
+        hasSearchQuery: boolean;
     },
 ) {
     // props
     const {
         folderScopedItem: { folderScope, folderScopeItems, folderScopeLabel },
         showFlatFolderScope,
+        hasSearchQuery,
         ...rootBucketProps
     } = props;
 
     // state
-    const [isFolderCollapsed, setIsFolderCollapsed] = useState(false);
+    const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
+        rootBucketProps.collapseFoldersOnMount ?? true,
+    );
+    const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
 
     // handlers
     const toggleFolderCollapse = () =>
@@ -229,7 +234,11 @@ function FolderScopeItemRenderer(
             className="folder-scope-wrapper"
             id={`folder-scope-${folderScope}`}
         >
-            <div className="folder-scope-label">
+            <div
+                className="folder-scope-label"
+                role="buton"
+                onClick={toggleFolderCollapse}
+            >
                 <div className="folder-scope-label-icon">
                     <img src={tableIcon} />
                 </div>
@@ -239,8 +248,8 @@ function FolderScopeItemRenderer(
 
                 <div
                     className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
-                    role="button"
-                    onClick={toggleFolderCollapse}
+                    // role="button"
+                    // onClick={toggleFolderCollapse}
                 >
                     {isFolderCollapsed ? (
                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />

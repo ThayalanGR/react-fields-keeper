@@ -1,7 +1,7 @@
-import Example1 from './Example1';
+import Example1_sample_usecase from './Example1_sample_usecase';
 import Example2_highlight_targeted_items from './Example2_highlight_targeted_items';
 import Example3_grouping_items from './Example3_grouping_items';
-import Example4 from './Example4';
+import Example4_custom_bucket_priority from './Example4_custom_bucket_priority';
 import Example5_disabling_fields from './Example5_disabling_fields';
 import Example6 from './Example6';
 import Example7 from './Example7';
@@ -15,15 +15,16 @@ import Example14 from './Example14';
 import Example15 from './Example15';
 import Example16 from './Example16';
 import Example17_should_render_prop from './Example17_should_render_prop';
-import Example18_pass_suffix_node from './Example18_pass_suffix_node';
+import Example18_pass_suffix_node from './Example18_suffix_node_support';
 import Example19_disable_bucket from './Example19_disable_bucket';
 import Example20_folder_scope from './Example20_folder_scope';
+import Example21_prefix_node_support from './Example21_prefix_node_support';
 
 export const examples = {
-    Example1,
+    Example1_sample_usecase,
     Example2_highlight_targeted_items,
     Example3_grouping_items,
-    Example4,
+    Example4_custom_bucket_priority,
     Example5_disabling_fields,
     Example6,
     Example7,
@@ -40,4 +41,5 @@ export const examples = {
     Example18_pass_suffix_node,
     Example19_disable_bucket,
     Example20_folder_scope,
+    Example21_prefix_node_support,
 };

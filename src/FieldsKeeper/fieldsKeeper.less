@@ -286,10 +286,14 @@
         .folder-scope-wrapper {
             .folder-scope-label {
                 cursor: pointer;
-                display: flex;
-                flex-direction: row;
-                gap: 2px;
-                align-items: center;
+                display: grid;
+                width: 100%;
+                max-width: 100%;
+                justify-content: center;
+                grid-template-columns: auto 1fr auto;
+                overflow: hidden;
+                place-items: center;
+
                 padding: 5px 3px;
                 border-radius: 2px;
                 user-select: none;
@@ -301,10 +305,17 @@
                 .folder-scope-label-icon {
                     display: grid;
                     place-items: center;
+                    padding-right: 3px;
                 }
 
-                // .folder-scope-label-text {
-                // }
+                .folder-scope-label-text {
+                    width: 100%;
+                    max-width: 100%;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    text-align: left;
+                }
 
                 .folder-scope-label-collapse-icon {
                     margin-left: auto;
@@ -320,7 +331,7 @@
         display: flex;
         flex-direction: row;
         width: 100%;
-        gap: 6px;
+        gap: 5px;
         align-items: center;
         cursor: pointer;
         padding: 6px 4px 6px 6px;
@@ -380,18 +391,36 @@
         }
 
         .react-fields-keeper-mapping-column-content-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: grid;
+            justify-content: center;
+            place-items: center;
             width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            grid-template-columns: auto 1fr auto auto;
+
+            .react-fields-keeper-mapping-column-content-prefix {
+                height: 100%;
+                display: flex;
+                place-items: center;
+                padding-right: 5px;
+                // width will be passed from the client
+            }
 
             .react-fields-keeper-mapping-column-content-label {
                 font-weight: normal;
+                width: 100%;
+                max-width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                text-align: left;
+                padding-right: 5px;
             }
-        }
 
-        .react-fields-keeper-mapping-column-content-suffix {
-            height: 100%;
+            .react-fields-keeper-mapping-column-content-suffix {
+                height: 100%;
+            }
         }
     }
 

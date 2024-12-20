@@ -8,33 +8,71 @@ import {
 } from '..';
 
 export default function Example18() {
+    const onIconClick = () => alert('Icon clicked');
 
-    const onIconClick = ()=> alert("Icon clicked")
-
-    const rootBucketSuffixNode : ReactNode = (
+    const rootBucketSuffixNode: ReactNode = (
         <div className="react-fields-keeper-mapping-column-content-sample-suffix-node">
             <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
-                <i onClick = {onIconClick} className="fk-ms-Icon fk-ms-Icon--Edit" />
+                <i
+                    onClick={onIconClick}
+                    className="fk-ms-Icon fk-ms-Icon--Edit"
+                />
             </div>
             <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
-                <i onClick = {onIconClick} className="fk-ms-Icon fk-ms-Icon--Delete" />
+                <i
+                    onClick={onIconClick}
+                    className="fk-ms-Icon fk-ms-Icon--Delete"
+                />
             </div>
         </div>
-    )
+    );
 
-    const bucketSuffixNode : ReactNode = (
+    const bucketSuffixNode: ReactNode = (
         <div className="react-fields-keeper-mapping-column-content-sample-suffix-node">
             <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
-                <i onClick = {onIconClick} className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                <i
+                    onClick={onIconClick}
+                    className="fk-ms-Icon fk-ms-Icon--ChevronDown"
+                />
             </div>
         </div>
-    )
+    );
 
     // compute
     const allItems: IFieldsKeeperItem[] = [
         { id: 'a', label: 'a', bucketSuffixNode },
         { id: 'b', label: 'b', bucketSuffixNode },
         { id: 'c', label: 'c', bucketSuffixNode, rootBucketSuffixNode },
+
+        {
+            id: 'date.quarter',
+            label: 'Quarter',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 1,
+            rootBucketSuffixNode,
+        },
+        {
+            id: 'date.year',
+            label: 'Year',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 0,
+        },
+        {
+            id: 'date.month',
+            label: 'Month',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 2,
+        },
+        {
+            id: 'date.day',
+            label: 'Day',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 3,
+        },
     ];
 
     const buckets: IFieldsKeeperBucket[] = [
@@ -49,7 +87,9 @@ export default function Example18() {
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">18. Render suffix nodes inside list items</div>
+            <div className="example-container-title">
+                18. Suffix nodes support for Root bucket items
+            </div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}

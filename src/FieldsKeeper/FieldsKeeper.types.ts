@@ -76,6 +76,14 @@ export interface IFieldsKeeperItem<T = any> {
      * Internal use only: Index of the field item for internal sorting.
      */
     _fieldItemIndex?: number;
+
+    /**
+     *
+     *
+     * pass 'measure-icon' to show default measure icon
+     *
+     */
+    prefixNode?: 'measure-icon' | ReactNode;
 }
 
 /**
@@ -200,6 +208,22 @@ export interface IFieldsKeeperRootBucketProps {
      * default - true
      */
     collapseFoldersOnMount?: boolean;
+
+    prefixNode?: {
+        allow: boolean;
+        /**
+         * defaults to true
+         */
+        reserveSpace?: boolean;
+        /**
+         *
+         * only applicable if reserveSpace is true
+         *
+         * default reserve space size (width) (15px)
+         *
+         */
+        reservedWidth?: number;
+    };
 }
 
 /**

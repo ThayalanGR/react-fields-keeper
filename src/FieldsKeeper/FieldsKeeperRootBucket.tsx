@@ -10,6 +10,7 @@ import FuzzySearch from 'fuzzy-search';
 import classNames from 'classnames';
 
 import tableIcon from '../assets/icons/tableIcon.svg';
+import measureIcon from '../assets/icons/measureIcon.svg';
 import './fieldsKeeper.less';
 import {
     IFieldsKeeperItem,
@@ -238,6 +239,7 @@ function FolderScopeItemRenderer(
                 className="folder-scope-label"
                 role="buton"
                 onClick={toggleFolderCollapse}
+                title={folderScopeLabel ?? ''}
             >
                 <div className="folder-scope-label-icon">
                     <img src={tableIcon} />
@@ -246,11 +248,7 @@ function FolderScopeItemRenderer(
                     {folderScopeLabel}
                 </div>
 
-                <div
-                    className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
-                    // role="button"
-                    // onClick={toggleFolderCollapse}
-                >
+                <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action">
                     {isFolderCollapsed ? (
                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
                     ) : (
@@ -288,7 +286,14 @@ function GroupedItemRenderer(
         allowDragAfterAssignment = true,
         allowDragging = true,
         toggleCheckboxOnLabelClick = false,
+        prefixNode: prefixNodeConfig,
     } = props;
+
+    const {
+        allow: allowPrefixNode = false,
+        reserveSpace: prefixNodeReserveSpace = true,
+        reservedWidth: prefixNodeReservedWidth = 15,
+    } = prefixNodeConfig ?? {};
 
     // state
     const { instanceId: instanceIdFromContext } =
@@ -418,7 +423,9 @@ function GroupedItemRenderer(
                     title={
                         (fieldItem.rootDisabled?.active
                             ? fieldItem.rootDisabled?.message
-                            : fieldItem.rootTooltip) ?? fieldItem.rootTooltip
+                            : fieldItem.rootTooltip) ??
+                        fieldItem.rootTooltip ??
+                        fieldItem.label
                     }
                 >
                     <div
@@ -480,10 +487,37 @@ function GroupedItemRenderer(
                             </div>
                         )}
                         <div className="react-fields-keeper-mapping-column-content-wrapper">
+                            {allowPrefixNode && !isGroupHeader ? (
+                                (fieldItem.prefixNode !== undefined ||
+                                    prefixNodeReserveSpace) && (
+                                    <div
+                                        className="react-fields-keeper-mapping-column-content-prefix"
+                                        style={{
+                                            width: prefixNodeReservedWidth,
+                                            maxWidth: prefixNodeReservedWidth,
+                                        }}
+                                    >
+                                        {fieldItem.prefixNode ===
+                                        'measure-icon' ? (
+                                            <img
+                                                src={measureIcon}
+                                                style={{
+                                                    transform:
+                                                        'translateX(-3px)',
+                                                }}
+                                            />
+                                        ) : (
+                                            fieldItem.prefixNode ?? null
+                                        )}
+                                    </div>
+                                )
+                            ) : (
+                                <div /> /** grid skeleton placeholder */
+                            )}
                             <div className="react-fields-keeper-mapping-column-content-label">
                                 {fieldItem.label}
                             </div>
-                            {isGroupHeader && (
+                            {isGroupHeader ? (
                                 <div
                                     className={classNames(
                                         'react-fields-keeper-mapping-column-content-action',
@@ -497,13 +531,17 @@ function GroupedItemRenderer(
                                         <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
                                     )}
                                 </div>
+                            ) : (
+                                <div />
+                            )}
+                            {fieldItem.rootBucketSuffixNode ? (
+                                <div className="react-fields-keeper-mapping-column-content-suffix">
+                                    {fieldItem.rootBucketSuffixNode}
+                                </div>
+                            ) : (
+                                <div />
                             )}
                         </div>
-                        {fieldItem.rootBucketSuffixNode && (
-                            <div className="react-fields-keeper-mapping-column-content-suffix">
-                                {fieldItem.rootBucketSuffixNode}
-                            </div>
-                        )}
                     </div>
                 </div>
             );

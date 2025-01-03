@@ -357,7 +357,20 @@ function GroupedItemRenderer(
             if (priorityGroupBucket) return priorityGroupBucket;
         }
         const leastFilledOrderedBuckets = [...buckets]
-            .filter((bucket) => !bucket.disabled)
+            .filter((bucket) => {
+                const currentFillingItemType = currentFillingItem[0]
+                    .type as string;
+                const currentBucketType = bucket.acceptTypes ?? [];
+                const isTypeFilled =
+                    currentBucketType.length && currentFillingItemType;
+                const isValidBucketType = currentBucketType.includes(
+                    currentFillingItemType,
+                );
+                return (
+                    !bucket.disabled &&
+                    ((isTypeFilled && isValidBucketType) || !isTypeFilled)
+                );
+            })
             .sort(
                 (bucketA, bucketB) =>
                     bucketA.items.length - bucketB.items.length,

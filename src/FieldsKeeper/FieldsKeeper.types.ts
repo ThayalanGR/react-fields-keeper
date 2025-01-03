@@ -84,6 +84,11 @@ export interface IFieldsKeeperItem<T = any> {
      *
      */
     prefixNode?: 'measure-icon' | ReactNode;
+
+    /**
+     * useful for matching the field item type with corresponding bucket type
+     */
+    type?: string;
 }
 
 /**
@@ -118,6 +123,7 @@ export interface IFieldsKeeperBucket<T = any> {
 
     /** Indicates if the bucket is disabled */
     disabled?: boolean;
+    acceptTypes?: string[];
 }
 
 /**

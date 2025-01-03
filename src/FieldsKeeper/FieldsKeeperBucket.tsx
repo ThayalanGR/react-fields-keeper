@@ -555,6 +555,21 @@ export function assignFieldItems(props: {
     } else {
         // insert new item into bucket
         if (!targetBucket) return;
+        // check if the item type is accepted by the bucket
+        if (
+            !requiredFieldItems.every((item) => {
+                // default case
+                if (
+                    !targetBucket.acceptTypes ||
+                    !targetBucket.acceptTypes.length
+                )
+                    return true;
+                if (!item.type) return true;
+                // check if the item type is accepted by the bucket
+                return targetBucket.acceptTypes.includes(item.type);
+            })
+        )
+            return;
         const targetBucketItemsPreviousLength = targetBucket.items.length;
 
         if (fromBucketId === FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID) {

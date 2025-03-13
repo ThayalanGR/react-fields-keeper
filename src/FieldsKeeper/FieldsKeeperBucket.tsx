@@ -281,6 +281,8 @@ const GroupedItemRenderer = (
         groupHeader,
     }: IGroupedItemRenderer) => {
         // compute
+        const { suffixNodeRenderer } = props;
+
         const isGroupHeader = groupHeader !== undefined;
 
         // styles
@@ -322,9 +324,9 @@ const GroupedItemRenderer = (
                         </div>
                         <div className="react-fields-keeper-mapping-content-action-buttons">
                             {orientation === 'vertical' && groupCollapseButton}
-                            {fieldItem.bucketSuffixNode && (
+                            {suffixNodeRenderer !== undefined && (
                                 <div className="react-fields-keeper-mapping-content-action-suffixNode">
-                                    {fieldItem.bucketSuffixNode}
+                                    {suffixNodeRenderer({bucketId: currentBucket.id, fieldItem})}
                                 </div>
                             )}
                             {suffixNode ||

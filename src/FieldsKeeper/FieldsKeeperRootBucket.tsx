@@ -405,6 +405,7 @@ function GroupedItemRenderer(
         isGroupItem,
         groupHeader,
     }: IGroupedItemRenderer) => {
+        const { suffixNodeRenderer } = props; 
         // compute
         const isGroupHeader = groupHeader !== undefined;
 
@@ -547,9 +548,9 @@ function GroupedItemRenderer(
                             ) : (
                                 <div />
                             )}
-                            {fieldItem.rootBucketSuffixNode ? (
+                            {suffixNodeRenderer !== undefined ? (
                                 <div className="react-fields-keeper-mapping-column-content-suffix">
-                                    {fieldItem.rootBucketSuffixNode}
+                                    {suffixNodeRenderer(fieldItem)}
                                 </div>
                             ) : (
                                 <div />

@@ -1,0 +1,1 @@
+export const CONTEXT_MENU_PADDING = 10;

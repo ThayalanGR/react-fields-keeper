@@ -1,48 +1,19 @@
-import { ReactNode } from 'react';
 import {
     FieldsKeeperProvider,
     FieldsKeeperBucket,
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
+    ContextMenu,
 } from '..';
 
 export default function Example18() {
-    const onIconClick = () => alert('Icon clicked');
-
-    const rootBucketSuffixNode: ReactNode = (
-        <div className="react-fields-keeper-mapping-column-content-sample-suffix-node">
-            <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
-                <i
-                    onClick={onIconClick}
-                    className="fk-ms-Icon fk-ms-Icon--Edit"
-                />
-            </div>
-            <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
-                <i
-                    onClick={onIconClick}
-                    className="fk-ms-Icon fk-ms-Icon--Delete"
-                />
-            </div>
-        </div>
-    );
-
-    const bucketSuffixNode: ReactNode = (
-        <div className="react-fields-keeper-mapping-column-content-sample-suffix-node">
-            <div className="react-fields-keeper-mapping-column-content-sample-suffix-node-button">
-                <i
-                    onClick={onIconClick}
-                    className="fk-ms-Icon fk-ms-Icon--ChevronDown"
-                />
-            </div>
-        </div>
-    );
 
     // compute
     const allItems: IFieldsKeeperItem[] = [
-        { id: 'a', label: 'a', bucketSuffixNode },
-        { id: 'b', label: 'b', bucketSuffixNode },
-        { id: 'c', label: 'c', bucketSuffixNode, rootBucketSuffixNode },
+        { id: 'a', label: 'a' },
+        { id: 'b', label: 'b' },
+        { id: 'c', label: 'c' },
 
         {
             id: 'date.quarter',
@@ -50,7 +21,6 @@ export default function Example18() {
             group: 'date',
             groupLabel: 'Date',
             groupOrder: 1,
-            rootBucketSuffixNode,
         },
         {
             id: 'date.year',
@@ -103,6 +73,27 @@ export default function Example18() {
                             id="bucket1"
                             label="Bucket 1"
                             allowRemoveFields
+                            suffixNodeRenderer={({ fieldItem, bucketId }) => {
+
+                                const contextMenuOptions = [
+                                    { label: "Option 1", id: "option1" },
+                                    { label: "Option 2", id: "option2" },
+                                    { label: "Option 3", id: "option3" }, 
+                                ];
+
+                                const onOptionClick  = (id: string) => {
+                                    console.log("onContextMenuClick", id); 
+                                }
+
+                                return (
+                                    <ContextMenu fieldItem={fieldItem} bucketId={bucketId} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+                                        <i
+                                            className="fk-ms-Icon fk-ms-Icon--ChevronDown"
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                    </ContextMenu>
+                                )
+                            }}
                         />
                         <FieldsKeeperBucket
                             id="bucket2"
@@ -116,7 +107,28 @@ export default function Example18() {
                         />
                     </div>
                     <div className="root-bucket-container">
-                        <FieldsKeeperRootBucket label="Root Bucket" />
+                        <FieldsKeeperRootBucket 
+                            label="Root Bucket" 
+                            suffixNodeRenderer = {(fieldItem ) => {
+                                const contextMenuOptions = [
+                                    { label: "Option 1", id: "option1" },
+                                    { label: "Option 2", id: "option2" },
+                                    { label: "Option 3", id: "option3" }, 
+                                ];
+
+                                const onOptionClick  = (id: string) => {
+                                    console.log("onContextMenuClick", id); 
+                                }
+                                return (
+                                    <ContextMenu fieldItem={fieldItem} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+                                        <i
+                                            className="fk-ms-Icon fk-ms-Icon--ChevronDown"
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                    </ContextMenu>
+                                );
+                            }}
+                        />
                     </div>
                 </div>
             </FieldsKeeperProvider>

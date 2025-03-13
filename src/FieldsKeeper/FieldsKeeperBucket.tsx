@@ -281,6 +281,8 @@ const GroupedItemRenderer = (
         groupHeader,
     }: IGroupedItemRenderer) => {
         // compute
+        const { suffixNodeRenderer } = props;
+
         const isGroupHeader = groupHeader !== undefined;
 
         // styles
@@ -322,9 +324,9 @@ const GroupedItemRenderer = (
                         </div>
                         <div className="react-fields-keeper-mapping-content-action-buttons">
                             {orientation === 'vertical' && groupCollapseButton}
-                            {fieldItem.bucketSuffixNode && (
+                            {suffixNodeRenderer !== undefined && (
                                 <div className="react-fields-keeper-mapping-content-action-suffixNode">
-                                    {fieldItem.bucketSuffixNode}
+                                    {suffixNodeRenderer({bucketId: currentBucket.id, fieldItem})}
                                 </div>
                             )}
                             {suffixNode ||
@@ -485,7 +487,7 @@ export function checkAndMaintainMaxItems(
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function assignFieldItems(props: {
+export const assignFieldItems = (props: { // NEED TO CHECK
     instanceId: string;
     bucketId: string | null;
     fromBucket: string;
@@ -496,7 +498,7 @@ export function assignFieldItems(props: {
     sortGroupOrderWiseOnAssignment?: boolean;
     allowDuplicates?: boolean;
     removeIndex?: number;
-}) {
+}) => {
     // props
     const {
         instanceId,

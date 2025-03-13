@@ -64,14 +64,6 @@ export interface IFieldsKeeperItem<T = any> {
     /** Controls root-level disabled state */
     rootDisabled?: IFieldKeeperItemDisabled;
 
-    // Suffix node
-
-    /** Node to display as suffix within the item bucket */
-    bucketSuffixNode?: ReactNode;
-
-    /** Node to display as suffix within the root bucket */
-    rootBucketSuffixNode?: ReactNode;
-
     /**
      * Internal use only: Index of the field item for internal sorting.
      */
@@ -230,6 +222,9 @@ export interface IFieldsKeeperRootBucketProps {
          */
         reservedWidth?: number;
     };
+
+    /**  Function to customize suffix node rendering **/
+    suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
 }
 
 /**
@@ -338,6 +333,11 @@ export interface IFieldsKeeperBucketProps {
      * Custom function for rendering field items in this bucket
      */
     customItemRenderer?: (props: IFieldItemCustomRendererProps) => JSX.Element;
+    
+    /**
+     * Custom function for rendering suffix items specific to this bucket
+     */
+    suffixNodeRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
 
     /** Layout orientation for items within the bucket */
     orientation?: 'vertical' | 'horizontal';
@@ -347,6 +347,39 @@ export interface IFieldsKeeperBucketProps {
 
     /** If true, groups are displayed flat */
     showAllGroupsFlat?: boolean;
+}
+
+/**
+ * Custom renderer properties for suffix items within a bucket.
+ */
+export interface ISuffixNodeRendererProps {
+    /** The field item being rendered */
+    fieldItem: IFieldsKeeperItem;
+
+    /** ID of the bucket containing this item */
+    bucketId?: string;
+
+}
+
+/**
+ * Custom renderer properties for rendering Context Menu.
+ */
+export interface IContextMenuProps {
+    /** The field item being rendered */
+    fieldItem: IFieldsKeeperItem;
+
+    /** ID of the bucket containing this item */
+    bucketId?: string;
+
+    /** Child elements to be rendered inside the context menu. */
+    children: ReactNode;
+
+     /** List of options available in the context menu, each with a label and ID. */
+    contextMenuOptions: { label: string, id: string }[];
+
+    /** Callback function triggered when an option is clicked, receiving the option ID. */
+    onOptionClick: (id: string) => void;
+
 }
 
 /**

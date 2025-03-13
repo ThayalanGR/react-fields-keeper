@@ -82,7 +82,7 @@ export default function Example18() {
                                 ];
 
                                 const onOptionClick  = (id: string) => {
-                                    console.log("onContextMenuClick", id); // NEED TO CHECK
+                                    console.log("onContextMenuClick", id); 
                                 }
 
                                 return (
@@ -117,7 +117,7 @@ export default function Example18() {
                                 ];
 
                                 const onOptionClick  = (id: string) => {
-                                    console.log("onContextMenuClick", id); // NEED TO CHECK
+                                    console.log("onContextMenuClick", id); 
                                 }
                                 return (
                                     <ContextMenu fieldItem={fieldItem} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>

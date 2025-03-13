@@ -487,7 +487,7 @@ export function checkAndMaintainMaxItems(
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const assignFieldItems = (props: { // NEED TO CHECK
+export function assignFieldItems(props: {
     instanceId: string;
     bucketId: string | null;
     fromBucket: string;
@@ -498,7 +498,7 @@ export const assignFieldItems = (props: { // NEED TO CHECK
     sortGroupOrderWiseOnAssignment?: boolean;
     allowDuplicates?: boolean;
     removeIndex?: number;
-}) => {
+}) {
     // props
     const {
         instanceId,

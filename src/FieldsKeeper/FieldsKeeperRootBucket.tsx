@@ -531,6 +531,13 @@ function GroupedItemRenderer(
                             <div className="react-fields-keeper-mapping-column-content-label">
                                 {fieldItem.label}
                             </div>
+                            {suffixNodeRenderer !== undefined ? (
+                                <div className="react-fields-keeper-mapping-column-content-suffix">
+                                    {suffixNodeRenderer(fieldItem)}
+                                </div>
+                            ) : (
+                                <div />
+                            )}
                             {isGroupHeader ? (
                                 <div
                                     className={classNames(
@@ -544,13 +551,6 @@ function GroupedItemRenderer(
                                     ) : (
                                         <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
                                     )}
-                                </div>
-                            ) : (
-                                <div />
-                            )}
-                            {suffixNodeRenderer !== undefined ? (
-                                <div className="react-fields-keeper-mapping-column-content-suffix">
-                                    {suffixNodeRenderer(fieldItem)}
                                 </div>
                             ) : (
                                 <div />

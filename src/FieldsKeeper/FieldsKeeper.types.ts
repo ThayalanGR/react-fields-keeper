@@ -362,6 +362,33 @@ export interface ISuffixNodeRendererProps {
 }
 
 /**
+ * Represents the structure of a dropdown option.
+ * Currently, we support only one level of submenu.
+ */
+export interface IContextMenuOptions extends IDropdownOptions {
+    /**
+     * An array of submenu options.
+     * Note: Currently, We do not support submenu options inside other submenu options.
+     */
+    subMenuOptions?: IDropdownOptions[];
+}
+
+/**
+ * Represents the structure of a dropdown option.
+ */
+export interface IDropdownOptions {
+    /** 
+     * The label to be displayed for the dropdown option. 
+     */
+    label: string;
+
+    /** 
+     * A unique identifier for the dropdown option.
+     */
+    id: string;
+}
+
+/**
  * Custom renderer properties for rendering Context Menu.
  */
 export interface IContextMenuProps {
@@ -374,8 +401,8 @@ export interface IContextMenuProps {
     /** Child elements to be rendered inside the context menu. */
     children: ReactNode;
 
-     /** List of options available in the context menu, each with a label and ID. */
-    contextMenuOptions: { label: string, id: string }[];
+     /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
+    contextMenuOptions: IContextMenuOptions[];
 
     /** Callback function triggered when an option is clicked, receiving the option ID. */
     onOptionClick: (id: string) => void;

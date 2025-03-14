@@ -1,1 +1,2 @@
 export const CONTEXT_MENU_PADDING = 10;
+export const CONTEXT_MENU_OPTIONS_PADDING = 2;

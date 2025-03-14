@@ -41,7 +41,7 @@ export default function Example22_bucket_accept_types() {
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">20. Bucket types!</div>
+            <div className="example-container-title">22. Bucket types!</div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}

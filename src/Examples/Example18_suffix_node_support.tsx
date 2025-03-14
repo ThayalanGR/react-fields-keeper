@@ -5,6 +5,7 @@ import {
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
     ContextMenu,
+    IContextMenuOptions,
 } from '..';
 
 export default function Example18() {
@@ -75,9 +76,19 @@ export default function Example18() {
                             allowRemoveFields
                             suffixNodeRenderer={({ fieldItem, bucketId }) => {
 
-                                const contextMenuOptions = [
-                                    { label: "Option 1", id: "option1" },
-                                    { label: "Option 2", id: "option2" },
+                                const contextMenuOptions: IContextMenuOptions[] = [
+                                    { label: "Option 1", id: "option1", subMenuOptions: [
+                                        { label: "Sub Option 1", id: "subOption1" },
+                                        { label: "Sub Option 2", id: "subOption2" },
+                                        { label: "Sub Option 3", id: "subOption3" }
+                                    ]},
+                                    { label: "Option 2", id: "option2",
+                                        subMenuOptions: [
+                                            { label: "Sub Option 1", id: "subOption1" },
+                                            { label: "Sub Option 2", id: "subOption2" },
+                                            { label: "Sub Option 3", id: "subOption3" }
+                                        ]
+                                    },
                                     { label: "Option 3", id: "option3" }, 
                                 ];
 
@@ -110,7 +121,8 @@ export default function Example18() {
                         <FieldsKeeperRootBucket 
                             label="Root Bucket" 
                             suffixNodeRenderer = {(fieldItem ) => {
-                                const contextMenuOptions = [
+                               
+                                const contextMenuOptions: IContextMenuOptions[] = [
                                     { label: "Option 1", id: "option1" },
                                     { label: "Option 2", id: "option2" },
                                     { label: "Option 3", id: "option3" }, 

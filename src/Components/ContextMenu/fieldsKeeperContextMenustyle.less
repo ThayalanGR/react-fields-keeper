@@ -1,0 +1,63 @@
+
+.react-fields-keeper-context-menu-underlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: transparent;
+    z-index: 999999;
+}
+
+.react-fields-keeper-context-menu-node {
+    font-family: Arial, sans-serif;
+    position: fixed;
+    display: block;
+    background: rgb(255, 255, 255);
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    z-index: 20;
+
+}
+
+.react-fields-keeper-context-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    min-width: max-content;
+    cursor: pointer;
+    background: white;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.react-fields-keeper-context-menu-option-label {
+    max-width: 250px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.react-fields-keeper-context-sub-menu-icon {
+    padding: 0px 0px 0px 15px;
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.react-fields-keeper-separator {
+    height: 1px;
+    background-color: rgb(243, 242, 241);
+}
+
+.react-fields-keeper-checkable-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: PowrMDL2;
+    content: "\e73e";
+    position: fixed;
+    width: 1.14285714em;
+    height: 20px;
+}

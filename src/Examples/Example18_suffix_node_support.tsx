@@ -4,9 +4,10 @@ import {
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
-    ContextMenu,
-    IContextMenuOptions,
+    FieldsKeeperContextMenu,
+    IFieldsKeeperContextMenuOptions,
 } from '..';
+import { SuffixNode } from '../Components/SuffixNode';
 
 export default function Example18() {
 
@@ -76,7 +77,7 @@ export default function Example18() {
                             allowRemoveFields
                             suffixNodeRenderer={({ fieldItem, bucketId }) => {
 
-                                const contextMenuOptions: IContextMenuOptions[] = [
+                                const fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[] = [
                                     { label: "Option 1", id: "option1", subMenuOptions: [
                                         { label: "Sub Option 1", id: "subOption1" },
                                         { label: "Sub Option 2", id: "subOption2" },
@@ -87,7 +88,8 @@ export default function Example18() {
                                             { label: "Sub Option 1", id: "subOption1" },
                                             { label: "Sub Option 2", id: "subOption2" },
                                             { label: "Sub Option 3", id: "subOption3" }
-                                        ]
+                                        ],
+                                        isSeparatorNeeded: true
                                     },
                                     { label: "Option 3", id: "option3" }, 
                                 ];
@@ -97,12 +99,8 @@ export default function Example18() {
                                 }
 
                                 return (
-                                    <ContextMenu fieldItem={fieldItem} bucketId={bucketId} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
-                                        <i
-                                            className="fk-ms-Icon fk-ms-Icon--ChevronDown"
-                                            style={{ cursor: "pointer" }}
-                                        />
-                                    </ContextMenu>
+                                    <SuffixNode fieldItem={fieldItem} bucketId={bucketId} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick} />
+                                        
                                 )
                             }}
                         />
@@ -122,7 +120,7 @@ export default function Example18() {
                             label="Root Bucket" 
                             suffixNodeRenderer = {(fieldItem ) => {
                                
-                                const contextMenuOptions: IContextMenuOptions[] = [
+                                const fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[] = [
                                     { label: "Option 1", id: "option1" },
                                     { label: "Option 2", id: "option2" },
                                     { label: "Option 3", id: "option3" }, 
@@ -132,12 +130,12 @@ export default function Example18() {
                                     console.log("onContextMenuClick", id); 
                                 }
                                 return (
-                                    <ContextMenu fieldItem={fieldItem} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+                                    <FieldsKeeperContextMenu fieldItem={fieldItem} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick}>
                                         <i
                                             className="fk-ms-Icon fk-ms-Icon--ChevronDown"
                                             style={{ cursor: "pointer" }}
                                         />
-                                    </ContextMenu>
+                                    </FieldsKeeperContextMenu>
                                 );
                             }}
                         />

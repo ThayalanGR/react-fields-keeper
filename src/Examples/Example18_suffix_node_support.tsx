@@ -4,7 +4,6 @@ import {
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
-    FieldsKeeperContextMenu,
     IFieldsKeeperContextMenuOptions,
 } from '..';
 import { SuffixNode } from '../Components/SuffixNode';
@@ -100,7 +99,6 @@ export default function Example18() {
 
                                 return (
                                     <SuffixNode fieldItem={fieldItem} bucketId={bucketId} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick} />
-                                        
                                 )
                             }}
                         />
@@ -130,12 +128,7 @@ export default function Example18() {
                                     console.log("onContextMenuClick", id); 
                                 }
                                 return (
-                                    <FieldsKeeperContextMenu fieldItem={fieldItem} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick}>
-                                        <i
-                                            className="fk-ms-Icon fk-ms-Icon--ChevronDown"
-                                            style={{ cursor: "pointer" }}
-                                        />
-                                    </FieldsKeeperContextMenu>
+                                    <SuffixNode fieldItem={fieldItem} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick} />
                                 );
                             }}
                         />

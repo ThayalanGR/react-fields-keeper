@@ -2,11 +2,7 @@ import { ISuffixNodeProps } from "../FieldsKeeper/FieldsKeeper.types"
 import { FieldsKeeperContextMenu } from "./ContextMenu/FieldsKeeperContextMenu"
 
 export const SuffixNode = (props: ISuffixNodeProps) => {
-    const { fieldItem, bucketId, fieldKeeperContextMenuOptions } = props;
-
-    const onOptionClick  = (id: string) => {
-        console.log("onContextMenuClick", id); 
-    }
+    const { fieldItem, bucketId, fieldKeeperContextMenuOptions, onOptionClick } = props;
     
     return (
         <>

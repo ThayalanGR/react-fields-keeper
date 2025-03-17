@@ -60,7 +60,7 @@ export default function Example18() {
     return (
         <div className="example-container">
             <div className="example-container-title">
-                18. Suffix nodes support for Root bucket items
+                18. Suffix nodes support for Root bucket items with Context Menu
             </div>
             <FieldsKeeperProvider
                 allItems={allItems}

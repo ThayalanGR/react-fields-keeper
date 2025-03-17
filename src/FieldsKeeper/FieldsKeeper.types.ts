@@ -371,6 +371,12 @@ export interface IContextMenuOptions extends IDropdownOptions {
      * Note: Currently, We do not support submenu options inside other submenu options.
      */
     subMenuOptions?: IDropdownOptions[];
+
+    /** 
+     * Adds a separator before this menu option.
+     */
+    isSeparatorNeeded?: boolean;
+
 }
 
 /**

@@ -4,7 +4,7 @@ import {
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
-    ContextMenu,
+    FieldsKeeperContextMenu,
     IContextMenuOptions,
 } from '..';
 
@@ -87,7 +87,8 @@ export default function Example18() {
                                             { label: "Sub Option 1", id: "subOption1" },
                                             { label: "Sub Option 2", id: "subOption2" },
                                             { label: "Sub Option 3", id: "subOption3" }
-                                        ]
+                                        ],
+                                        isSeparatorNeeded: true
                                     },
                                     { label: "Option 3", id: "option3" }, 
                                 ];
@@ -97,12 +98,12 @@ export default function Example18() {
                                 }
 
                                 return (
-                                    <ContextMenu fieldItem={fieldItem} bucketId={bucketId} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+                                    <FieldsKeeperContextMenu fieldItem={fieldItem} bucketId={bucketId} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
                                         <i
                                             className="fk-ms-Icon fk-ms-Icon--ChevronDown"
                                             style={{ cursor: "pointer" }}
                                         />
-                                    </ContextMenu>
+                                    </FieldsKeeperContextMenu>
                                 )
                             }}
                         />
@@ -132,12 +133,12 @@ export default function Example18() {
                                     console.log("onContextMenuClick", id); 
                                 }
                                 return (
-                                    <ContextMenu fieldItem={fieldItem} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+                                    <FieldsKeeperContextMenu fieldItem={fieldItem} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
                                         <i
                                             className="fk-ms-Icon fk-ms-Icon--ChevronDown"
                                             style={{ cursor: "pointer" }}
                                         />
-                                    </ContextMenu>
+                                    </FieldsKeeperContextMenu>
                                 );
                             }}
                         />

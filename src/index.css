@@ -189,44 +189,6 @@ h1 {
     background-color: #004085;
 }
 
-.context-menu-node {
-    font-family: Arial, sans-serif;
-    position: fixed;
-    display: block;
-    background: rgb(255, 255, 255);
-    border: 1px solid #ccc;
-    padding: 4px;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-    border-radius: 5px;
-    z-index: 20;
-
-}
-
-.context-menu-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 8px;
-    min-width: max-content;
-    cursor: pointer;
-    background: white;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.context-menu-option-label {
-    max-width: 250px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-.context-sub-menu-icon {
-    padding: 0px 0px 0px 10px;
-    cursor: pointer;
-    font-size: 10px;
-}
-
 .github-code-button {
     background-color: #333;
     color: white;

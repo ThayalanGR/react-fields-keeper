@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CONTEXT_MENU_OPTIONS_PADDING, CONTEXT_MENU_PADDING } from "./utils";
-import { IContextMenuOptions, IContextMenuProps } from "../FieldsKeeper/FieldsKeeper.types";
-import { ContextMenuOption } from "./ContextMenuOption";
+import { CONTEXT_MENU_PADDING } from "./utils";
+import { IContextMenuOptions, IContextMenuProps } from "../../FieldsKeeper/FieldsKeeper.types";
+import { FieldsKeeperContextMenuOption } from "./FieldsKeeperContextMenuOption";
+import './fieldsKeeperContextMenustyle.less';
 
-
-export const ContextMenu = (props: IContextMenuProps) => {
+export const FieldsKeeperContextMenu = (props: IContextMenuProps) => {
     const {children, contextMenuOptions, onOptionClick} = props;
 
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const overlayRef = useRef<HTMLDivElement | null>(null);
 
     const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
     const [subMenuOptionIdHovered, setSubMenuOptionIdHovered] = useState('');
@@ -31,7 +32,7 @@ export const ContextMenu = (props: IContextMenuProps) => {
     const onContextMenuClick = (e?: React.MouseEvent) => {
         if(e){
             setIsContextMenuVisible(!isContextMenuVisible);
-            setPosition({ x: e.clientX + CONTEXT_MENU_OPTIONS_PADDING, y: e.clientY });
+            setPosition({ x: e.clientX + CONTEXT_MENU_PADDING, y: e.clientY });
         }
     };
 
@@ -44,7 +45,7 @@ export const ContextMenu = (props: IContextMenuProps) => {
             if(option.subMenuOptions?.length && !isSubMenuHover) {
                 const rect = e.currentTarget.getBoundingClientRect();
                 if(rect) {
-                    setSubMenuPosition({ x: (rect.x + rect.width) + CONTEXT_MENU_OPTIONS_PADDING, y: rect.y });
+                    setSubMenuPosition({ x: (rect.x + rect.width), y: rect.y });
                     setSubMenuOptionIdHovered(option.id);
                 }
             } else if(isSubMenuHover) {
@@ -55,20 +56,33 @@ export const ContextMenu = (props: IContextMenuProps) => {
         }
     }
 
+    const onOverlayScroll = (e: React.WheelEvent | React.TouchEvent) => {
+        e.stopPropagation();
+    }
+
+    const preventScroll = (e: Event) => {
+        e.preventDefault();
+    };
+
     useEffect(() => {
         const handleOutsideClick = (e: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
                 onOutsideClick();
             }
-            document.body.style.overflow = 'unset';
         };
 
-        if (isContextMenuVisible && typeof window != 'undefined' && window.document) {
-            document.body.style.overflow = 'hidden';
+        const overlay = overlayRef.current;
+        if (overlay) {
+            overlay.addEventListener("wheel", preventScroll, { passive: false });
+            overlay.addEventListener("touchmove", preventScroll, { passive: false });
         }
 
         document.addEventListener("mousedown", handleOutsideClick);
         return () => {
+            if (overlay) {
+                overlay.removeEventListener("wheel", preventScroll);
+                overlay.removeEventListener("touchmove", preventScroll);
+            }
             document.removeEventListener("mousedown", handleOutsideClick);
         };
     });
@@ -80,26 +94,30 @@ export const ContextMenu = (props: IContextMenuProps) => {
             </div>
 
             {isContextMenuVisible && createPortal(
-                <div ref={menuRef} className="context-menu-node"
+                <div ref={overlayRef} className="react-fields-keeper-context-menu-underlay" onWheel={onOverlayScroll} onTouchMove={onOverlayScroll}>
+                    <div ref={menuRef} className="react-fields-keeper-context-menu-node"
                     style={{
                         top: position.y ,
                         left: position.x ?? 0 + CONTEXT_MENU_PADDING,
                     }}
-                >
-                    {contextMenuOptions.map((option) => (
-                        <div key={option.id}>
-                            <ContextMenuOption 
-                                key={option.id}
-                                option={option} 
-                                onMouseOver={onMouseOver} 
-                                onOptionClickHandler={onOptionClickHandler} 
-                                isSubMenu={false}
-                                subMenuOptionIdHovered={subMenuOptionIdHovered}
-                                subMenuPosition={subMenuPosition}
-                            />
-                        </div>
-                    ))}
-                </div>,
+                    >
+                        {contextMenuOptions.map((option) => (
+                            <div key={option.id}>
+                                <FieldsKeeperContextMenuOption 
+                                    key={option.id}
+                                    option={option} 
+                                    onMouseOver={onMouseOver} 
+                                    onOptionClickHandler={onOptionClickHandler} 
+                                    isSubMenu={false}
+                                    subMenuOptionIdHovered={subMenuOptionIdHovered}
+                                    subMenuPosition={subMenuPosition}
+                                />
+                                { option.isSeparatorNeeded ? <div className="react-fields-keeper-separator"> </div>: null}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                ,
                 document.body
             )}
         </>

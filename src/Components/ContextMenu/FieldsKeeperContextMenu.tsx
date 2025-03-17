@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CONTEXT_MENU_PADDING } from "./utils";
-import { IContextMenuOptions, IContextMenuProps } from "../../FieldsKeeper/FieldsKeeper.types";
+import { IFieldsKeeperContextMenuOptions, IFieldsKeeperContextMenuProps } from "../../FieldsKeeper/FieldsKeeper.types";
 import { FieldsKeeperContextMenuOption } from "./FieldsKeeperContextMenuOption";
 import './fieldsKeeperContextMenustyle.less';
 
-export const FieldsKeeperContextMenu = (props: IContextMenuProps) => {
-    const {children, contextMenuOptions, onOptionClick} = props;
+export const FieldsKeeperContextMenu = (props: IFieldsKeeperContextMenuProps) => {
+    const {children, fieldKeeperContextMenuOptions, onOptionClick} = props;
 
     const menuRef = useRef<HTMLDivElement | null>(null);
     const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -21,7 +21,7 @@ export const FieldsKeeperContextMenu = (props: IContextMenuProps) => {
         setSubMenuOptionIdHovered('');
     };
 
-    const onOptionClickHandler = (option:IContextMenuOptions) => {
+    const onOptionClickHandler = (option:IFieldsKeeperContextMenuOptions) => {
         if(option.subMenuOptions?.length) {
             return false;
         }
@@ -36,7 +36,7 @@ export const FieldsKeeperContextMenu = (props: IContextMenuProps) => {
         }
     };
 
-    const onMouseOver = (e:  React.MouseEvent<HTMLDivElement, MouseEvent>, option: IContextMenuOptions, isSubMenuHover = false ) => {
+    const onMouseOver = (e:  React.MouseEvent<HTMLDivElement, MouseEvent>, option: IFieldsKeeperContextMenuOptions, isSubMenuHover = false ) => {
         if(e?.currentTarget) {
             if(e.currentTarget.style){
                 e.currentTarget.style.backgroundColor = "rgb(243, 242, 241)";
@@ -101,7 +101,7 @@ export const FieldsKeeperContextMenu = (props: IContextMenuProps) => {
                         left: position.x ?? 0 + CONTEXT_MENU_PADDING,
                     }}
                     >
-                        {contextMenuOptions.map((option) => (
+                        {fieldKeeperContextMenuOptions.map((option) => (
                             <div key={option.id}>
                                 <FieldsKeeperContextMenuOption 
                                     key={option.id}

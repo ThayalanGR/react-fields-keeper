@@ -1,15 +1,15 @@
-import { IContextMenuOptions } from "../../FieldsKeeper/FieldsKeeper.types";
+import { IFieldsKeeperContextMenuOptions } from "../../FieldsKeeper/FieldsKeeper.types";
 
-export interface IContextMenuOptionProps {
-    option: IContextMenuOptions;
+export interface IFieldsKeeperContextMenuOptionProps {
+    option: IFieldsKeeperContextMenuOptions;
     isSubMenu: boolean;
     subMenuOptionIdHovered?: string;
     subMenuPosition?: { x: number; y: number };
-    onOptionClickHandler: (option: IContextMenuOptions) => void;
-    onMouseOver: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, option: IContextMenuOptions, isSubMenuHover: boolean ) => void;
+    onOptionClickHandler: (option: IFieldsKeeperContextMenuOptions) => void;
+    onMouseOver: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, option: IFieldsKeeperContextMenuOptions, isSubMenuHover: boolean ) => void;
 }
 
-export const FieldsKeeperContextMenuOption = (props: IContextMenuOptionProps) => {
+export const FieldsKeeperContextMenuOption = (props: IFieldsKeeperContextMenuOptionProps) => {
 
     const {option, isSubMenu, subMenuOptionIdHovered, subMenuPosition, onOptionClickHandler, onMouseOver} = props;
     

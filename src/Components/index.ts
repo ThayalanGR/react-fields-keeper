@@ -1,1 +1,1 @@
-export * from './ContextMenuComponent/FieldsKeeperContextMenu';
+export * from './ContextMenu/FieldsKeeperContextMenu';

@@ -358,14 +358,25 @@ export interface ISuffixNodeRendererProps {
 
     /** ID of the bucket containing this item */
     bucketId?: string;
+}
 
+/**
+ * Interface representing the properties for a Suffix Node component.
+ * Extends the ISuffixNodeRendererProps interface.
+ */
+export interface ISuffixNodeProps extends ISuffixNodeRendererProps {
+    /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
+    fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[];
+
+    /** Callback function triggered when an option is clicked, receiving the option ID. */
+    onOptionClick: (id: string) => void;
 }
 
 /**
  * Represents the structure of a dropdown option.
  * Currently, we support only one level of submenu.
  */
-export interface IContextMenuOptions extends IDropdownOptions {
+export interface IFieldsKeeperContextMenuOptions extends IDropdownOptions {
     /**
      * An array of submenu options.
      * Note: Currently, We do not support submenu options inside other submenu options.
@@ -397,22 +408,9 @@ export interface IDropdownOptions {
 /**
  * Custom renderer properties for rendering Context Menu.
  */
-export interface IContextMenuProps {
-    /** The field item being rendered */
-    fieldItem: IFieldsKeeperItem;
-
-    /** ID of the bucket containing this item */
-    bucketId?: string;
-
+export interface IFieldsKeeperContextMenuProps extends ISuffixNodeProps {
     /** Child elements to be rendered inside the context menu. */
     children: ReactNode;
-
-     /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
-    contextMenuOptions: IContextMenuOptions[];
-
-    /** Callback function triggered when an option is clicked, receiving the option ID. */
-    onOptionClick: (id: string) => void;
-
 }
 
 /**

@@ -5,8 +5,9 @@ import {
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
     FieldsKeeperContextMenu,
-    IContextMenuOptions,
+    IFieldsKeeperContextMenuOptions,
 } from '..';
+import { SuffixNode } from '../Components/SuffixNode';
 
 export default function Example18() {
 
@@ -76,7 +77,7 @@ export default function Example18() {
                             allowRemoveFields
                             suffixNodeRenderer={({ fieldItem, bucketId }) => {
 
-                                const contextMenuOptions: IContextMenuOptions[] = [
+                                const fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[] = [
                                     { label: "Option 1", id: "option1", subMenuOptions: [
                                         { label: "Sub Option 1", id: "subOption1" },
                                         { label: "Sub Option 2", id: "subOption2" },
@@ -98,12 +99,8 @@ export default function Example18() {
                                 }
 
                                 return (
-                                    <FieldsKeeperContextMenu fieldItem={fieldItem} bucketId={bucketId} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
-                                        <i
-                                            className="fk-ms-Icon fk-ms-Icon--ChevronDown"
-                                            style={{ cursor: "pointer" }}
-                                        />
-                                    </FieldsKeeperContextMenu>
+                                    <SuffixNode fieldItem={fieldItem} bucketId={bucketId} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick} />
+                                        
                                 )
                             }}
                         />
@@ -123,7 +120,7 @@ export default function Example18() {
                             label="Root Bucket" 
                             suffixNodeRenderer = {(fieldItem ) => {
                                
-                                const contextMenuOptions: IContextMenuOptions[] = [
+                                const fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[] = [
                                     { label: "Option 1", id: "option1" },
                                     { label: "Option 2", id: "option2" },
                                     { label: "Option 3", id: "option3" }, 
@@ -133,7 +130,7 @@ export default function Example18() {
                                     console.log("onContextMenuClick", id); 
                                 }
                                 return (
-                                    <FieldsKeeperContextMenu fieldItem={fieldItem} contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+                                    <FieldsKeeperContextMenu fieldItem={fieldItem} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick}>
                                         <i
                                             className="fk-ms-Icon fk-ms-Icon--ChevronDown"
                                             style={{ cursor: "pointer" }}

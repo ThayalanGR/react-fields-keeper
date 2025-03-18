@@ -21,11 +21,11 @@ export const ContextMenu = (props: IContextMenuProps) => {
         setSubMenuOptionIdHovered('');
     };
 
-    const onOptionClickHandler = (option: IContextMenuOption) => {
+    const onOptionClickHandler = (option: IContextMenuOption, parentId?: string) => {
         if (option.subMenuOptions?.length) {
             return false;
         }
-        onOptionClick(option.id);
+        onOptionClick(option.id, parentId);
         setIsContextMenuVisible(false);
     };
 
@@ -111,14 +111,14 @@ export const ContextMenu = (props: IContextMenuProps) => {
                                     isSubMenu={false}
                                     subMenuOptionIdHovered={subMenuOptionIdHovered}
                                     subMenuPosition={subMenuPosition}
+                                    contextMenuOptions={contextMenuOptions}
                                 />
-                                {option.isSeparatorNeeded ? <div className="react-fields-keeper-separator"> </div> : null}
+                                { option.showSeparator ? <div className="react-fields-keeper-separator"> </div> : null }
                             </div>
                         ))}
                     </div>
                 </div>
-                ,
-                document.body
+                , document.body
             )}
         </>
     );

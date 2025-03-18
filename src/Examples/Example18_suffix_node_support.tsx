@@ -1,73 +1,70 @@
+import { useState } from 'react';
 import {
     FieldsKeeperProvider,
     FieldsKeeperBucket,
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
-    ContextMenu,
     IContextMenuOption,
 } from '..';
 import { SuffixNode } from '../Components/SuffixNode';
 
 export default function Example18() {
 
-    // compute
+    const [contextMenuOptions, setContextMenuOptions] = useState<IContextMenuOption[]>([
+        { label: "Option 1", id: "option1"},
+        { label: "Option 2", id: "option2",
+            subMenuOptions: [
+                { label: "SubOption 1", id: "suboption1", isActive: true },
+                { label: "SubOption 2", id: "suboption2" },
+                { label: "SubOption 3", id: "suboption3" },
+            ]
+        },
+        { label: "Option 3", id: "option3",
+            subMenuOptions: [
+                { label: "SubOption 4", id: "suboption4" },
+                { label: "SubOption 5", id: "suboption5", isActive: true },
+                { label: "SubOption 6", id: "suboption6" },
+            ],
+            showSeparator: true
+        },
+        { label: "Option 4", id: "option4" },
+        { label: "Option 5", id: "option5", isActive: true },
+        { label: "Option 6", id: "option6" },
+        { label: "Option 7", id: "option7" },
+        { label: "Option 8", id: "option8", showSeparator: true },
+        { label: "Option 9", id: "option9",
+            subMenuOptions: [
+                { label: "SubOption 7", id: "suboption7", isActive: true },
+                { label: "SubOption 8", id: "suboption8" },
+                { label: "SubOption 9", id: "suboption9" },
+            ]
+         },
+    ]);
+
     const allItems: IFieldsKeeperItem[] = [
         { id: 'a', label: 'a' },
         { id: 'b', label: 'b' },
         { id: 'c', label: 'c' },
-
-        {
-            id: 'date.quarter',
-            label: 'Quarter',
-            group: 'date',
-            groupLabel: 'Date',
-            groupOrder: 1,
-        },
-        {
-            id: 'date.year',
-            label: 'Year',
-            group: 'date',
-            groupLabel: 'Date',
-            groupOrder: 0,
-        },
-        {
-            id: 'date.month',
-            label: 'Month',
-            group: 'date',
-            groupLabel: 'Date',
-            groupOrder: 2,
-        },
-        {
-            id: 'date.day',
-            label: 'Day',
-            group: 'date',
-            groupLabel: 'Date',
-            groupOrder: 3,
-        },
+        { id: 'date.quarter', label: 'Quarter', group: 'date', groupLabel: 'Date', groupOrder: 1 },
+        { id: 'date.year', label: 'Year', group: 'date', groupLabel: 'Date', groupOrder: 0 },
+        { id: 'date.month', label: 'Month', group: 'date', groupLabel: 'Date', groupOrder: 2 },
+        { id: 'date.day', label: 'Day', group: 'date', groupLabel: 'Date', groupOrder: 3 },
     ];
 
     const buckets: IFieldsKeeperBucket[] = [
         { id: 'bucket1', items: [allItems[0]] },
-        {
-            id: 'bucket2',
-            items: [allItems[1], allItems[2]],
-        },
+        { id: 'bucket2', items: [allItems[1], allItems[2]] },
         { id: 'bucket3', items: [] },
     ];
 
-    // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">
-                18. Suffix nodes support for Root bucket items
-            </div>
+            <div className="example-container-title">18. Suffix nodes support for Root bucket items</div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
-                onUpdate={(state) => {
-                    console.log(state);
-                }}
+                onUpdate={(state) => console.log(state)}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">
@@ -76,35 +73,39 @@ export default function Example18() {
                             label="Bucket 1"
                             allowRemoveFields
                             suffixNodeRenderer={({ fieldItem, bucketId }) => {
+                                console.log("🚀 ~ Example18 ~ fieldItem:", fieldItem, bucketId);
 
-                                const contextMenuOptions: IContextMenuOption[] = [
-                                    {
-                                        label: "Option 1", id: "option1", subMenuOptions: [
-                                            { label: "Sub Option 1", id: "subOption1" },
-                                            { label: "Sub Option 2", id: "subOption2" },
-                                            { label: "Sub Option 3", id: "subOption3" }
-                                        ]
-                                    },
-                                    {
-                                        label: "Option 2", id: "option2",
-                                        subMenuOptions: [
-                                            { label: "Sub Option 1", id: "subOption1" },
-                                            { label: "Sub Option 2", id: "subOption2" },
-                                            { label: "Sub Option 3", id: "subOption3" }
-                                        ],
-                                        isSeparatorNeeded: true
-                                    },
-                                    { label: "Option 3", id: "option3" },
-                                ];
+                                const updateIsActive = (options: IContextMenuOption[], id: string, parentId?: string): IContextMenuOption[] => {
+                                    return options.map(option => {
+                                        if (parentId && option.id === parentId && option.subMenuOptions) {
+                                            return {
+                                                ...option,
+                                                subMenuOptions: option.subMenuOptions.map(subOption =>
+                                                    subOption.id === id ? { ...subOption, isActive: true } : { ...subOption, isActive: false }
+                                                ),
+                                            };
+                                        }
+                                        if (!parentId) {
+                                            if(option.id === id){
+                                                return { ...option, isActive: true };
+                                            }
+                                            return { ...option, isActive: false };
+                                        }
+                                        if (option.subMenuOptions) {
+                                            return {
+                                                ...option,
+                                                subMenuOptions: updateIsActive(option.subMenuOptions, id, parentId),
+                                            };
+                                        }
+                                        return option;
+                                    });
+                                };
 
-                                const onOptionClick = (id: string) => {
-                                    console.log("onContextMenuClick", id, fieldItem, bucketId);
-                                }
+                                const onOptionClick = (id: string, parentId?: string) => {
+                                    setContextMenuOptions(prevOptions => updateIsActive(prevOptions, id, parentId));
+                                };
 
-                                return (
-                                    <SuffixNode contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick} />
-
-                                )
+                                return <SuffixNode contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick} />;
                             }}
                         />
                         <FieldsKeeperBucket
@@ -122,24 +123,17 @@ export default function Example18() {
                         <FieldsKeeperRootBucket
                             label="Root Bucket"
                             suffixNodeRenderer={({ id: fieldId }) => {
-
-                                const contextMenuOptions: IContextMenuOption[] = [
+                                const contextMenuRootOptions: IContextMenuOption[] = [
                                     { label: "Option 1", id: "option1" },
                                     { label: "Option 2", id: "option2" },
                                     { label: "Option 3", id: "option3" },
                                 ];
-
+                                
                                 const onOptionClick = (id: string) => {
                                     console.log("onContextMenuClick", id, fieldId);
-                                }
-                                return (
-                                    <ContextMenu contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
-                                        <i
-                                            className="fk-ms-Icon fk-ms-Icon--ChevronDown"
-                                            style={{ cursor: "pointer" }}
-                                        />
-                                    </ContextMenu>
-                                );
+                                };
+
+                                return <SuffixNode contextMenuOptions={contextMenuRootOptions} onOptionClick={onOptionClick} />;
                             }}
                         />
                     </div>

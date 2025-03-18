@@ -382,11 +382,6 @@ export interface IContextMenuOption extends IDropdownOption {
      */
     subMenuOptions?: IDropdownOption[];
 
-    /** 
-     * Adds a separator before this menu option.
-     */
-    isSeparatorNeeded?: boolean;
-
 }
 
 /**
@@ -402,6 +397,13 @@ export interface IDropdownOption {
      * A unique identifier for the dropdown option.
      */
     id: string;
+
+    /** 
+     * Adds a separator before this menu option.
+     */
+    showSeparator?: boolean;
+
+    isActive?: boolean;
 }
 
 /**
@@ -415,7 +417,7 @@ export interface IContextMenuProps {
     contextMenuOptions: IContextMenuOption[];
 
     /** Callback function triggered when an option is clicked, receiving the option ID. */
-    onOptionClick: (id: string) => void;
+    onOptionClick: (id: string, parentId?: string) => void;
 }
 
 /**

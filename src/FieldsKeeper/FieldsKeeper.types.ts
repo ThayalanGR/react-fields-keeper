@@ -225,6 +225,9 @@ export interface IFieldsKeeperRootBucketProps {
 
     /**  Function to customize suffix node rendering **/
     suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+
+    /** If true, assignments will not be allowed */
+    disableAssignments?: boolean;
 }
 
 /**

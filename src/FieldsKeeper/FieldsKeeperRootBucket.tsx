@@ -287,6 +287,7 @@ function GroupedItemRenderer(
         allowDragging = true,
         toggleCheckboxOnLabelClick = false,
         prefixNode: prefixNodeConfig,
+        disableAssignments = false
     } = props;
 
     const {
@@ -381,6 +382,9 @@ function GroupedItemRenderer(
     const onFieldItemClick =
         (fieldItems: IFieldsKeeperItem[], remove = false) =>
         () => {
+            if(disableAssignments){
+                return false;
+            }
             const bucketToFill = getPriorityTargetBucketToFill({
                 buckets,
                 priorityGroup: fieldItems[0].group,
@@ -456,11 +460,12 @@ function GroupedItemRenderer(
                                     fieldItem.rootDisabled?.active,
                                 'react-fields-keeper-mapping-column-content-offset-without-checkbox':
                                     ignoreCheckBox && isGroupItem,
+                                'react-fields-keeper-mapping-content-disabled': disableAssignments
                             },
                         )}
                         style={itemStyle}
                         draggable={
-                            allowDragging &&
+                            allowDragging && !disableAssignments &&
                             (allowDragAfterAssignment
                                 ? true
                                 : !isFieldItemAssigned)

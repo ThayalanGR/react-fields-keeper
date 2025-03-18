@@ -402,7 +402,10 @@ export interface IDropdownOption {
      * Adds a separator before this menu option.
      */
     showSeparator?: boolean;
-
+    
+    /**
+     * Indicates whether the option is active. If true, a checkmark is displayed.
+     */
     isActive?: boolean;
 }
 

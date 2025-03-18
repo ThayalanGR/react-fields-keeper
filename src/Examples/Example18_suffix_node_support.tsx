@@ -42,25 +42,55 @@ export default function Example18() {
          },
     ]);
 
+    // compute
     const allItems: IFieldsKeeperItem[] = [
         { id: 'a', label: 'a' },
         { id: 'b', label: 'b' },
         { id: 'c', label: 'c' },
-        { id: 'date.quarter', label: 'Quarter', group: 'date', groupLabel: 'Date', groupOrder: 1 },
-        { id: 'date.year', label: 'Year', group: 'date', groupLabel: 'Date', groupOrder: 0 },
-        { id: 'date.month', label: 'Month', group: 'date', groupLabel: 'Date', groupOrder: 2 },
-        { id: 'date.day', label: 'Day', group: 'date', groupLabel: 'Date', groupOrder: 3 },
+        {
+            id: 'date.quarter',
+            label: 'Quarter',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 1,
+        },
+        {
+            id: 'date.year',
+            label: 'Year',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 0,
+        },
+        {
+            id: 'date.month',
+            label: 'Month',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 2,
+        },
+        {
+            id: 'date.day',
+            label: 'Day',
+            group: 'date',
+            groupLabel: 'Date',
+            groupOrder: 3,
+        },
     ];
 
     const buckets: IFieldsKeeperBucket[] = [
         { id: 'bucket1', items: [allItems[0]] },
-        { id: 'bucket2', items: [allItems[1], allItems[2]] },
+        {
+            id: 'bucket2',
+            items: [allItems[1], allItems[2]],
+        },
         { id: 'bucket3', items: [] },
     ];
 
     return (
         <div className="example-container">
-            <div className="example-container-title">18. Suffix nodes support for Root bucket items</div>
+            <div className="example-container-title">
+                18. Suffix nodes support for Root bucket items
+            </div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}

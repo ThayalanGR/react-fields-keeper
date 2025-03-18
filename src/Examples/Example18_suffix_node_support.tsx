@@ -4,7 +4,8 @@ import {
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
-    IFieldsKeeperContextMenuOptions,
+    ContextMenu,
+    IContextMenuOption,
 } from '..';
 import { SuffixNode } from '../Components/SuffixNode';
 
@@ -59,7 +60,7 @@ export default function Example18() {
     return (
         <div className="example-container">
             <div className="example-container-title">
-                18. Suffix nodes support for Root bucket items
+                18. Suffix nodes support for Root bucket items with Context Menu
             </div>
             <FieldsKeeperProvider
                 allItems={allItems}
@@ -76,13 +77,16 @@ export default function Example18() {
                             allowRemoveFields
                             suffixNodeRenderer={({ fieldItem, bucketId }) => {
 
-                                const fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[] = [
-                                    { label: "Option 1", id: "option1", subMenuOptions: [
-                                        { label: "Sub Option 1", id: "subOption1" },
-                                        { label: "Sub Option 2", id: "subOption2" },
-                                        { label: "Sub Option 3", id: "subOption3" }
-                                    ]},
-                                    { label: "Option 2", id: "option2",
+                                const contextMenuOptions: IContextMenuOption[] = [
+                                    {
+                                        label: "Option 1", id: "option1", subMenuOptions: [
+                                            { label: "Sub Option 1", id: "subOption1" },
+                                            { label: "Sub Option 2", id: "subOption2" },
+                                            { label: "Sub Option 3", id: "subOption3" }
+                                        ]
+                                    },
+                                    {
+                                        label: "Option 2", id: "option2",
                                         subMenuOptions: [
                                             { label: "Sub Option 1", id: "subOption1" },
                                             { label: "Sub Option 2", id: "subOption2" },
@@ -90,15 +94,16 @@ export default function Example18() {
                                         ],
                                         isSeparatorNeeded: true
                                     },
-                                    { label: "Option 3", id: "option3" }, 
+                                    { label: "Option 3", id: "option3" },
                                 ];
 
-                                const onOptionClick  = (id: string) => {
-                                    console.log("onContextMenuClick", id); 
+                                const onOptionClick = (id: string) => {
+                                    console.log("onContextMenuClick", id, fieldItem, bucketId);
                                 }
 
                                 return (
-                                    <SuffixNode fieldItem={fieldItem} bucketId={bucketId} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick} />
+                                    <SuffixNode contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick} />
+
                                 )
                             }}
                         />
@@ -114,21 +119,26 @@ export default function Example18() {
                         />
                     </div>
                     <div className="root-bucket-container">
-                        <FieldsKeeperRootBucket 
-                            label="Root Bucket" 
-                            suffixNodeRenderer = {(fieldItem ) => {
-                               
-                                const fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[] = [
+                        <FieldsKeeperRootBucket
+                            label="Root Bucket"
+                            suffixNodeRenderer={({ id: fieldId }) => {
+
+                                const contextMenuOptions: IContextMenuOption[] = [
                                     { label: "Option 1", id: "option1" },
                                     { label: "Option 2", id: "option2" },
-                                    { label: "Option 3", id: "option3" }, 
+                                    { label: "Option 3", id: "option3" },
                                 ];
 
-                                const onOptionClick  = (id: string) => {
-                                    console.log("onContextMenuClick", id); 
+                                const onOptionClick = (id: string) => {
+                                    console.log("onContextMenuClick", id, fieldId);
                                 }
                                 return (
-                                    <SuffixNode fieldItem={fieldItem} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick} />
+                                    <ContextMenu contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+                                        <i
+                                            className="fk-ms-Icon fk-ms-Icon--ChevronDown"
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                    </ContextMenu>
                                 );
                             }}
                         />

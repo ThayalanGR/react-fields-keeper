@@ -1,18 +1,16 @@
 import { ISuffixNodeProps } from "../FieldsKeeper/FieldsKeeper.types"
-import { FieldsKeeperContextMenu } from "./ContextMenu/FieldsKeeperContextMenu"
+import { ContextMenu } from "./ContextMenu/ContextMenu"
 
 export const SuffixNode = (props: ISuffixNodeProps) => {
-    const { fieldItem, bucketId, fieldKeeperContextMenuOptions, onOptionClick } = props;
-    
+    const { contextMenuOptions, onOptionClick } = props;
+
     return (
-        <>
-            <FieldsKeeperContextMenu fieldItem={fieldItem} bucketId={bucketId} fieldKeeperContextMenuOptions={fieldKeeperContextMenuOptions} onOptionClick={onOptionClick}>
-                <i
-                    className="fk-ms-Icon fk-ms-Icon--ChevronDown"
-                    style={{ cursor: "pointer" }}
-                />
-            </FieldsKeeperContextMenu>
-        </>
+        <ContextMenu contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
+            <i
+                className="fk-ms-Icon fk-ms-Icon--ChevronDown"
+                style={{ cursor: "pointer" }}
+            />
+        </ContextMenu>
     )
-    
+
 }

@@ -333,7 +333,7 @@ export interface IFieldsKeeperBucketProps {
      * Custom function for rendering field items in this bucket
      */
     customItemRenderer?: (props: IFieldItemCustomRendererProps) => JSX.Element;
-    
+
     /**
      * Custom function for rendering suffix items specific to this bucket
      */
@@ -364,24 +364,20 @@ export interface ISuffixNodeRendererProps {
  * Interface representing the properties for a Suffix Node component.
  * Extends the ISuffixNodeRendererProps interface.
  */
-export interface ISuffixNodeProps extends ISuffixNodeRendererProps {
-    /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
-    fieldKeeperContextMenuOptions: IFieldsKeeperContextMenuOptions[];
-
-    /** Callback function triggered when an option is clicked, receiving the option ID. */
-    onOptionClick: (id: string) => void;
+export interface ISuffixNodeProps extends Omit<IContextMenuProps, 'children'> {
+    _dummy?: boolean;
 }
 
 /**
  * Represents the structure of a dropdown option.
  * Currently, we support only one level of submenu.
  */
-export interface IFieldsKeeperContextMenuOptions extends IDropdownOptions {
+export interface IContextMenuOption extends IDropdownOption {
     /**
      * An array of submenu options.
      * Note: Currently, We do not support submenu options inside other submenu options.
      */
-    subMenuOptions?: IDropdownOptions[];
+    subMenuOptions?: IDropdownOption[];
 
     /** 
      * Adds a separator before this menu option.
@@ -393,7 +389,7 @@ export interface IFieldsKeeperContextMenuOptions extends IDropdownOptions {
 /**
  * Represents the structure of a dropdown option.
  */
-export interface IDropdownOptions {
+export interface IDropdownOption {
     /** 
      * The label to be displayed for the dropdown option. 
      */
@@ -408,9 +404,15 @@ export interface IDropdownOptions {
 /**
  * Custom renderer properties for rendering Context Menu.
  */
-export interface IFieldsKeeperContextMenuProps extends ISuffixNodeProps {
+export interface IContextMenuProps {
     /** Child elements to be rendered inside the context menu. */
     children: ReactNode;
+
+    /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
+    contextMenuOptions: IContextMenuOption[];
+
+    /** Callback function triggered when an option is clicked, receiving the option ID. */
+    onOptionClick: (id: string) => void;
 }
 
 /**

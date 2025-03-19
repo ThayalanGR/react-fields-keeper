@@ -10,6 +10,7 @@ import FuzzySearch from 'fuzzy-search';
 import classNames from 'classnames';
 
 import tableIcon from '../assets/icons/tableIcon.svg';
+import checkMarkIcon from '../assets/icons/checkMarkIcon.svg';
 import measureIcon from '../assets/icons/measureIcon.svg';
 import './fieldsKeeper.less';
 import {
@@ -210,11 +211,27 @@ function FolderScopeItemRenderer(
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
+    const [isAnyoneFieldSelected, setIsAnyoneFieldSelected] = useState(false);
     const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
 
     // handlers
     const toggleFolderCollapse = () =>
         setIsFolderCollapsed((collapsed) => !collapsed);
+
+    const { instanceId: instanceIdFromContext } = useContext(FieldsKeeperContext);
+    const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
+    const { buckets } = useStoreState(instanceId);
+
+    useMemo(() => {
+        const isAnySelected = folderScopeItems.some((groupedItem) =>
+            groupedItem.items.some((item) =>
+                buckets.some((bucket) =>
+                    bucket.items.some((bucketItem) => bucketItem.id === item.id)
+                )
+            )
+        );
+        setIsAnyoneFieldSelected(isAnySelected);
+    }, [folderScopeItems, buckets]);
 
     // paint
     if (showFlatFolderScope)
@@ -237,17 +254,19 @@ function FolderScopeItemRenderer(
         >
             <div
                 className="folder-scope-label"
-                role="buton"
+                role="button"
                 onClick={toggleFolderCollapse}
                 title={folderScopeLabel ?? ''}
             >
                 <div className="folder-scope-label-icon">
-                    <img src={tableIcon} />
+                    <img src={tableIcon} alt="Table Icon" />
+                    {isAnyoneFieldSelected && (
+                        <img src={checkMarkIcon} alt="checkMarkIcon" className="checkmark-overlay" />
+                    )}
                 </div>
                 <div className="folder-scope-label-text">
                     {folderScopeLabel}
                 </div>
-
                 <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action">
                     {isFolderCollapsed ? (
                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
@@ -287,7 +306,7 @@ function GroupedItemRenderer(
         allowDragging = true,
         toggleCheckboxOnLabelClick = false,
         prefixNode: prefixNodeConfig,
-        disableAssignments = false
+        disableAssignments = false,
     } = props;
 
     const {

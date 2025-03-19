@@ -45,6 +45,8 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         emptyFilterMessage = undefined,
         disableEmptyFilterMessage = false,
         shouldRender = () => true,
+        filteredItems,
+        emptyDataMessage = 'No data found'
     } = props;
 
     // refs
@@ -58,8 +60,11 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const [searchQuery, setSearchQuery] = useState('');
     const allItems = useMemo(() => {
         // should render to spot the renderers
-        return allOriginalItems.filter((item) => shouldRender(item));
-    }, [allOriginalItems, shouldRender]);
+        const currentItems = filteredItems ?? allOriginalItems;
+        return currentItems.filter((item) => shouldRender(item));
+    }, [allOriginalItems, filteredItems, shouldRender]);
+    
+    const hasData = allItems?.length > 0;
 
     // compute
     const defaultFolderScope = '___DEFAULT';
@@ -162,7 +167,9 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                               hasSearchQuery={hasSearchQuery}
                           />
                       ))
-                    : !disableEmptyFilterMessage && (
+                    : !hasData ? (
+                        <div className="react-fields-keeper-mapping-no-search-items-found">{emptyDataMessage}</div>
+                    ) : !disableEmptyFilterMessage && (
                           <div className="react-fields-keeper-mapping-no-search-items-found">
                               {emptyFilterMessage ?? (
                                   <>

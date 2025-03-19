@@ -30,7 +30,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         centerAlignPlaceholder = false,
         placeHolderWrapperClassName,
         wrapperClassName,
-
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
     } = props;

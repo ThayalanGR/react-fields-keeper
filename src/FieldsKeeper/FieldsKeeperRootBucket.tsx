@@ -211,7 +211,6 @@ function FolderScopeItemRenderer(
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
-    const [isAnyoneFieldSelected, setIsAnyoneFieldSelected] = useState(false);
     const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
 
     // handlers
@@ -222,16 +221,15 @@ function FolderScopeItemRenderer(
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
     const { buckets } = useStoreState(instanceId);
 
-    useMemo(() => {
-        const isAnySelected = folderScopeItems.some((groupedItem) =>
-            groupedItem.items.some((item) =>
-                buckets.some((bucket) =>
-                    bucket.items.some((bucketItem) => bucketItem.id === item.id)
-                )
-            )
-        );
-        setIsAnyoneFieldSelected(isAnySelected);
-    }, [folderScopeItems, buckets]);
+    const hasActiveSelection = useMemo(() => {
+        return folderScopeItems.some((groupedItem) =>
+                    groupedItem.items.some((item) =>
+                        buckets.some((bucket) =>
+                            bucket.items.some((bucketItem) => bucketItem.id === item.id)  
+                        )
+                    )
+                );
+            }, [folderScopeItems, buckets])
 
     // paint
     if (showFlatFolderScope)
@@ -260,7 +258,7 @@ function FolderScopeItemRenderer(
             >
                 <div className="folder-scope-label-icon">
                     <img src={tableIcon} alt="Table Icon" />
-                    {isAnyoneFieldSelected && (
+                    {hasActiveSelection && (
                         <img src={checkMarkIcon} alt="checkMarkIcon" className="checkmark-overlay" />
                     )}
                 </div>

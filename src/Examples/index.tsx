@@ -21,6 +21,7 @@ import Example20_folder_scope from './Example20_folder_scope';
 import Example21_prefix_node_support from './Example21_prefix_node_support';
 import Example22_bucket_accept_types from './Example22_bucket_accept_types';
 import Example23_disable_assignments from './Example23_disable_assignments';
+import Example24_filter_items from './Example24_filter_items';
 
 export const examples = {
     Example1_sample_usecase,
@@ -45,5 +46,6 @@ export const examples = {
     Example20_folder_scope,
     Example21_prefix_node_support,
     Example22_bucket_accept_types,
-    Example23_disable_assignments
+    Example23_disable_assignments,
+    Example24_filter_items,
 };

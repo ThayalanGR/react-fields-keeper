@@ -6,7 +6,7 @@ import {
     IFieldsKeeperBucket,
 } from '..';
 
-export default function Example24() {
+export default function Example25() {
     // compute
     const allItems: IFieldsKeeperItem[] = [
         {
@@ -87,7 +87,7 @@ export default function Example24() {
     return (
         <div className="example-container">
             <div className="example-container-title">
-                24. Accent Color 
+                25. Accent Color 
             </div>
             <FieldsKeeperProvider
                 allItems={allItems}

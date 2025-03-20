@@ -228,6 +228,13 @@ export interface IFieldsKeeperRootBucketProps {
 
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;
+    
+    /** Filtered list of items based on certain conditions. */
+    filteredItems?: IFieldsKeeperItem[];
+
+    /** Message to show when there is no data. */
+    emptyDataMessage?: string;
+
 }
 
 /**

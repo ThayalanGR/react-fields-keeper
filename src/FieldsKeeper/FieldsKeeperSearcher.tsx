@@ -5,6 +5,7 @@ export interface IFieldsKeeperSearcherProps {
     searchQuery: string;
     searchPlaceholder?: string;
     className?: string;
+    accentColorStyle?: React.CSSProperties;
     onSearchQueryChange: (value: string) => void;
 }
 
@@ -13,8 +14,7 @@ export const FieldsKeeperSearcher = forwardRef<
     IFieldsKeeperSearcherProps
 >((props, ref) => {
     // props
-    const { className, searchPlaceholder, searchQuery, onSearchQueryChange } =
-        props;
+    const { className, searchPlaceholder, searchQuery, accentColorStyle = {}, onSearchQueryChange } = props;
 
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -30,7 +30,6 @@ export const FieldsKeeperSearcher = forwardRef<
         else searchInputRef.current?.focus();
     };
 
-    // props
     return (
         <div
             className={classNames(
@@ -38,7 +37,7 @@ export const FieldsKeeperSearcher = forwardRef<
                 className,
             )}
         >
-            <div className="react-fields-keeper-mapping-column-searcher-prefix">
+            <div className="react-fields-keeper-mapping-column-searcher-prefix" style={accentColorStyle}>
                 <span className="fk-ms-Icon fk-ms-Icon--Search" />
             </div>
             <input
@@ -54,6 +53,7 @@ export const FieldsKeeperSearcher = forwardRef<
                     className="react-fields-keeper-mapping-column-searcher-clear"
                     role="button"
                     onClick={onClearSearchQuery}
+                    style={accentColorStyle}
                 >
                     <span className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                 </div>

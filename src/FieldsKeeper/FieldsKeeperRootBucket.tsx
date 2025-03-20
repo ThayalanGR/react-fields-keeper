@@ -9,8 +9,6 @@ import React, {
 import FuzzySearch from 'fuzzy-search';
 import classNames from 'classnames';
 
-import tableIcon from '../assets/icons/tableIcon.svg';
-import measureIcon from '../assets/icons/measureIcon.svg';
 import './fieldsKeeper.less';
 import {
     IFieldsKeeperItem,
@@ -29,6 +27,7 @@ import {
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
 import { getGroupedItems } from './utils';
+import { Icons } from '../Components/svgElements/Icons';
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     // props
@@ -56,7 +55,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { allItems: allOriginalItems } = useStoreState(instanceId);
+    const { allItems: allOriginalItems, accentColor } = useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
     const allItems = useMemo(() => {
         // should render to spot the renderers
@@ -117,6 +116,11 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         onClearSearch?.();
     };
 
+    // style
+    const accentColorStyle = (
+        accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+    ) as CSSProperties;
+
     // paint
     return (
         <div
@@ -147,6 +151,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                     searchPlaceholder={searchPlaceholder}
                     searchQuery={searchQuery}
                     onSearchQueryChange={setSearchQuery}
+                    accentColorStyle={accentColorStyle}
                 />
             ) : (
                 <div />
@@ -185,6 +190,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                                                   className="react-fields-keeper-mapping-clear-search-link"
                                                   onClick={onClearSearchQuery}
                                                   role="button"
+                                                  style={accentColorStyle}
                                               >
                                                   Clear search
                                               </div>
@@ -223,6 +229,25 @@ function FolderScopeItemRenderer(
     const toggleFolderCollapse = () =>
         setIsFolderCollapsed((collapsed) => !collapsed);
 
+    const { instanceId: instanceIdFromContext } = useContext(FieldsKeeperContext);
+    const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
+    const { buckets, accentColor } = useStoreState(instanceId);
+
+    const hasActiveSelection = useMemo(() => {
+        return folderScopeItems.some((groupedItem) =>
+                    groupedItem.items.some((item) =>
+                        buckets.some((bucket) =>
+                            bucket.items.some((bucketItem) => bucketItem.id === item.id)  
+                        )
+                    )
+                );
+            }, [folderScopeItems, buckets])
+    
+    // style
+    const accentColorStyle = (
+        accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+    ) as CSSProperties;
+
     // paint
     if (showFlatFolderScope)
         return (
@@ -244,18 +269,20 @@ function FolderScopeItemRenderer(
         >
             <div
                 className="folder-scope-label"
-                role="buton"
+                role="button"
                 onClick={toggleFolderCollapse}
                 title={folderScopeLabel ?? ''}
             >
                 <div className="folder-scope-label-icon">
-                    <img src={tableIcon} />
+                    <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} />
+                    {hasActiveSelection && (
+                        <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
+                    )}
                 </div>
                 <div className="folder-scope-label-text">
                     {folderScopeLabel}
                 </div>
-
-                <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action">
+                <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={accentColorStyle}>
                     {isFolderCollapsed ? (
                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
                     ) : (
@@ -294,7 +321,7 @@ function GroupedItemRenderer(
         allowDragging = true,
         toggleCheckboxOnLabelClick = false,
         prefixNode: prefixNodeConfig,
-        disableAssignments = false
+        disableAssignments = false,
     } = props;
 
     const {
@@ -311,6 +338,7 @@ function GroupedItemRenderer(
         buckets,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
         allowDuplicates,
+        accentColor
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
@@ -430,6 +458,11 @@ function GroupedItemRenderer(
                 : {}
         ) as CSSProperties;
 
+        // style
+        const accentColorStyle = (
+            accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+        ) as CSSProperties;
+
         // paint
         return fieldItems.map((fieldItem) => {
             const isFieldItemAssigned = isGroupHeader
@@ -497,7 +530,9 @@ function GroupedItemRenderer(
                             <div className="react-fields-keeper-mapping-column-content-checkbox">
                                 <input
                                     type="checkbox"
+                                    className='react-fields-keeper-checkbox'
                                     checked={isFieldItemAssigned}
+                                    style={accentColorStyle}
                                     onChange={
                                         toggleCheckboxOnLabelClick
                                             ? undefined
@@ -523,15 +558,10 @@ function GroupedItemRenderer(
                                             maxWidth: prefixNodeReservedWidth,
                                         }}
                                     >
+                                        {/* style={accentColorStyle} */}
                                         {fieldItem.prefixNode ===
                                         'measure-icon' ? (
-                                            <img
-                                                src={measureIcon}
-                                                style={{
-                                                    transform:
-                                                        'translateX(-3px)',
-                                                }}
-                                            />
+                                            <Icons.measure className="folder-scope-label-measure-icon" style={{transform: 'translateX(-3px)', ...accentColorStyle}} />
                                         ) : (
                                             fieldItem.prefixNode ?? null
                                         )}
@@ -557,6 +587,7 @@ function GroupedItemRenderer(
                                     )}
                                     role="button"
                                     onClick={groupHeader.onGroupHeaderToggle}
+                                    style={accentColorStyle}
                                 >
                                     {groupHeader.isGroupCollapsed ? (
                                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />

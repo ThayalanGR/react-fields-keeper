@@ -240,6 +240,7 @@
                 &:hover {
                     background-color: #e4e4e4;
                 }
+                color: var(--root-bucket-accent-color);
             }
         }
     }
@@ -272,6 +273,8 @@
     i {
         font-size: 8px !important;
     }
+
+    color: var(--root-bucket-accent-color);
 }
 
 .react-fields-keeper-mapping-container {
@@ -319,6 +322,10 @@
                     display: grid;
                     place-items: center;
                     padding-right: 3px;
+
+                    .folder-scope-label-table-icon {
+                        fill: var(--root-bucket-accent-color)
+                    }
                 }
 
                 .folder-scope-label-text {
@@ -416,7 +423,6 @@
                 height: 100%;
                 display: flex;
                 place-items: center;
-                padding-right: 5px;
                 // width will be passed from the client
             }
 
@@ -449,14 +455,14 @@
 
         .react-fields-keeper-mapping-clear-search-link {
             margin-top: 5px;
-            border-bottom: 1px solid rgb(92, 92, 209);
-            color: rgb(92, 92, 209);
+            border-bottom: 1px solid var(--root-bucket-accent-color);
+            color: var(--root-bucket-accent-color);
             width: min-content;
             white-space: nowrap;
             cursor: pointer;
 
             &:hover {
-                color: rgb(50, 50, 172);
+                filter: brightness(80%);
             }
         }
     }
@@ -494,6 +500,8 @@
         span {
             font-size: 1em !important;
         }
+
+        color: var(--root-bucket-accent-color);
     }
 
     .react-fields-keeper-mapping-column-searcher-clear {
@@ -508,6 +516,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        color: var(--root-bucket-accent-color);
+
         span {
             font-size: 8px !important;
         }
@@ -554,20 +564,26 @@
 
 .folder-scope-label-icon {
     position: relative;
-    display: inline-block;
-
-    img:first-child {
-        width: 24px;
-        height: 24px;
-    }
 
     .checkmark-overlay {
         position: absolute;
-        top: 80%;
-        left: 80%;
+        top: 85%;
+        left: 65%;
         transform: translate(-50%, -50%);
-        width: 16px;
-        height: 16px;
+        width: 12px;
+        height: 12px;
+    }
+}
+
+.react-fields-keeper-mapping-column-content-checkbox {
+    .react-fields-keeper-checkbox{
+        accent-color: var(--root-bucket-accent-color);
+    }
+}
+
+.react-fields-keeper-mapping-column-content-prefix {
+    .folder-scope-label-measure-icon{
+        fill: var(--root-bucket-accent-color);
     }
 }
 

@@ -258,6 +258,11 @@ export interface IFieldsKeeperState {
      * @default false
      */
     allowDuplicates?: boolean;
+
+    /** 
+     * Allows setting a highlight color. Used for theming.
+     */
+    accentColor?: string
 }
 
 /**

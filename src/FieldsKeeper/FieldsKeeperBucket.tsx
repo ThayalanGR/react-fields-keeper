@@ -245,6 +245,7 @@ const GroupedItemRenderer = (
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
+    const { accentColor } = useStoreState(instanceId);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
 
     // compute
@@ -294,6 +295,11 @@ const GroupedItemRenderer = (
                 : {}
         ) as CSSProperties;
 
+        // style
+            const accentColorStyle = (
+                accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+            ) as CSSProperties;
+
         // paint
         return fieldItems.map((fieldItem, fieldIndex) => {
             // handlers
@@ -308,6 +314,7 @@ const GroupedItemRenderer = (
                         )}
                         role="button"
                         onClick={groupHeader.onGroupHeaderToggle}
+                        style={accentColorStyle}
                     >
                         {groupHeader.isGroupCollapsed ? (
                             <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
@@ -336,6 +343,7 @@ const GroupedItemRenderer = (
                                         )}
                                         role="button"
                                         onClick={remove}
+                                        style={accentColorStyle}
                                     >
                                         <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                                     </div>

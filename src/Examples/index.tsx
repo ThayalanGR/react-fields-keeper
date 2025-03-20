@@ -15,7 +15,7 @@ import Example14 from './Example14';
 import Example15 from './Example15';
 import Example16 from './Example16';
 import Example17_should_render_prop from './Example17_should_render_prop';
-import Example18_pass_suffix_node from './Example18_suffix_node_support';
+import Example18_suffix_node_support from './Example18_suffix_node_support';
 import Example19_disable_bucket from './Example19_disable_bucket';
 import Example20_folder_scope from './Example20_folder_scope';
 import Example21_prefix_node_support from './Example21_prefix_node_support';
@@ -42,7 +42,7 @@ export const examples = {
     Example15,
     Example16,
     Example17_should_render_prop,
-    Example18_pass_suffix_node,
+    Example18_suffix_node_support,
     Example19_disable_bucket,
     Example20_folder_scope,
     Example21_prefix_node_support,

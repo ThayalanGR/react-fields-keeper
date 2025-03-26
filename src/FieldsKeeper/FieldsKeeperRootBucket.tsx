@@ -2,6 +2,7 @@
 import React, {
     CSSProperties,
     useContext,
+    useEffect,
     useMemo,
     useRef,
     useState,
@@ -224,6 +225,12 @@ function FolderScopeItemRenderer(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
     const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
+
+    // effects
+    useEffect(() => {
+        if(rootBucketProps.collapseFoldersOnMount !== undefined)
+            setIsFolderCollapsed(rootBucketProps.collapseFoldersOnMount);
+    },[rootBucketProps.collapseFoldersOnMount])
 
     // handlers
     const toggleFolderCollapse = () =>

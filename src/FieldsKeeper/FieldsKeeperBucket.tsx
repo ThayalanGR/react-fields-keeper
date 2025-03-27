@@ -712,7 +712,7 @@ export function assignFieldItems(props: {
             const isAssignmentFromSameBucket = fromBucketId === targetBucket.id;
 
             if (isAssignmentFromSameBucket) {
-                if (!allowDuplicates) filterItemsFromBucket(targetBucket);
+                filterItemsFromBucket(targetBucket);
                 insertItemsToBucket(true);
                 checkAndMaintainMaxItems(
                     targetBucket,

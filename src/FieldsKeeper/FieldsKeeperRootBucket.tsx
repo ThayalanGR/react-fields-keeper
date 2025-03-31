@@ -368,7 +368,8 @@ function GroupedItemRenderer(
         buckets,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
         allowDuplicates,
-        accentColor
+        accentColor,
+        accentHighlightColor
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
@@ -490,7 +491,7 @@ function GroupedItemRenderer(
 
         // style
         const accentColorStyle = (
-            accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+            { '--root-bucket-accent-color': accentColor ?? '#007bff', '--search-highlight-text-color': accentHighlightColor ?? '#ffffff' } 
         ) as CSSProperties;
 
         // paint

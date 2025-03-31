@@ -24,6 +24,7 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
         receiveFieldItemsFromInstances,
         allowDuplicates,
         accentColor,
+        accentHighlightColor,
         getPriorityTargetBucketToFill,
         onUpdate,
     } = props;
@@ -44,6 +45,7 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
             receiveFieldItemsFromInstances,
             allowDuplicates,
             accentColor,
+            accentHighlightColor,
             getPriorityTargetBucketToFill,
             onStateUpdate: (state, updateInfo) => {
                 // introduce delayed updates later

@@ -484,7 +484,7 @@ function GroupedItemRenderer(
             isGroupHeader
                 ? {
                       '--root-bucket-group-items-count':
-                          groupHeader.groupItems.length + 1,
+                          groupHeader.groupItems.length + 1.5,
                   }
                 : {}
         ) as CSSProperties;

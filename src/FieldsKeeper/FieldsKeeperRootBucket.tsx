@@ -368,7 +368,8 @@ function GroupedItemRenderer(
         buckets,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
         allowDuplicates,
-        accentColor
+        accentColor,
+        accentHighlightColor
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
@@ -483,14 +484,14 @@ function GroupedItemRenderer(
             isGroupHeader
                 ? {
                       '--root-bucket-group-items-count':
-                          groupHeader.groupItems.length + 1,
+                          groupHeader.groupItems.length + 1.5,
                   }
                 : {}
         ) as CSSProperties;
 
         // style
         const accentColorStyle = (
-            accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+            { '--root-bucket-accent-color': accentColor ?? '#007bff', '--search-highlight-text-color': accentHighlightColor ?? '#ffffff' } 
         ) as CSSProperties;
 
         // paint

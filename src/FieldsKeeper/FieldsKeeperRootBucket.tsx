@@ -73,7 +73,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const folderScopedItems = useMemo<
         IFolderScopedItem<IGroupedFieldsKeeperItem>[]
     >(() => {
-        const searcher = new FuzzySearch(allItems, ['label', 'id', 'folderScopeLabel'], {
+        const searcher = new FuzzySearch(allItems, ['label', 'id', 'folderScopeLabel', 'folderScope'] satisfies (keyof IFieldsKeeperItem)[], {
             sort: true,
         });
         const currentItems = searcher.search(customSearchQuery ?? searchQuery);

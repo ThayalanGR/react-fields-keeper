@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import FuzzySearch from 'fuzzy-search';
 import classNames from 'classnames';
-
+import Mark from 'mark.js';
 import './fieldsKeeper.less';
 import {
     IFieldsKeeperItem,
@@ -51,7 +51,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
-
+    const contentContainerRef = useRef<HTMLDivElement>(null);
     // state
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
@@ -73,7 +73,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const folderScopedItems = useMemo<
         IFolderScopedItem<IGroupedFieldsKeeperItem>[]
     >(() => {
-        const searcher = new FuzzySearch(allItems, ['label', 'id'], {
+        const searcher = new FuzzySearch(allItems, ['label', 'id', 'folderScopeLabel', 'folderScope'] satisfies (keyof IFieldsKeeperItem)[], {
             sort: true,
         });
         const currentItems = searcher.search(customSearchQuery ?? searchQuery);
@@ -105,6 +105,28 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
         return newFolderScopedItems;
     }, [customSearchQuery, searchQuery, allItems]);
+
+    useEffect(() => {
+        if (contentContainerRef.current) {
+            const markInstance = new Mark(contentContainerRef.current);
+            const query = customSearchQuery || searchQuery;
+    
+            if (query) {
+                markInstance.unmark({
+                    done: () => {
+                        markInstance.mark(query, {
+                            className: 'search-highlight',
+                            separateWordSearch: true,
+                            diacritics: true,
+                            caseSensitive: false
+                        });
+                    }
+                });
+            } else {
+                markInstance.unmark();
+            }
+        }
+    }, [customSearchQuery, searchQuery, folderScopedItems]);
 
     const showFlatFolderScope =
         folderScopedItems.length === 1 &&
@@ -158,6 +180,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 <div />
             )}
             <div
+                ref={contentContainerRef}
                 className={classNames(
                     'react-fields-keeper-mapping-content-scrollable-container',
                     'react-fields-keeper-mapping-content-scrollable-container-columns',
@@ -286,7 +309,7 @@ function FolderScopeItemRenderer(
                         <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
                     )}
                 </div>
-                <div className="folder-scope-label-text">
+                <div className="folder-scope-label-text" style={accentColorStyle}>
                     {folderScopeLabel}
                 </div>
                 <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={accentColorStyle}>
@@ -565,7 +588,6 @@ function GroupedItemRenderer(
                                             maxWidth: prefixNodeReservedWidth,
                                         }}
                                     >
-                                        {/* style={accentColorStyle} */}
                                         {fieldItem.prefixNode ===
                                         'measure-icon' ? (
                                             <Icons.measure className="folder-scope-label-measure-icon" style={{transform: 'translateX(-3px)', ...accentColorStyle}} />
@@ -577,8 +599,8 @@ function GroupedItemRenderer(
                             ) : (
                                 <div /> /** grid skeleton placeholder */
                             )}
-                            <div className="react-fields-keeper-mapping-column-content-label">
-                                {fieldItem.label}
+                            <div className="react-fields-keeper-mapping-column-content-label" style={accentColorStyle}>
+                                <span>{fieldItem.label}</span>
                             </div>
                             {suffixNodeRenderer !== undefined ? (
                                 <div className="react-fields-keeper-mapping-column-content-suffix">

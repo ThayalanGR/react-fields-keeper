@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+import { usePopper } from 'react-popper';
 import { IContextMenuOption } from "../../FieldsKeeper/FieldsKeeper.types";
 
 export interface IContextMenuOptionProps {
@@ -5,7 +7,6 @@ export interface IContextMenuOptionProps {
     contextMenuOptions?: IContextMenuOption[];
     isSubMenu: boolean;
     subMenuOptionIdHovered?: string;
-    subMenuPosition?: { x: number; y: number };
     onOptionClickHandler: (option: IContextMenuOption, parentId?: string) => void;
     onMouseOver: (
         e: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -19,17 +20,25 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
         option,
         isSubMenu,
         subMenuOptionIdHovered,
-        subMenuPosition,
         contextMenuOptions,
         onOptionClickHandler,
         onMouseOver,
     } = props;
+
+    const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
+    const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
+
+    const { styles, attributes } = usePopper(referenceElement, popperElement, {
+        placement: 'right-start',
+        modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
+    });
 
     const isActiveMarker = contextMenuOptions?.some((opt) => opt.isActive);
 
     return (
         <div
             className="react-fields-keeper-context-menu-item"
+            ref={setReferenceElement}
             title={option.label}
             onClick={(e) => {
                 e.stopPropagation();
@@ -65,10 +74,13 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
                     <span className="react-fields-keeper-context-sub-menu-icon">
                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
                     </span>
+
                     {subMenuOptionIdHovered === option.id && (
                         <div
+                            ref={setPopperElement}
                             className="react-fields-keeper-context-menu-node"
-                            style={{ top: subMenuPosition?.y, left: subMenuPosition?.x }}
+                            style={styles.popper}
+                            {...attributes.popper}
                         >
                             {option.subMenuOptions.map((subMenuOption) => (
                                 <div key={subMenuOption.id}>
@@ -81,7 +93,6 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
                                         }
                                         isSubMenu={true}
                                         subMenuOptionIdHovered={subMenuOptionIdHovered}
-                                        subMenuPosition={subMenuPosition}
                                     />
                                 </div>
                             ))}

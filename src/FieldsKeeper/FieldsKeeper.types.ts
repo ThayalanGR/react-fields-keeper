@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { StateUpdateInfo } from './FieldsKeeper.context';
 
 // types
@@ -431,7 +431,7 @@ export interface IDropdownOption {
  */
 export interface IContextMenuProps {
     /** Child elements to be rendered inside the context menu. */
-    children: ReactNode;
+    children: ReactElement;
 
     /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
     contextMenuOptions: IContextMenuOption[];

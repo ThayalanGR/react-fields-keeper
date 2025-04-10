@@ -23,6 +23,7 @@ import Example22_bucket_accept_types from './Example22_bucket_accept_types';
 import Example23_disable_assignments from './Example23_disable_assignments';
 import Example24_filter_items from './Example24_filter_items';
 import Example25_Accent_color from './Example25_accent_color';
+import Example26_Edited_Bucket_Label from './Example26_Edited_Bucket_Label';
 
 export const examples = {
     Example1_sample_usecase,
@@ -50,4 +51,5 @@ export const examples = {
     Example23_disable_assignments,
     Example24_filter_items,
     Example25_Accent_color,
+    Example26_Edited_Bucket_Label,
 };

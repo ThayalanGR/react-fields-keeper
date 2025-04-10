@@ -307,7 +307,8 @@ const GroupedItemRenderer = (
         onDragOverHandler,
         onFieldItemRemove,
         fieldItemIndex,
-        activeDraggedElementRef
+        activeDraggedElementRef,
+        onFieldItemLabelClick,
     } = props;
 
     // state
@@ -317,7 +318,18 @@ const GroupedItemRenderer = (
     const { accentColor } = useStoreState(instanceId);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
 
-    // compute
+    // State to manage editable field items and their labels
+    const [editableItemId, setEditableItemId] = useState<string | null>(null);
+    const [editedLabels, setEditedLabels] = useState<Record<string, string>>(
+        items.reduce((acc, item) => {
+            if(item.group && item.group != FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && acc[item.group] === undefined) {
+                acc[item.group] = item.groupLabel as string;
+            }
+            acc[item.id] = item.label;
+            return acc;
+        }, {} as Record<string, string>)
+    );
+
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
     // handlers
@@ -344,8 +356,20 @@ const GroupedItemRenderer = (
             activeDraggedElementRef.current = e.target as HTMLDivElement;
         };
 
-    // paint
-    const renderFieldItems = ({
+    const onInputFieldChange = (fieldItemId: string, value: string) => {
+        setEditedLabels((prev) => ({ ...prev, [fieldItemId]: value }));
+    };
+
+    const onEnterKeyPress = (fieldItem: IFieldsKeeperItem, isOnBlur = false, e?: React.KeyboardEvent<HTMLInputElement>) => {
+        if (onFieldItemLabelClick && (e?.key === 'Enter' || isOnBlur)) {
+            const oldValue = fieldItem.label;
+            const updatedFieldItem = { ...fieldItem, label: editedLabels[fieldItem.id] };
+            onFieldItemLabelClick({bucketId: currentBucket.id, fieldItem: updatedFieldItem , oldValue, newvalue: editedLabels[fieldItem.id]});
+            setEditableItemId(null);
+        }
+    };
+
+    const renderFieldItems = ({ 
         fieldItems,
         isGroupItem,
         groupHeader,
@@ -395,9 +419,19 @@ const GroupedItemRenderer = (
                 );
                 return (
                     <Fragment>
-                        <div className="react-fields-keeper-mapping-content-input-filled-value">
-                            {fieldItem.label}
-                        </div>
+                        {editableItemId === ( isGroupHeader ? group : fieldItem.id ) ? (
+                            <input
+                                value={editedLabels[fieldItem.id]}
+                                onChange={(e) => onInputFieldChange(fieldItem.id, e.target.value)}
+                                onKeyDown={(e) => onEnterKeyPress(fieldItem, false, e)}
+                                onBlur={() => onEnterKeyPress(fieldItem, true)}
+                                autoFocus
+                            />
+                        ) : (
+                            <div className="react-fields-keeper-mapping-content-input-filled-value">
+                                {editedLabels[fieldItem.id]}
+                            </div>
+                        )}
                         <div className="react-fields-keeper-mapping-content-action-buttons">
                             {orientation === 'vertical' && groupCollapseButton}
                             {suffixNodeRenderer !== undefined && (
@@ -441,6 +475,11 @@ const GroupedItemRenderer = (
                             ? fieldItem.disabled?.message
                             : fieldItem.tooltip) ?? fieldItem.tooltip
                     }
+                    onDoubleClick={() => {
+                        if (onFieldItemLabelClick) {
+                            setEditableItemId(fieldItem.id);
+                        }
+                    }}
                 >
                     <div
                         className={classNames(

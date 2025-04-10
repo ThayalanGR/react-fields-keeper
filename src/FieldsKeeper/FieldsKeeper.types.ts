@@ -367,6 +367,23 @@ export interface IFieldsKeeperBucketProps {
 
     /** If true, groups are displayed flat */
     showAllGroupsFlat?: boolean;
+
+    /** Callback triggered when a field item label is clicked */
+    onFieldItemLabelClick?: (fieldItemClickProps: IFieldItemLabelClickProps) => void;
+}
+
+export interface IFieldItemLabelClickProps {
+   /** ID of the bucket containing the field item */
+   bucketId: string;
+
+   /** The clicked field item object */
+   fieldItem: IFieldsKeeperItem;
+
+   /** Previous value of the field item */
+   oldValue: string;
+
+   /** Updated value of the field item */
+   newvalue: string;
 }
 
 /**

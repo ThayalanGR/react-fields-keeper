@@ -86,7 +86,7 @@ export default function Example26() {
     ]);
 
     const updateFieldLabel = (fieldItemLabelClickProps: IFieldItemLabelClickProps)=> {
-        const { bucketId, fieldItem, oldValue, newvalue } = fieldItemLabelClickProps;
+        const { bucketId, fieldItem, newvalue } = fieldItemLabelClickProps;
         const updateAllItems = buckets.map((bucket) => {
             if(bucket.id === bucketId) {
                 return {

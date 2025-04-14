@@ -499,6 +499,10 @@ function GroupedItemRenderer(
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
                 : checkIsFieldItemAssigned(fieldItem);
+            const isSuffixNodeRendererValid = typeof suffixNodeRenderer === 'function';
+            const suffixNodeRendererOutput = isSuffixNodeRendererValid ? suffixNodeRenderer(fieldItem) : null;
+            const isSuffixNodeValid = suffixNodeRendererOutput !== undefined && suffixNodeRendererOutput !== null;
+
             return (
                 <div
                     key={fieldItem.id}
@@ -579,7 +583,7 @@ function GroupedItemRenderer(
                             </div>
                         )}
                         <div className="react-fields-keeper-mapping-column-content-wrapper">
-                            {allowPrefixNode && !isGroupHeader ? (
+                            {allowPrefixNode ? (
                                 (fieldItem.prefixNode !== undefined ||
                                     prefixNodeReserveSpace) && (
                                     <div
@@ -593,7 +597,8 @@ function GroupedItemRenderer(
                                         'measure-icon' ? (
                                             <Icons.measure className="folder-scope-label-measure-icon" style={{transform: 'translateX(-3px)', ...accentColorStyle}} />
                                         ) : (
-                                            fieldItem.prefixNode ?? null
+                                            fieldItem.prefixNode ??
+                                            (isGroupHeader && !fieldItem.hideHierarchyIcon ? <i className="fk-ms-Icon fk-ms-Icon--Org tilt-left" /> : null)
                                         )}
                                     </div>
                                 )
@@ -603,9 +608,9 @@ function GroupedItemRenderer(
                             <div className="react-fields-keeper-mapping-column-content-label" style={accentColorStyle}>
                                 <span>{fieldItem.label}</span>
                             </div>
-                            {suffixNodeRenderer !== undefined ? (
+                            {isSuffixNodeValid ? (
                                 <div className="react-fields-keeper-mapping-column-content-suffix">
-                                    {suffixNodeRenderer(fieldItem)}
+                                    {suffixNodeRendererOutput}
                                 </div>
                             ) : (
                                 <div />

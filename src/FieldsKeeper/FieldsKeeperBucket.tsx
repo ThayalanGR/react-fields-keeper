@@ -1,4 +1,4 @@
-import { useState, useMemo, CSSProperties, useContext, Fragment, useRef } from 'react';
+import { useState, useMemo, CSSProperties, useContext, Fragment, useRef, useEffect } from 'react';
 import classNames from 'classnames';
 
 import {
@@ -330,6 +330,22 @@ const GroupedItemRenderer = (
         }, {} as Record<string, string>)
     );
 
+    useEffect(() => {
+        setEditedLabels((prev) => {
+            const newLabels = { ...prev };
+            items.forEach((item) => {
+                newLabels[item.id] = item.label;
+                if (
+                    item.group &&
+                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) {
+                    newLabels[item.group] = item.groupLabel as string;
+                }
+            });
+            return newLabels;
+        });
+    }, [items]);
+
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
     // handlers
@@ -417,6 +433,9 @@ const GroupedItemRenderer = (
                         )}
                     </div>
                 );
+                const isSuffixNodeRendererValid = typeof suffixNodeRenderer === 'function';
+                const suffixNodeRendererOutput = isSuffixNodeRendererValid ? suffixNodeRenderer({ bucketId: currentBucket.id, fieldItem }) : null;
+                const isSuffixNodeValid = suffixNodeRendererOutput !== undefined && suffixNodeRendererOutput !== null;
                 return (
                     <Fragment>
                         {editableItemId === ( isGroupHeader ? group : fieldItem.id ) ? (
@@ -436,9 +455,9 @@ const GroupedItemRenderer = (
                         )}
                         <div className="react-fields-keeper-mapping-content-action-buttons">
                             {orientation === 'vertical' && groupCollapseButton}
-                            {suffixNodeRenderer !== undefined && (
+                            {isSuffixNodeValid && (
                                 <div className="react-fields-keeper-mapping-content-action-suffixNode">
-                                    {suffixNodeRenderer({bucketId: currentBucket.id, fieldItem})}
+                                    {suffixNodeRendererOutput}
                                 </div>
                             )}
                             {suffixNode ||

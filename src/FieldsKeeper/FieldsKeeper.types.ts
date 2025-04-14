@@ -228,13 +228,12 @@ export interface IFieldsKeeperRootBucketProps {
 
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;
-    
+
     /** Filtered list of items based on certain conditions. */
     filteredItems?: IFieldsKeeperItem[];
 
     /** Message to show when there is no data. */
     emptyDataMessage?: string;
-
 }
 
 /**
@@ -266,12 +265,12 @@ export interface IFieldsKeeperState {
      */
     allowDuplicates?: boolean;
 
-    /** 
+    /**
      * Allows setting an accent color for theming.
-    */
+     */
     accentColor?: string;
 
-    /** 
+    /**
      * Allows setting a highlight color for text.
      */
     accentHighlightColor?: string;
@@ -369,21 +368,23 @@ export interface IFieldsKeeperBucketProps {
     showAllGroupsFlat?: boolean;
 
     /** Callback triggered when a field item label is clicked */
-    onFieldItemLabelClick?: (fieldItemClickProps: IFieldItemLabelClickProps) => void;
+    onFieldItemLabelClick?: (
+        fieldItemClickProps: IFieldItemLabelClickProps,
+    ) => void;
 }
 
 export interface IFieldItemLabelClickProps {
-   /** ID of the bucket containing the field item */
-   bucketId: string;
+    /** ID of the bucket containing the field item */
+    bucketId: string;
 
-   /** The clicked field item object */
-   fieldItem: IFieldsKeeperItem;
+    /** The clicked field item object */
+    fieldItem: IFieldsKeeperItem;
 
-   /** Previous value of the field item */
-   oldValue: string;
+    /** Previous value of the field item */
+    oldValue: string;
 
-   /** Updated value of the field item */
-   newvalue: string;
+    /** Updated value of the field item */
+    newvalue: string;
 }
 
 /**
@@ -395,6 +396,12 @@ export interface ISuffixNodeRendererProps {
 
     /** ID of the bucket containing this item */
     bucketId?: string;
+
+    // up when rendering group label
+    isGroupHeader?: boolean;
+
+    // when isGroupHeader is up all its children will be passed
+    groupFieldItems?: IFieldsKeeperItem[];
 }
 
 /**
@@ -415,28 +422,27 @@ export interface IContextMenuOption extends IDropdownOption {
      * Note: Currently, We do not support submenu options inside other submenu options.
      */
     subMenuOptions?: IDropdownOption[];
-
 }
 
 /**
  * Represents the structure of a dropdown option.
  */
 export interface IDropdownOption {
-    /** 
-     * The label to be displayed for the dropdown option. 
+    /**
+     * The label to be displayed for the dropdown option.
      */
     label: string;
 
-    /** 
+    /**
      * A unique identifier for the dropdown option.
      */
     id: string;
 
-    /** 
+    /**
      * Adds a separator before this menu option.
      */
     showSeparator?: boolean;
-    
+
     /**
      * Indicates whether the option is active. If true, a checkmark is displayed.
      */

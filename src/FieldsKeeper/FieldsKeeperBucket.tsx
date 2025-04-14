@@ -1,4 +1,11 @@
-import { useState, useMemo, CSSProperties, useContext, Fragment, useRef } from 'react';
+import {
+    useState,
+    useMemo,
+    CSSProperties,
+    useContext,
+    Fragment,
+    useRef,
+} from 'react';
 import classNames from 'classnames';
 
 import {
@@ -49,7 +56,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         buckets,
         allowDuplicates,
         receiveFieldItemsFromInstances = [],
-        accentColor
+        accentColor,
     } = useStoreState(instanceId);
 
     // compute
@@ -94,7 +101,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         if (preHoveredElementRef.current) {
             preHoveredElementRef.current.style.borderBottom = 'none';
             preHoveredElementRef.current.style.borderTop = 'none';
-            preHoveredElementRef.current.style.paddingBottom = '3px'; 
+            preHoveredElementRef.current.style.paddingBottom = '3px';
             preHoveredElementRef.current.style.marginTop = '';
         }
         setIsCurrentFieldActive(false);
@@ -104,21 +111,24 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         setIsCurrentFieldActive(true);
     };
 
-    const onDragOverHandler = (e: React.DragEvent<HTMLDivElement>, isParentElement = false) => {
+    const onDragOverHandler = (
+        e: React.DragEvent<HTMLDivElement>,
+        isParentElement = false,
+    ) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (preHoveredElementRef.current) {
             Object.assign(preHoveredElementRef.current.style, {
                 borderBottom: 'none',
                 borderTop: 'none',
                 paddingBottom: '3px',
-                marginTop: ''
+                marginTop: '',
             });
         }
         const draggableParentSelectors = [
-            '.react-fields-keeper-mapping-content-input-filled-group', 
-            '.react-fields-keeper-tooltip-wrapper'         
+            '.react-fields-keeper-mapping-content-input-filled-group',
+            '.react-fields-keeper-tooltip-wrapper',
         ];
 
         if (!isParentElement) {
@@ -127,13 +137,13 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             let hoveredTargetElement = null as HTMLDivElement | null;
             for (const className of draggableParentSelectors) {
                 hoveredTargetElement = hoveredElement.closest(className);
-                if (hoveredTargetElement) break; 
+                if (hoveredTargetElement) break;
             }
 
             if (hoveredTargetElement) {
                 if (hoveredTargetElement === activeDraggedElementRef.current) {
                     preHoveredElementRef.current = hoveredTargetElement;
-                    return; 
+                    return;
                 }
                 const rect = hoveredTargetElement.getBoundingClientRect();
                 const hoveredElementHeight = rect.height;
@@ -141,15 +151,27 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
                 const cursorOffsetY = e.clientY - hoveredElementTop;
 
-                isPointerAboveCenter = cursorOffsetY < ( hoveredElementHeight / 2 );
+                isPointerAboveCenter = cursorOffsetY < hoveredElementHeight / 2;
 
-                const borderStyle = accentColor ? `3px solid ${accentColor}` : '3px solid #0078d4';
-                Object.assign(hoveredTargetElement.style, 
+                const borderStyle = accentColor
+                    ? `3px solid ${accentColor}`
+                    : '3px solid #0078d4';
+                Object.assign(
+                    hoveredTargetElement.style,
                     isPointerAboveCenter
-                        ? { borderTop: borderStyle, borderBottom: 'none', paddingBottom: '3px', marginTop: '-3px' }
-                        : { borderBottom: borderStyle, borderTop: 'none', paddingBottom: '0px', marginTop: '' }
+                        ? {
+                              borderTop: borderStyle,
+                              borderBottom: 'none',
+                              paddingBottom: '3px',
+                              marginTop: '-3px',
+                          }
+                        : {
+                              borderBottom: borderStyle,
+                              borderTop: 'none',
+                              paddingBottom: '0px',
+                              marginTop: '',
+                          },
                 );
-
             }
 
             preHoveredElementRef.current = hoveredTargetElement;
@@ -185,7 +207,9 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
     const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
         const { fromBucket, fieldItemIds, fieldItemIndex } = getFieldItemIds(e);
-        const dropIndex = Number((e.target as HTMLDivElement).getAttribute("data-index"));
+        const dropIndex = Number(
+            (e.target as HTMLDivElement).getAttribute('data-index'),
+        );
 
         const fieldItems = allItems.filter((item) =>
             fieldItemIds.some((fieldItemId) => item.id === fieldItemId),
@@ -205,7 +229,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                         : undefined,
                 updateState,
                 dropIndex,
-                isPointerAboveCenter
+                isPointerAboveCenter,
             });
         onDragLeaveHandler();
     };
@@ -290,7 +314,7 @@ const GroupedItemRenderer = (
         onDragOverHandler: (e: React.DragEvent<HTMLDivElement>) => void;
         onFieldItemRemove: (...fieldItem: IFieldsKeeperItem[]) => () => void;
         fieldItemIndex: number;
-        activeDraggedElementRef: React.MutableRefObject<HTMLDivElement | null>
+        activeDraggedElementRef: React.MutableRefObject<HTMLDivElement | null>;
     } & IFieldsKeeperBucketProps,
 ) => {
     // props
@@ -322,12 +346,16 @@ const GroupedItemRenderer = (
     const [editableItemId, setEditableItemId] = useState<string | null>(null);
     const [editedLabels, setEditedLabels] = useState<Record<string, string>>(
         items.reduce((acc, item) => {
-            if(item.group && item.group != FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && acc[item.group] === undefined) {
+            if (
+                item.group &&
+                item.group != FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                acc[item.group] === undefined
+            ) {
                 acc[item.group] = item.groupLabel as string;
             }
             acc[item.id] = item.label;
             return acc;
-        }, {} as Record<string, string>)
+        }, {} as Record<string, string>),
     );
 
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
@@ -360,16 +388,28 @@ const GroupedItemRenderer = (
         setEditedLabels((prev) => ({ ...prev, [fieldItemId]: value }));
     };
 
-    const onEnterKeyPress = (fieldItem: IFieldsKeeperItem, isOnBlur = false, e?: React.KeyboardEvent<HTMLInputElement>) => {
+    const onEnterKeyPress = (
+        fieldItem: IFieldsKeeperItem,
+        isOnBlur = false,
+        e?: React.KeyboardEvent<HTMLInputElement>,
+    ) => {
         if (onFieldItemLabelClick && (e?.key === 'Enter' || isOnBlur)) {
             const oldValue = fieldItem.label;
-            const updatedFieldItem = { ...fieldItem, label: editedLabels[fieldItem.id] };
-            onFieldItemLabelClick({bucketId: currentBucket.id, fieldItem: updatedFieldItem , oldValue, newvalue: editedLabels[fieldItem.id]});
+            const updatedFieldItem = {
+                ...fieldItem,
+                label: editedLabels[fieldItem.id],
+            };
+            onFieldItemLabelClick({
+                bucketId: currentBucket.id,
+                fieldItem: updatedFieldItem,
+                oldValue,
+                newvalue: editedLabels[fieldItem.id],
+            });
             setEditableItemId(null);
         }
     };
 
-    const renderFieldItems = ({ 
+    const renderFieldItems = ({
         fieldItems,
         isGroupItem,
         groupHeader,
@@ -390,9 +430,9 @@ const GroupedItemRenderer = (
         ) as CSSProperties;
 
         // style
-            const accentColorStyle = (
-                accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
-            ) as CSSProperties;
+        const accentColorStyle = (
+            accentColor ? { '--root-bucket-accent-color': accentColor } : {}
+        ) as CSSProperties;
 
         // paint
         return fieldItems.map((fieldItem, fieldIndex) => {
@@ -419,12 +459,20 @@ const GroupedItemRenderer = (
                 );
                 return (
                     <Fragment>
-                        {editableItemId === ( isGroupHeader ? group : fieldItem.id ) ? (
+                        {editableItemId ===
+                        (isGroupHeader ? group : fieldItem.id) ? (
                             <input
                                 className="react-fields-keeper-mapping-content-input-edit"
                                 value={editedLabels[fieldItem.id]}
-                                onChange={(e) => onInputFieldChange(fieldItem.id, e.target.value)}
-                                onKeyDown={(e) => onEnterKeyPress(fieldItem, false, e)}
+                                onChange={(e) =>
+                                    onInputFieldChange(
+                                        fieldItem.id,
+                                        e.target.value,
+                                    )
+                                }
+                                onKeyDown={(e) =>
+                                    onEnterKeyPress(fieldItem, false, e)
+                                }
                                 onBlur={() => onEnterKeyPress(fieldItem, true)}
                                 onFocus={(e) => e.target.select()}
                                 autoFocus
@@ -438,7 +486,13 @@ const GroupedItemRenderer = (
                             {orientation === 'vertical' && groupCollapseButton}
                             {suffixNodeRenderer !== undefined && (
                                 <div className="react-fields-keeper-mapping-content-action-suffixNode">
-                                    {suffixNodeRenderer({bucketId: currentBucket.id, fieldItem})}
+                                    {suffixNodeRenderer({
+                                        bucketId: currentBucket.id,
+                                        fieldItem,
+                                        isGroupHeader,
+                                        groupFieldItems:
+                                            groupHeader?.groupItems,
+                                    })}
                                 </div>
                             )}
                             {suffixNode ||
@@ -618,7 +672,7 @@ export function assignFieldItems(props: {
     allowDuplicates?: boolean;
     removeIndex?: number;
     dropIndex?: number;
-    isPointerAboveCenter?: boolean
+    isPointerAboveCenter?: boolean;
 }) {
     // props
     const {
@@ -651,18 +705,17 @@ export function assignFieldItems(props: {
         if (removeIndex !== undefined && bucket.id === fromBucketId) {
             bucket.items.splice(removeIndex, requiredFieldItems.length);
         } else {
-            bucket.items = bucket.items.filter(
-                (item, itemIndex) => 
-                {
-                    const shouldKeepItem = requiredFieldItems.some(
-                        (fieldItem) => fieldItem.id === item.id) === false ||
-                        restrictedItems.some(
+            bucket.items = bucket.items.filter((item, itemIndex) => {
+                const shouldKeepItem =
+                    requiredFieldItems.some(
                         (fieldItem) => fieldItem.id === item.id,
-                    )
-                    if(!shouldKeepItem) draggedIndex = itemIndex;
-                    return shouldKeepItem;
-                }
-            );
+                    ) === false ||
+                    restrictedItems.some(
+                        (fieldItem) => fieldItem.id === item.id,
+                    );
+                if (!shouldKeepItem) draggedIndex = itemIndex;
+                return shouldKeepItem;
+            });
         }
     };
 
@@ -702,12 +755,16 @@ export function assignFieldItems(props: {
 
         const insertItemsToBucket = (isAssignmentFromSameBucket = false) => {
             if (dropIndex < 0) {
-                targetBucket.items.splice(targetBucket.items.length, 0, ...requiredFieldItems);
+                targetBucket.items.splice(
+                    targetBucket.items.length,
+                    0,
+                    ...requiredFieldItems,
+                );
                 return;
             }
-        
+
             let dropTargetIndex: number;
-        
+
             if (isAssignmentFromSameBucket) {
                 const isDraggingBottomToTop = draggedIndex > dropIndex;
                 const isDraggingTopToBottom = draggedIndex < dropIndex;
@@ -716,11 +773,15 @@ export function assignFieldItems(props: {
                 if (isSamePosition) {
                     dropTargetIndex = dropIndex;
                 } else if (isDraggingBottomToTop) {
-                    dropTargetIndex = isPointerAboveCenter ? dropIndex : dropIndex + 1;
+                    dropTargetIndex = isPointerAboveCenter
+                        ? dropIndex
+                        : dropIndex + 1;
                 } else if (isDraggingTopToBottom) {
-                    dropTargetIndex = isPointerAboveCenter ? dropIndex : dropIndex + 1;
+                    dropTargetIndex = isPointerAboveCenter
+                        ? dropIndex
+                        : dropIndex + 1;
                     if (dropIndex > draggedIndex) {
-                        dropTargetIndex -= 1; 
+                        dropTargetIndex -= 1;
                     }
                 } else {
                     dropTargetIndex = dropIndex;
@@ -732,8 +793,12 @@ export function assignFieldItems(props: {
                     dropTargetIndex = dropIndex + 1;
                 }
             }
-        
-            targetBucket.items.splice(dropTargetIndex, 0, ...requiredFieldItems);
+
+            targetBucket.items.splice(
+                dropTargetIndex,
+                0,
+                ...requiredFieldItems,
+            );
         };
 
         if (fromBucketId === FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID) {

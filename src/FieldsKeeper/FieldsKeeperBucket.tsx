@@ -421,10 +421,12 @@ const GroupedItemRenderer = (
                     <Fragment>
                         {editableItemId === ( isGroupHeader ? group : fieldItem.id ) ? (
                             <input
+                                className="react-fields-keeper-mapping-content-input-edit"
                                 value={editedLabels[fieldItem.id]}
                                 onChange={(e) => onInputFieldChange(fieldItem.id, e.target.value)}
                                 onKeyDown={(e) => onEnterKeyPress(fieldItem, false, e)}
                                 onBlur={() => onEnterKeyPress(fieldItem, true)}
+                                onFocus={(e) => e.target.select()}
                                 autoFocus
                             />
                         ) : (

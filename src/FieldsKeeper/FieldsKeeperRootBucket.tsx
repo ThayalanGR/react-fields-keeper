@@ -529,9 +529,14 @@ function GroupedItemRenderer(
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
                 : checkIsFieldItemAssigned(fieldItem);
-            const isSuffixNodeRendererValid = typeof suffixNodeRenderer === 'function';
-            const suffixNodeRendererOutput = isSuffixNodeRendererValid ? suffixNodeRenderer(fieldItem) : null;
-            const isSuffixNodeValid = suffixNodeRendererOutput !== undefined && suffixNodeRendererOutput !== null;
+            const isSuffixNodeRendererValid =
+                typeof suffixNodeRenderer === 'function';
+            const suffixNodeRendererOutput = isSuffixNodeRendererValid
+                ? suffixNodeRenderer(fieldItem)
+                : null;
+            const isSuffixNodeValid =
+                suffixNodeRendererOutput !== undefined &&
+                suffixNodeRendererOutput !== null;
 
             return (
                 <div
@@ -637,7 +642,10 @@ function GroupedItemRenderer(
                                             />
                                         ) : (
                                             fieldItem.prefixNode ??
-                                            (isGroupHeader && !fieldItem.hideHierarchyIcon ? <i className="fk-ms-Icon fk-ms-Icon--Org tilt-left" /> : null)
+                                            (isGroupHeader &&
+                                            !fieldItem.hideHierarchyIcon ? (
+                                                <i className="fk-ms-Icon fk-ms-Icon--Org tilt-left" />
+                                            ) : null)
                                         )}
                                     </div>
                                 )

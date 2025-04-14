@@ -14,7 +14,13 @@ export const FieldsKeeperSearcher = forwardRef<
     IFieldsKeeperSearcherProps
 >((props, ref) => {
     // props
-    const { className, searchPlaceholder, searchQuery, accentColorStyle = {}, onSearchQueryChange } = props;
+    const {
+        className,
+        searchPlaceholder,
+        searchQuery,
+        accentColorStyle = {},
+        onSearchQueryChange,
+    } = props;
 
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +43,10 @@ export const FieldsKeeperSearcher = forwardRef<
                 className,
             )}
         >
-            <div className="react-fields-keeper-mapping-column-searcher-prefix" style={accentColorStyle}>
+            <div
+                className="react-fields-keeper-mapping-column-searcher-prefix"
+                style={accentColorStyle}
+            >
                 <span className="fk-ms-Icon fk-ms-Icon--Search" />
             </div>
             <input

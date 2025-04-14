@@ -334,13 +334,10 @@ const GroupedItemRenderer = (
         setEditedLabels((prev) => {
             const newLabels = { ...prev };
             items.forEach((item) => {
-                if (newLabels[item.id] === undefined) {
-                    newLabels[item.id] = item.label;
-                }
+                newLabels[item.id] = item.label;
                 if (
                     item.group &&
-                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
-                    newLabels[item.group] === undefined
+                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
                 ) {
                     newLabels[item.group] = item.groupLabel as string;
                 }

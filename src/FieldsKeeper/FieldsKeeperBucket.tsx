@@ -1,4 +1,4 @@
-import { useState, useMemo, CSSProperties, useContext, Fragment, useRef } from 'react';
+import { useState, useMemo, CSSProperties, useContext, Fragment, useRef, useEffect } from 'react';
 import classNames from 'classnames';
 
 import {
@@ -329,6 +329,25 @@ const GroupedItemRenderer = (
             return acc;
         }, {} as Record<string, string>)
     );
+
+    useEffect(() => {
+        setEditedLabels((prev) => {
+            const newLabels = { ...prev };
+            items.forEach((item) => {
+                if (newLabels[item.id] === undefined) {
+                    newLabels[item.id] = item.label;
+                }
+                if (
+                    item.group &&
+                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                    newLabels[item.group] === undefined
+                ) {
+                    newLabels[item.group] = item.groupLabel as string;
+                }
+            });
+            return newLabels;
+        });
+    }, [items]);
 
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 

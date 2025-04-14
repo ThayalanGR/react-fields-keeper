@@ -480,6 +480,8 @@ const GroupedItemRenderer = (
                     ? suffixNodeRenderer({
                           bucketId: currentBucket.id,
                           fieldItem,
+                          isGroupHeader,
+                          groupFieldItems: groupHeader?.groupItems,
                       })
                     : null;
                 const isSuffixNodeValid =

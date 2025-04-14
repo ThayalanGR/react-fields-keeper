@@ -499,6 +499,10 @@ function GroupedItemRenderer(
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
                 : checkIsFieldItemAssigned(fieldItem);
+            const isSuffixNodeRendererValid = typeof suffixNodeRenderer === 'function';
+            const suffixNodeRendererOutput = isSuffixNodeRendererValid ? suffixNodeRenderer(fieldItem) : null;
+            const isSuffixNodeValid = suffixNodeRendererOutput !== undefined && suffixNodeRendererOutput !== null;
+
             return (
                 <div
                     key={fieldItem.id}
@@ -604,9 +608,9 @@ function GroupedItemRenderer(
                             <div className="react-fields-keeper-mapping-column-content-label" style={accentColorStyle}>
                                 <span>{fieldItem.label}</span>
                             </div>
-                            {suffixNodeRenderer !== undefined ? (
+                            {isSuffixNodeValid ? (
                                 <div className="react-fields-keeper-mapping-column-content-suffix">
-                                    {suffixNodeRenderer(fieldItem)}
+                                    {suffixNodeRendererOutput}
                                 </div>
                             ) : (
                                 <div />

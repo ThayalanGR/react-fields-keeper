@@ -433,6 +433,9 @@ const GroupedItemRenderer = (
                         )}
                     </div>
                 );
+                const isSuffixNodeRendererValid = typeof suffixNodeRenderer === 'function';
+                const suffixNodeRendererOutput = isSuffixNodeRendererValid ? suffixNodeRenderer({ bucketId: currentBucket.id, fieldItem }) : null;
+                const isSuffixNodeValid = suffixNodeRendererOutput !== undefined && suffixNodeRendererOutput !== null;
                 return (
                     <Fragment>
                         {editableItemId === ( isGroupHeader ? group : fieldItem.id ) ? (
@@ -452,9 +455,9 @@ const GroupedItemRenderer = (
                         )}
                         <div className="react-fields-keeper-mapping-content-action-buttons">
                             {orientation === 'vertical' && groupCollapseButton}
-                            {suffixNodeRenderer !== undefined && (
+                            {isSuffixNodeValid && (
                                 <div className="react-fields-keeper-mapping-content-action-suffixNode">
-                                    {suffixNodeRenderer({bucketId: currentBucket.id, fieldItem})}
+                                    {suffixNodeRendererOutput}
                                 </div>
                             )}
                             {suffixNode ||

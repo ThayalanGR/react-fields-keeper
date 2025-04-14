@@ -46,7 +46,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         disableEmptyFilterMessage = false,
         shouldRender = () => true,
         filteredItems,
-        emptyDataMessage = 'No data found'
+        emptyDataMessage = 'No data found',
     } = props;
 
     // refs
@@ -56,14 +56,15 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { allItems: allOriginalItems, accentColor } = useStoreState(instanceId);
+    const { allItems: allOriginalItems, accentColor } =
+        useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
     const allItems = useMemo(() => {
         // should render to spot the renderers
         const currentItems = filteredItems ?? allOriginalItems;
         return currentItems.filter((item) => shouldRender(item));
     }, [allOriginalItems, filteredItems, shouldRender]);
-    
+
     const hasData = allItems?.length > 0;
 
     // compute
@@ -73,9 +74,18 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const folderScopedItems = useMemo<
         IFolderScopedItem<IGroupedFieldsKeeperItem>[]
     >(() => {
-        const searcher = new FuzzySearch(allItems, ['label', 'id', 'folderScopeLabel', 'folderScope'] satisfies (keyof IFieldsKeeperItem)[], {
-            sort: true,
-        });
+        const searcher = new FuzzySearch(
+            allItems,
+            [
+                'label',
+                'id',
+                'folderScopeLabel',
+                'folderScope',
+            ] satisfies (keyof IFieldsKeeperItem)[],
+            {
+                sort: true,
+            },
+        );
         const currentItems = searcher.search(customSearchQuery ?? searchQuery);
 
         const newFolderScopedItemsMapping = currentItems.reduce((acc, curr) => {
@@ -110,7 +120,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         if (contentContainerRef.current) {
             const markInstance = new Mark(contentContainerRef.current);
             const query = customSearchQuery || searchQuery;
-    
+
             if (query) {
                 markInstance.unmark({
                     done: () => {
@@ -118,9 +128,9 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             className: 'search-highlight',
                             separateWordSearch: true,
                             diacritics: true,
-                            caseSensitive: false
+                            caseSensitive: false,
                         });
-                    }
+                    },
                 });
             } else {
                 markInstance.unmark();
@@ -141,7 +151,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
     // style
     const accentColorStyle = (
-        accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+        accentColor ? { '--root-bucket-accent-color': accentColor } : {}
     ) as CSSProperties;
 
     // paint
@@ -186,43 +196,47 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                     'react-fields-keeper-mapping-content-scrollable-container-columns',
                 )}
             >
-                {folderScopedItems.length > 0
-                    ? folderScopedItems.map((folderScopedItem, index) => (
-                          <FolderScopeItemRenderer
-                              {...props}
-                              key={index}
-                              folderScopedItem={folderScopedItem}
-                              showFlatFolderScope={showFlatFolderScope}
-                              hasSearchQuery={hasSearchQuery}
-                          />
-                      ))
-                    : !hasData ? (
-                        <div className="react-fields-keeper-mapping-no-search-items-found">{emptyDataMessage}</div>
-                    ) : !disableEmptyFilterMessage && (
-                          <div className="react-fields-keeper-mapping-no-search-items-found">
-                              {emptyFilterMessage ?? (
-                                  <>
-                                      <div>
-                                          No items found for <br />
-                                          <br />
-                                          <code>'{searchQuery}'</code>
-                                      </div>
-                                      <br />
-                                      {showClearSearchLink &&
-                                          allItems.length > 0 && (
-                                              <div
-                                                  className="react-fields-keeper-mapping-clear-search-link"
-                                                  onClick={onClearSearchQuery}
-                                                  role="button"
-                                                  style={accentColorStyle}
-                                              >
-                                                  Clear search
-                                              </div>
-                                          )}
-                                  </>
-                              )}
-                          </div>
-                      )}
+                {folderScopedItems.length > 0 ? (
+                    folderScopedItems.map((folderScopedItem, index) => (
+                        <FolderScopeItemRenderer
+                            {...props}
+                            key={index}
+                            folderScopedItem={folderScopedItem}
+                            showFlatFolderScope={showFlatFolderScope}
+                            hasSearchQuery={hasSearchQuery}
+                        />
+                    ))
+                ) : !hasData ? (
+                    <div className="react-fields-keeper-mapping-no-search-items-found">
+                        {emptyDataMessage}
+                    </div>
+                ) : (
+                    !disableEmptyFilterMessage && (
+                        <div className="react-fields-keeper-mapping-no-search-items-found">
+                            {emptyFilterMessage ?? (
+                                <>
+                                    <div>
+                                        No items found for <br />
+                                        <br />
+                                        <code>'{searchQuery}'</code>
+                                    </div>
+                                    <br />
+                                    {showClearSearchLink &&
+                                        allItems.length > 0 && (
+                                            <div
+                                                className="react-fields-keeper-mapping-clear-search-link"
+                                                onClick={onClearSearchQuery}
+                                                role="button"
+                                                style={accentColorStyle}
+                                            >
+                                                Clear search
+                                            </div>
+                                        )}
+                                </>
+                            )}
+                        </div>
+                    )
+                )}
             </div>
         </div>
     );
@@ -251,31 +265,34 @@ function FolderScopeItemRenderer(
 
     // effects
     useEffect(() => {
-        if(rootBucketProps.collapseFoldersOnMount !== undefined)
+        if (rootBucketProps.collapseFoldersOnMount !== undefined)
             setIsFolderCollapsed(rootBucketProps.collapseFoldersOnMount);
-    },[rootBucketProps.collapseFoldersOnMount])
+    }, [rootBucketProps.collapseFoldersOnMount]);
 
     // handlers
     const toggleFolderCollapse = () =>
         setIsFolderCollapsed((collapsed) => !collapsed);
 
-    const { instanceId: instanceIdFromContext } = useContext(FieldsKeeperContext);
+    const { instanceId: instanceIdFromContext } =
+        useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
     const { buckets, accentColor } = useStoreState(instanceId);
 
     const hasActiveSelection = useMemo(() => {
         return folderScopeItems.some((groupedItem) =>
-                    groupedItem.items.some((item) =>
-                        buckets.some((bucket) =>
-                            bucket.items.some((bucketItem) => bucketItem.id === item.id)  
-                        )
-                    )
-                );
-            }, [folderScopeItems, buckets])
-    
+            groupedItem.items.some((item) =>
+                buckets.some((bucket) =>
+                    bucket.items.some(
+                        (bucketItem) => bucketItem.id === item.id,
+                    ),
+                ),
+            ),
+        );
+    }, [folderScopeItems, buckets]);
+
     // style
     const accentColorStyle = (
-        accentColor ?  { '--root-bucket-accent-color': accentColor } : {}
+        accentColor ? { '--root-bucket-accent-color': accentColor } : {}
     ) as CSSProperties;
 
     // paint
@@ -304,15 +321,27 @@ function FolderScopeItemRenderer(
                 title={folderScopeLabel ?? ''}
             >
                 <div className="folder-scope-label-icon">
-                    <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} />
+                    <Icons.table
+                        className="folder-scope-label-table-icon"
+                        style={accentColorStyle}
+                    />
                     {hasActiveSelection && (
-                        <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
+                        <Icons.checkMark
+                            className="folder-scope-label-table-icon checkmark-overlay"
+                            style={accentColorStyle}
+                        />
                     )}
                 </div>
-                <div className="folder-scope-label-text" style={accentColorStyle}>
+                <div
+                    className="folder-scope-label-text"
+                    style={accentColorStyle}
+                >
                     {folderScopeLabel}
                 </div>
-                <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={accentColorStyle}>
+                <div
+                    className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
+                    style={accentColorStyle}
+                >
                     {isFolderCollapsed ? (
                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
                     ) : (
@@ -369,7 +398,7 @@ function GroupedItemRenderer(
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
         allowDuplicates,
         accentColor,
-        accentHighlightColor
+        accentHighlightColor,
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
@@ -448,7 +477,7 @@ function GroupedItemRenderer(
     const onFieldItemClick =
         (fieldItems: IFieldsKeeperItem[], remove = false) =>
         () => {
-            if(disableAssignments){
+            if (disableAssignments) {
                 return false;
             }
             const bucketToFill = getPriorityTargetBucketToFill({
@@ -475,7 +504,7 @@ function GroupedItemRenderer(
         isGroupItem,
         groupHeader,
     }: IGroupedItemRenderer) => {
-        const { suffixNodeRenderer } = props; 
+        const { suffixNodeRenderer } = props;
         // compute
         const isGroupHeader = groupHeader !== undefined;
 
@@ -490,9 +519,10 @@ function GroupedItemRenderer(
         ) as CSSProperties;
 
         // style
-        const accentColorStyle = (
-            { '--root-bucket-accent-color': accentColor ?? '#007bff', '--search-highlight-text-color': accentHighlightColor ?? '#ffffff' } 
-        ) as CSSProperties;
+        const accentColorStyle = {
+            '--root-bucket-accent-color': accentColor ?? '#007bff',
+            '--search-highlight-text-color': accentHighlightColor ?? '#ffffff',
+        } as CSSProperties;
 
         // paint
         return fieldItems.map((fieldItem) => {
@@ -531,12 +561,14 @@ function GroupedItemRenderer(
                                     fieldItem.rootDisabled?.active,
                                 'react-fields-keeper-mapping-column-content-offset-without-checkbox':
                                     ignoreCheckBox && isGroupItem,
-                                'react-fields-keeper-mapping-content-disabled': disableAssignments
+                                'react-fields-keeper-mapping-content-disabled':
+                                    disableAssignments,
                             },
                         )}
                         style={itemStyle}
                         draggable={
-                            allowDragging && !disableAssignments &&
+                            allowDragging &&
+                            !disableAssignments &&
                             (allowDragAfterAssignment
                                 ? true
                                 : !isFieldItemAssigned)
@@ -561,7 +593,7 @@ function GroupedItemRenderer(
                             <div className="react-fields-keeper-mapping-column-content-checkbox">
                                 <input
                                     type="checkbox"
-                                    className='react-fields-keeper-checkbox'
+                                    className="react-fields-keeper-checkbox"
                                     checked={isFieldItemAssigned}
                                     style={accentColorStyle}
                                     onChange={
@@ -591,7 +623,14 @@ function GroupedItemRenderer(
                                     >
                                         {fieldItem.prefixNode ===
                                         'measure-icon' ? (
-                                            <Icons.measure className="folder-scope-label-measure-icon" style={{transform: 'translateX(-3px)', ...accentColorStyle}} />
+                                            <Icons.measure
+                                                className="folder-scope-label-measure-icon"
+                                                style={{
+                                                    transform:
+                                                        'translateX(-3px)',
+                                                    ...accentColorStyle,
+                                                }}
+                                            />
                                         ) : (
                                             fieldItem.prefixNode ?? null
                                         )}
@@ -600,7 +639,10 @@ function GroupedItemRenderer(
                             ) : (
                                 <div /> /** grid skeleton placeholder */
                             )}
-                            <div className="react-fields-keeper-mapping-column-content-label" style={accentColorStyle}>
+                            <div
+                                className="react-fields-keeper-mapping-column-content-label"
+                                style={accentColorStyle}
+                            >
                                 <span>{fieldItem.label}</span>
                             </div>
                             {suffixNodeRenderer !== undefined ? (
@@ -652,24 +694,25 @@ function GroupedItemRenderer(
             };
         }
 
+        const groupHeaderFieldItem: IFieldsKeeperItem = {
+            label: groupLabel,
+            id: group,
+            group,
+            groupLabel,
+            rootDisabled,
+        };
+
         return (
             <>
                 {renderFieldItems({
-                    fieldItems: [
-                        {
-                            label: groupLabel,
-                            id: group,
-                            group,
-                            groupLabel,
-                            rootDisabled,
-                        },
-                    ],
+                    fieldItems: [groupHeaderFieldItem],
                     groupHeader: {
-                        isGroupHeaderSelected: filteredItems.some(
-                            (item) =>
-                                item.rootDisabled?.active !== true &&
-                                checkIsFieldItemAssigned(item),
-                        ),
+                        isGroupHeaderSelected:
+                            filteredItems.some(
+                                (item) =>
+                                    item.rootDisabled?.active !== true &&
+                                    checkIsFieldItemAssigned(item),
+                            ) || checkIsFieldItemAssigned(groupHeaderFieldItem),
                         groupItems: filteredItems,
                         isGroupCollapsed,
                         onGroupHeaderToggle: () =>

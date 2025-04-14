@@ -579,7 +579,7 @@ function GroupedItemRenderer(
                             </div>
                         )}
                         <div className="react-fields-keeper-mapping-column-content-wrapper">
-                            {allowPrefixNode && !isGroupHeader ? (
+                            {allowPrefixNode ? (
                                 (fieldItem.prefixNode !== undefined ||
                                     prefixNodeReserveSpace) && (
                                     <div
@@ -593,7 +593,8 @@ function GroupedItemRenderer(
                                         'measure-icon' ? (
                                             <Icons.measure className="folder-scope-label-measure-icon" style={{transform: 'translateX(-3px)', ...accentColorStyle}} />
                                         ) : (
-                                            fieldItem.prefixNode ?? null
+                                            fieldItem.prefixNode ??
+                                            (isGroupHeader && !fieldItem.hideHierarchyIcon ? <i className="fk-ms-Icon fk-ms-Icon--Org tilt-left" /> : null)
                                         )}
                                     </div>
                                 )

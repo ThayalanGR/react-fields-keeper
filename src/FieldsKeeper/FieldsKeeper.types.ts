@@ -81,6 +81,12 @@ export interface IFieldsKeeperItem<T = any> {
      * useful for matching the field item type with corresponding bucket type
      */
     type?: string;
+
+    /**
+     * Determines whether to display hierarchy icon for 'Group Elements'
+     * Defaults to false
+     */
+    hideHierarchyIcon?: boolean;
 }
 
 /**

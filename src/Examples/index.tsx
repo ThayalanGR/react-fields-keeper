@@ -25,6 +25,7 @@ import Example24_filter_items from './Example24_filter_items';
 import Example25_Accent_color from './Example25_accent_color';
 import Example26_Edited_Bucket_Label from './Example26_Edited_Bucket_Label';
 import Example27_Group_Only_Selection from './Example27_group_only_selection';
+import Example28_nested_folder from './Example28_nested_folder';
 
 export const examples = {
     Example1_sample_usecase,
@@ -54,4 +55,5 @@ export const examples = {
     Example25_Accent_color,
     Example26_Edited_Bucket_Label,
     Example27_Group_Only_Selection,
+    Example28_nested_folder,
 };

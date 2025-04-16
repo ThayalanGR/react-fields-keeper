@@ -12,29 +12,25 @@ export default function Example27_Group_Only_Selection() {
         {
             id: 'date.quarter',
             label: 'Quarter',
-            group: 'date',
-            groupLabel: 'Date',
+            folders: ['date'],
             groupOrder: 1,
         },
         {
             id: 'date.year',
             label: 'Year',
-            group: 'date',
-            groupLabel: 'Date',
+            folders: ['date'],
             groupOrder: 0,
         },
         {
             id: 'date.month',
             label: 'Month',
-            group: 'date',
-            groupLabel: 'Date',
+            folders: ['date'],
             groupOrder: 2,
         },
         {
             id: 'date.day',
             label: 'Day',
-            group: 'date',
-            groupLabel: 'Date',
+            folders: ['date'],
             groupOrder: 3,
         },
         { id: 'b', label: 'b' },
@@ -71,6 +67,16 @@ export default function Example27_Group_Only_Selection() {
                 onUpdate={(state) => {
                     console.log(state);
                 }}
+                foldersMeta={
+                    {
+                        'date':
+                        {
+                            'id': 'date',
+                            'label': 'Date',
+                            'type': 'group',
+                        }
+                    }
+                }
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

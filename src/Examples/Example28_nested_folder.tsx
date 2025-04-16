@@ -2,59 +2,87 @@ import {
     FieldsKeeperProvider,
     FieldsKeeperBucket,
     FieldsKeeperRootBucket,
-    IFieldsKeeperItem,
     IFieldsKeeperBucket,
 } from '..';
 
-export default function Example23() {
+export default function Example28() {
     // compute
-    const allItems: IFieldsKeeperItem[] = [
-        {
-            id: 'a',
-            label: 'a',
-            folders: ['folder_1']
-        },
-        {
-            id: 'b',
-            label: 'b',
-            folders: ['folder_1']
-        },
+    const allItems = [
         {
             id: 'c',
             label: 'c',
-            folders: ['folder_2']
+            prefixNode: 'measure-icon',
+            folders: ['folder_1', 'folder_2'],
         },
         {
             id: 'd',
             label: 'd',
-            folders: ['folder_2']
+            prefixNode: 'measure-icon',
+            folders: ['folder_1', 'folder_2']
+        },
+        {
+            id: 'e',
+            label: 'e',
+            prefixNode: 'measure-icon',
+            folders: ['folder_1','folder_2','folder_3']
+        },
+        {
+            id: 'f',
+            label: 'f',
+            prefixNode: 'measure-icon',
+            folders: ['folder_1','folder_2','folder_3']
+        },
+        {
+            id: 'g',
+            label: 'g',
+            prefixNode: 'measure-icon',
+            folders: ['folder_1','folder_2','folder_3']
 
+        },
+        {
+            id: 'k',
+            label: 'k',
+            prefixNode: 'measure-icon',
+            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+        },
+        {
+            id: 'l',
+            label: 'l',
+            prefixNode: 'measure-icon',
+            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+        },
+        {
+            id: 'm',
+            label: 'm',
+            prefixNode: 'measure-icon',
+            folders: ['folder_1','folder_2','folder_3', 'folder_4']
         },
         {
             id: 'date.quarter',
             label: 'Quarter',
-            folders: ['folder_2', 'date'],
             groupOrder: 1,
+            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
         },
         {
             id: 'date.year',
             label: 'Year',
-            folders: ['folder_2', 'date'],
             groupOrder: 0,
+            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
         },
         {
             id: 'date.month',
-            label: 'Month',
-            folders: ['folder_2', 'date'],
+            label: 'Month long string test pass',
             groupOrder: 2,
+            prefixNode: 'measure-icon',
+            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
         },
         {
             id: 'date.day',
             label: 'Day',
             groupOrder: 3,
-            folders: ['folder_2', 'date'],
+            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
         },
-    ];
+    ]
 
     const buckets: IFieldsKeeperBucket[] = [
         { id: 'bucket1', items: [allItems[0]] },
@@ -68,13 +96,16 @@ export default function Example23() {
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">23. Disable Field Assignments</div>
+            <div className="example-container-title">
+                28. Nested Folder
+            </div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
                 onUpdate={(state) => {
                     console.log(state);
                 }}
+                accentColor={'#117865'}
                 foldersMeta={
                     {
                         'folder_1': 
@@ -89,10 +120,20 @@ export default function Example23() {
                             'label': 'Folder 2',
                             'type': 'folder',
                         },
-                        'date':
+                        'folder_3': 
                         {
+                            'id': 'folder_3',
+                            'label': 'Folder 3',
+                            'type': 'folder',
+                        },
+                        'folder_4':{
+                            'id': 'folder_4',
+                            'label': 'Folder 4',
+                            'type': 'folder',
+                        },
+                        'date':{
                             'id': 'date',
-                            'label': 'Date long group header sample pass',
+                            'label': 'Date ',
                             'type': 'group',
                         }
                     }
@@ -103,27 +144,24 @@ export default function Example23() {
                         <FieldsKeeperBucket
                             id="bucket1"
                             label="Bucket 1"
-                            allowRemoveFields={false}
-                            disabled={true}
+                            allowRemoveFields
                         />
                         <FieldsKeeperBucket
                             id="bucket2"
                             label="Bucket 2"
-                            allowRemoveFields={false}
-                            disabled={true}
+                            allowRemoveFields
                         />
                         <FieldsKeeperBucket
                             id="bucket3"
                             label="Bucket 3"
-                            allowRemoveFields={false}
-                            disabled={true}
+                            allowRemoveFields
                         />
                     </div>
                     <div className="root-bucket-container">
                         <FieldsKeeperRootBucket
                             label="Root Bucket"
                             collapseFoldersOnMount={false}
-                            disableAssignments={true}
+                            prefixNode={{ allow: true, reserveSpace: true }}
                         />
                     </div>
                 </div>

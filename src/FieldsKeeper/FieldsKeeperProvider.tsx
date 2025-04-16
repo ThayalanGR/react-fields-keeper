@@ -27,6 +27,7 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
         accentHighlightColor,
         getPriorityTargetBucketToFill,
         onUpdate,
+        foldersMeta
     } = props;
 
     // state
@@ -45,6 +46,7 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
             receiveFieldItemsFromInstances,
             allowDuplicates,
             accentColor,
+            foldersMeta,
             accentHighlightColor,
             getPriorityTargetBucketToFill,
             onStateUpdate: (state, updateInfo) => {

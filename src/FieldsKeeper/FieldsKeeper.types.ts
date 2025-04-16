@@ -6,6 +6,20 @@ import { StateUpdateInfo } from './FieldsKeeper.context';
 /**
  * Represents an item within a FieldsKeeper structure.
  */
+export interface IFieldsKeeperFolder {
+    /** Unique ID for the item */
+    id: string;
+
+    /** Display label for the item */
+    label: string;
+
+    /** Optional icon or React node shown before the label */
+    prefixNode?: 'measure-icon' | ReactNode;
+
+    /** Type of the item: can be folder, group, leaf, or table */
+    type: 'folder' | 'group' | 'leaf' | 'table';
+}
+
 export interface IFieldsKeeperItem<T = any> {
     /** Unique identifier for the item */
     id: string;
@@ -17,6 +31,11 @@ export interface IFieldsKeeperItem<T = any> {
      * Optional value associated with the item, allowing customization.
      */
     value?: T;
+
+    /** 
+     * Names of folders where this item is placed 
+     * */
+    folders?: string[];
 
     // Grouping properties
 
@@ -280,6 +299,11 @@ export interface IFieldsKeeperState {
      * Allows setting a highlight color for text.
      */
     accentHighlightColor?: string;
+
+    /** 
+     * A list of folders with folder name as key and folder details as value 
+     */
+    foldersMeta?: Record<string, IFieldsKeeperFolder>
 }
 
 /**
@@ -505,7 +529,14 @@ export interface IGroupedItemRenderer {
 }
 
 export interface IFolderScopedItem<T = IFieldsKeeperItem> {
-    folderScope: string;
-    folderScopeLabel: string;
-    folderScopeItems: T[];
+    folderScope?: string;
+    folderScopeLabel?: string;
+    folderScopeItems?: T[];
+    type?: 'folder' | 'group' | 'leaf' | 'table';
+    folders: string[];
+    itemLabel?: string;
+    id: string;
+    groupId?: string;
+    group?: string;
+    groupLabel?: string;
 }

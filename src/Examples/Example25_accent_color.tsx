@@ -12,65 +12,47 @@ export default function Example25() {
         {
             id: 'a',
             label: 'a',
-            folderScope: 'folder_1',
-            folderScopeLabel: 'Folder 1',
-            prefixNode: 'measure-icon',
+            folders: ['folder_1']
         },
         {
             id: 'b',
             label: 'b',
-            folderScope: 'folder_1',
-            folderScopeLabel: 'Folder 1',
+            folders: ['folder_1']
         },
         {
             id: 'c',
             label: 'c',
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
+            folders: ['folder_2']
         },
         {
             id: 'd',
             label: 'd',
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
-            prefixNode: 'measure-icon'
+            folders: ['folder_2']
+
         },
         {
             id: 'date.quarter',
             label: 'Quarter',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            folders: ['folder_2', 'date'],
             groupOrder: 1,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
         },
         {
             id: 'date.year',
             label: 'Year',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            folders: ['folder_2', 'date'],
             groupOrder: 0,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
         },
         {
             id: 'date.month',
-            label: 'Month long string test pass',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            label: 'Month',
+            folders: ['folder_2', 'date'],
             groupOrder: 2,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
-            prefixNode: 'measure-icon',
         },
         {
             id: 'date.day',
             label: 'Day',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            folders: ['folder_2', 'date'],
             groupOrder: 3,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
         },
     ];
 
@@ -96,6 +78,28 @@ export default function Example25() {
                     console.log(state);
                 }}
                 accentColor={'#117865'}
+                foldersMeta={
+                    {
+                        'folder_1': 
+                        {
+                            'id': 'folder_1',
+                            'label': 'Folder 1',
+                            'type': 'folder',
+                        },
+                        'folder_2': 
+                        {
+                            'id': 'folder_2',
+                            'label': 'Folder 2',
+                            'type': 'folder',
+                        },
+                        'date':
+                        {
+                            'id': 'date',
+                            'label': 'Date long group header sample pass',
+                            'type': 'group',
+                        }
+                    }
+                }
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

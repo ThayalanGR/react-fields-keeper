@@ -13,27 +13,23 @@ export default function Example21() {
         {
             id: 'a',
             label: 'a',
-            folderScope: 'folder_1',
-            folderScopeLabel: 'Folder 1',
+            folders: ['folder_1'],
             prefixNode: 'measure-icon',
         },
         {
             id: 'b',
             label: 'b',
-            folderScope: 'folder_1',
-            folderScopeLabel: 'Folder 1',
+            folders: ['folder_1'],
         },
         {
             id: 'c',
             label: 'c',
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
+            folders: ['folder_2'],
         },
         {
             id: 'd',
             label: 'd',
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
+            folders: ['folder_2'],
             prefixNode: (
                 <img
                     src={measureIcon}
@@ -46,11 +42,8 @@ export default function Example21() {
         {
             id: 'date.quarter',
             label: 'Quarter',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
             groupOrder: 1,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
+            folders: ['folder_2', 'date'],
         },
         {
             id: 'date.year',
@@ -58,27 +51,20 @@ export default function Example21() {
             group: 'date',
             groupLabel: 'Date long group header sample pass',
             groupOrder: 0,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
+            folders: ['folder_2', 'date'],
         },
         {
             id: 'date.month',
             label: 'Month long string test pass',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
             groupOrder: 2,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
+            folders: ['folder_2', 'date'],
             prefixNode: 'measure-icon',
         },
         {
             id: 'date.day',
             label: 'Day',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
             groupOrder: 3,
-            folderScope: 'folder_2',
-            folderScopeLabel: 'Folder 2 Long header sample pass',
+            folders: ['folder_2', 'date'],
         },
     ];
 
@@ -103,6 +89,28 @@ export default function Example21() {
                 onUpdate={(state) => {
                     console.log(state);
                 }}
+                foldersMeta={
+                    {
+                        'folder_1': 
+                        {
+                            'id': 'folder_1',
+                            'label': 'Folder 1',
+                            'type': 'folder',
+                        },
+                        'folder_2': 
+                        {
+                            'id': 'folder_2',
+                            'label': 'Folder 2',
+                            'type': 'folder',
+                        },
+                        'date':
+                        {
+                            'id': 'date',
+                            'label': 'Date long group header sample pass',
+                            'type': 'group',
+                        }
+                    }
+                }
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

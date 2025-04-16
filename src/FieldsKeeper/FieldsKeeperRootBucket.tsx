@@ -49,6 +49,8 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         emptyDataMessage = 'No data found',
     } = props;
 
+    const [ collapsedNodes, setCollapsedNodes ] = useState<Record<string, boolean>>({});
+
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
     const contentContainerRef = useRef<HTMLDivElement>(null);
@@ -56,7 +58,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { allItems: allOriginalItems, accentColor } =
+    const { allItems: allOriginalItems, accentColor, foldersMeta } =
         useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
     const allItems = useMemo(() => {
@@ -74,54 +76,83 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const folderScopedItems = useMemo<
         IFolderScopedItem<IGroupedFieldsKeeperItem>[]
     >(() => {
-        const searcher = new FuzzySearch(
-            allItems,
-            [
-                'label',
-                'id',
-                'folderScopeLabel',
-                'folderScope',
-            ] satisfies (keyof IFieldsKeeperItem)[],
-            {
-                sort: true,
-            },
-        );
+        const searcher = new FuzzySearch(allItems, ['label', 'id', 'folders'] satisfies (keyof IFieldsKeeperItem)[], {
+            sort: true,
+        });
         const currentItems = searcher.search(customSearchQuery ?? searchQuery);
 
-        const newFolderScopedItemsMapping = currentItems.reduce((acc, curr) => {
-            const folderScope = curr.folderScope ?? defaultFolderScope;
-            const folderScopeLabel = curr.folderScopeLabel ?? 'Default';
-            if (!acc.has(folderScope)) {
-                acc.set(folderScope, {
-                    folderScope,
-                    folderScopeLabel,
-                    folderScopeItems: [],
+        const scopedItemsMap = currentItems.reduce((acc, curr) => {
+            const itemFolders = curr.folders ?? [];
+            let shouldSkipLeafEntry = false;
+        
+            if (itemFolders.length > 0) {
+                itemFolders.forEach((folderName, folderIndex) => {
+                    const folderMeta = foldersMeta?.[folderName];
+                    const folderId = folderMeta?.id as string;
+        
+                    if (!acc.has(folderName)) {
+                        acc.set(folderName, {
+                            folderScopeLabel: folderMeta?.label as string,
+                            folderScopeItems: [],
+                            type: folderMeta?.type,
+                            folders: itemFolders.length > 1 && acc.size > 0
+                                ? itemFolders.slice(0, folderIndex)
+                                : [],
+                            id: folderId,
+                            itemLabel: folderMeta?.label as string,
+                        });
+                    }
+        
+                    if (folderMeta?.type === 'group') {
+                        shouldSkipLeafEntry = true;
+                        acc.get(folderId)?.folderScopeItems?.push({
+                            type: 'leaf',
+                            folders: [...itemFolders],
+                            id: curr.id,
+                            label: curr.label,
+                            group: folderId,
+                            groupLabel: folderMeta?.label,
+                            groupOrder: curr.groupOrder,
+                        });
+                    }
                 });
             }
-            acc.get(folderScope)?.folderScopeItems.push(curr);
+        
+            if (!acc.has(curr.id) && !shouldSkipLeafEntry) {
+                acc.set(curr.id, {
+                    type: 'leaf',
+                    folders: [...itemFolders],
+                    id: curr.id,
+                    itemLabel: curr.label,
+                });
+            }
+        
             return acc;
         }, new Map<string, IFolderScopedItem>());
+        
 
-        // folder scoped grouped items
-        const newFolderScopedItems = Array.from(
-            newFolderScopedItemsMapping.values(),
-        ).map(({ folderScope, folderScopeItems, folderScopeLabel }) => {
+        const scopeItemValues = Array.from(scopedItemsMap.values());
+        const newRefactorFolderScopedItems = scopeItemValues.map(({ folders, type, id, itemLabel, groupId, folderScopeItems }) => {
+            
             return {
-                folderScope,
-                folderScopeLabel,
-                folderScopeItems: getGroupedItems(folderScopeItems),
+                folders, 
+                type,
+                id,
+                itemLabel,
+                groupId, 
+                folderScopeItems: getGroupedItems(folderScopeItems ?? []) ?? []
             } satisfies IFolderScopedItem<IGroupedFieldsKeeperItem>;
         });
 
-        return newFolderScopedItems;
-    }, [customSearchQuery, searchQuery, allItems]);
-
+        return newRefactorFolderScopedItems;
+    }, [customSearchQuery, searchQuery, allItems, foldersMeta]);
+    
     useEffect(() => {
         if (contentContainerRef.current) {
             const markInstance = new Mark(contentContainerRef.current);
             const query = customSearchQuery || searchQuery;
-
-            if (query) {
+    
+            if (folderScopedItems.length && query) {
                 markInstance.unmark({
                     done: () => {
                         markInstance.mark(query, {
@@ -196,47 +227,46 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                     'react-fields-keeper-mapping-content-scrollable-container-columns',
                 )}
             >
-                {folderScopedItems.length > 0 ? (
-                    folderScopedItems.map((folderScopedItem, index) => (
-                        <FolderScopeItemRenderer
-                            {...props}
-                            key={index}
-                            folderScopedItem={folderScopedItem}
-                            showFlatFolderScope={showFlatFolderScope}
-                            hasSearchQuery={hasSearchQuery}
-                        />
-                    ))
-                ) : !hasData ? (
-                    <div className="react-fields-keeper-mapping-no-search-items-found">
-                        {emptyDataMessage}
-                    </div>
-                ) : (
-                    !disableEmptyFilterMessage && (
-                        <div className="react-fields-keeper-mapping-no-search-items-found">
-                            {emptyFilterMessage ?? (
-                                <>
-                                    <div>
-                                        No items found for <br />
-                                        <br />
-                                        <code>'{searchQuery}'</code>
-                                    </div>
-                                    <br />
-                                    {showClearSearchLink &&
-                                        allItems.length > 0 && (
-                                            <div
-                                                className="react-fields-keeper-mapping-clear-search-link"
-                                                onClick={onClearSearchQuery}
-                                                role="button"
-                                                style={accentColorStyle}
-                                            >
-                                                Clear search
-                                            </div>
-                                        )}
-                                </>
-                            )}
-                        </div>
-                    )
-                )}
+                {folderScopedItems.length > 0
+                    ? folderScopedItems.map((folderScopedItem, index) => (
+                          <FolderScopeItemRenderer
+                              {...props}
+                              key={index}
+                              folderScopedItem={folderScopedItem}
+                              showFlatFolderScope={showFlatFolderScope}
+                              hasSearchQuery={hasSearchQuery}
+                              folderScopedItemsArray={folderScopedItems}
+                              collapsedNodes={collapsedNodes}
+                              setCollapsedNodes={setCollapsedNodes}
+                          />
+                      ))
+                    : !hasData ? (
+                        <div className="react-fields-keeper-mapping-no-search-items-found">{emptyDataMessage}</div>
+                    ) : !disableEmptyFilterMessage && (
+                          <div className="react-fields-keeper-mapping-no-search-items-found">
+                              {emptyFilterMessage ?? (
+                                  <>
+                                      <div>
+                                          No items found for <br />
+                                          <br />
+                                          <code>'{searchQuery}'</code>
+                                      </div>
+                                      <br />
+                                      {showClearSearchLink &&
+                                          allItems.length > 0 && (
+                                              <div
+                                                  className="react-fields-keeper-mapping-clear-search-link"
+                                                  onClick={onClearSearchQuery}
+                                                  role="button"
+                                                  style={accentColorStyle}
+                                              >
+                                                  Clear search
+                                              </div>
+                                          )}
+                                  </>
+                              )}
+                          </div>
+                      )}
             </div>
         </div>
     );
@@ -247,16 +277,22 @@ function FolderScopeItemRenderer(
         folderScopedItem: IFolderScopedItem<IGroupedFieldsKeeperItem>;
         showFlatFolderScope: boolean;
         hasSearchQuery: boolean;
+        folderScopedItemsArray: IFolderScopedItem<IGroupedFieldsKeeperItem>[];
+        collapsedNodes: Record<string, boolean>;
+        setCollapsedNodes: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
     },
 ) {
     // props
     const {
-        folderScopedItem: { folderScope, folderScopeItems, folderScopeLabel },
+        folderScopedItem: { id, itemLabel, type, folders, groupId, folderScopeItems},
         showFlatFolderScope,
         hasSearchQuery,
+        folderScopedItemsArray,
+        collapsedNodes,
+        setCollapsedNodes,
         ...rootBucketProps
     } = props;
-
+    
     // state
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
@@ -270,26 +306,34 @@ function FolderScopeItemRenderer(
     }, [rootBucketProps.collapseFoldersOnMount]);
 
     // handlers
-    const toggleFolderCollapse = () =>
-        setIsFolderCollapsed((collapsed) => !collapsed);
+    const toggleFolderCollapse = (id: string) => {
+        setCollapsedNodes((prevState) => ({
+            ...prevState,
+            [id]: !prevState[id]
+        }))
+
+        setIsFolderCollapsed(!isFolderCollapsed);
+    }
 
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
     const { buckets, accentColor } = useStoreState(instanceId);
+    const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray : folderScopedItemsArray.filter((groupedItem) => groupedItem.folders?.includes(folders?.[folders?.length - 1]) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folders.length > folders?.length );
 
     const hasActiveSelection = useMemo(() => {
-        return folderScopeItems.some((groupedItem) =>
-            groupedItem.items.some((item) =>
-                buckets.some((bucket) =>
-                    bucket.items.some(
-                        (bucketItem) => bucketItem.id === item.id,
-                    ),
-                ),
-            ),
+        const isItemActive = (itemId: string) =>
+          buckets.some((bucket) => bucket.items.some((item) => item.id === itemId));
+      
+        return updatedFolderScopeItems.some((groupedItem) =>
+          groupedItem.type === 'group'
+            ? groupedItem.folderScopeItems?.some((group) =>
+                group.items.some((groupItem) => isItemActive(groupItem.id))
+              )
+            : isItemActive(groupedItem.id)
         );
-    }, [folderScopeItems, buckets]);
-
+      }, [buckets, updatedFolderScopeItems]);
+    
     // style
     const accentColorStyle = (
         accentColor ? { '--root-bucket-accent-color': accentColor } : {}
@@ -299,7 +343,7 @@ function FolderScopeItemRenderer(
     if (showFlatFolderScope)
         return (
             <>
-                {folderScopeItems.map((groupedItems, index) => (
+                {folderScopeItems?.map((groupedItems, index) => (
                     <GroupedItemRenderer
                         {...rootBucketProps}
                         key={index}
@@ -308,57 +352,73 @@ function FolderScopeItemRenderer(
                 ))}
             </>
         );
+    
+    const { group, groupLabel } = (() => {
+        let resolvedGroupLabel = 'NO_GROUP';
+        if (type === 'group') {
+            resolvedGroupLabel = folderScopedItemsArray
+                .filter((item) => item.id === groupId)?.[0]?.itemLabel as string;
+        }
+        return { group: resolvedGroupLabel, groupLabel: resolvedGroupLabel };
+    })();
+
+    const checkIsFolderCollapsed = () => {
+        let isCollapsed = false;
+        folders.forEach((folder) => {
+            if (collapsedNodes[folder]) {
+                isCollapsed = true;
+            } 
+        })
+        return isCollapsed;
+    }
 
     return (
         <div
             className="folder-scope-wrapper"
-            id={`folder-scope-${folderScope}`}
-        >
-            <div
-                className="folder-scope-label"
-                role="button"
-                onClick={toggleFolderCollapse}
-                title={folderScopeLabel ?? ''}
-            >
-                <div className="folder-scope-label-icon">
-                    <Icons.table
-                        className="folder-scope-label-table-icon"
-                        style={accentColorStyle}
+            id={`folder-scope-${folders[folders.length - 1]}`}
+            style={{paddingLeft: 13 * (folders ? folders?.length : 0)}}
+        >   
+            {!checkIsFolderCollapsed() && ((type === 'folder' || type === 'table') ?
+                <div
+                    className="folder-scope-label"
+                    role="button"
+                    onClick={() => toggleFolderCollapse(id)}
+                    title={itemLabel ?? ''}
+                >
+                    <div className="folder-scope-label-icon">
+                        { type === 'folder' ? <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} /> : <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} /> }
+                        {hasActiveSelection && (
+                            <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
+                        )}
+                    </div>
+                    
+                    <div className="folder-scope-label-text" style={accentColorStyle}>
+                        {itemLabel}
+                    </div>
+                    <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={accentColorStyle}>
+                        {isFolderCollapsed ? (
+                            <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                        ) : (
+                            <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                        )}
+                    </div>  
+                </div> 
+                : 
+                (folderScopeItems?.length ? 
+                    <div>
+                        {folderScopeItems.map((groupedItems, index) => (
+                            <GroupedItemRenderer
+                                {...rootBucketProps}
+                                key={index}
+                                groupedItems={groupedItems}
+                            />
+                        ))}
+                    </div> : 
+                    <GroupedItemRenderer
+                        {...rootBucketProps}
+                        groupedItems={{ "group": group, "groupLabel": groupLabel, items: [{ id, type, folders, label: itemLabel as string }]}}
                     />
-                    {hasActiveSelection && (
-                        <Icons.checkMark
-                            className="folder-scope-label-table-icon checkmark-overlay"
-                            style={accentColorStyle}
-                        />
-                    )}
-                </div>
-                <div
-                    className="folder-scope-label-text"
-                    style={accentColorStyle}
-                >
-                    {folderScopeLabel}
-                </div>
-                <div
-                    className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
-                    style={accentColorStyle}
-                >
-                    {isFolderCollapsed ? (
-                        <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                    ) : (
-                        <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                    )}
-                </div>
-            </div>
-            {!isFolderCollapsed && (
-                <div className="folder-scope-items">
-                    {folderScopeItems.map((groupedItems, index) => (
-                        <GroupedItemRenderer
-                            {...rootBucketProps}
-                            key={index}
-                            groupedItems={groupedItems}
-                        />
-                    ))}
-                </div>
+                )
             )}
         </div>
     );

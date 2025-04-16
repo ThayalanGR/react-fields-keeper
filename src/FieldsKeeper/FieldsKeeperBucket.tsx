@@ -58,6 +58,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         allowDuplicates,
         receiveFieldItemsFromInstances = [],
         accentColor,
+        foldersMeta
     } = useStoreState(instanceId);
 
     // compute
@@ -67,13 +68,25 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     }>(() => {
         const bucket = buckets.find((bucket) => bucket.id === id);
         if (!bucket) return { groupedItems: [], currentBucket: bucket };
-
-        // group items
+        const items = bucket.items.map((item) => {
+        const lastFolderId = item.folders?.[item.folders.length - 1] ?? 0;
+            const folder = foldersMeta?.[lastFolderId];
+        
+            if (folder?.type === 'group') {
+            return {
+                ...item,
+                group: folder.id,
+                groupLabel: folder.label,
+            };
+            }
+            return item;
+        });
+        
         return {
-            groupedItems: getGroupedItems(bucket.items),
             currentBucket: bucket,
+            groupedItems: getGroupedItems(items),
         };
-    }, [buckets, id]);
+    }, [buckets, id, foldersMeta]);
 
     if (!currentBucket) return null;
     const { maxItems = Number.MAX_SAFE_INTEGER } = currentBucket;

@@ -17,28 +17,32 @@ export default function Example4() {
         {
             id: 'date.quarter',
             label: 'Quarter',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 1,
             from: 'category',
         },
         {
             id: 'date.year',
             label: 'Year',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 0,
             from: 'category',
         },
         {
             id: 'date.month',
             label: 'Month',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 2,
             from: 'category',
         },
         {
             id: 'date.day',
             label: 'Day',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 3,
             from: 'category',
         },
@@ -93,15 +97,6 @@ export default function Example4() {
                     console.log({ state, updateInfo });
                 }}
                 getPriorityTargetBucketToFill={getPriorityTargetBucketToFill}
-                foldersMeta={
-                    {   
-                        'date': {
-                            'id': 'date',
-                            'label': 'Date long group header sample pass',
-                            'type': 'group',
-                        } 
-                    }
-                }
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

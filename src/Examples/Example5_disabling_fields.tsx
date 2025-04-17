@@ -12,7 +12,8 @@ export default function Example5() {
         {
             id: 'a',
             label: 'a',
-            folders: ['grp-a'],
+            group: 'grp-a',
+            groupLabel: 'A',
             disabled: {
                 active: true,
                 message: 'Locked data item!',
@@ -28,7 +29,6 @@ export default function Example5() {
             id: 'b',
             label: 'b',
             tooltip: 'Normal tooltip!',
-            folders: ['grp-a'],
         },
         { id: 'c', label: 'c', rootTooltip: 'Root tooltip!' },
         {
@@ -63,15 +63,6 @@ export default function Example5() {
                 onUpdate={(state, updateInfo) => {
                     console.log({ state, updateInfo });
                 }}
-                foldersMeta={
-                    {   
-                        'grp-a': {
-                            'id': 'grp-a',
-                            'label': 'A',
-                            'type': 'group',
-                        } 
-                    }
-                }
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

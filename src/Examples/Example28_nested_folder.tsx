@@ -61,26 +61,34 @@ export default function Example28() {
             id: 'date.quarter',
             label: 'Quarter',
             groupOrder: 1,
-            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
+            group: 'date',
+            groupLabel: 'Date',
+            folders: ['folder_1','folder_2','folder_3', 'folder_4']
         },
         {
             id: 'date.year',
             label: 'Year',
             groupOrder: 0,
-            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
+            group: 'date',
+            groupLabel: 'Date',
+            folders: ['folder_1','folder_2','folder_3', 'folder_4']
         },
         {
             id: 'date.month',
             label: 'Month long string test pass',
             groupOrder: 2,
+            group: 'date',
+            groupLabel: 'Date',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
+            folders: ['folder_1','folder_2','folder_3', 'folder_4']
         },
         {
             id: 'date.day',
             label: 'Day',
             groupOrder: 3,
-            folders: ['folder_1','folder_2','folder_3', 'folder_4', 'date']
+            group: 'date',
+            groupLabel: 'Date',
+            folders: ['folder_1','folder_2','folder_3', 'folder_4']
         },
     ]
 
@@ -126,15 +134,11 @@ export default function Example28() {
                             'label': 'Folder 3',
                             'type': 'folder',
                         },
-                        'folder_4':{
+                        'folder_4':
+                        {
                             'id': 'folder_4',
                             'label': 'Folder 4',
                             'type': 'folder',
-                        },
-                        'date':{
-                            'id': 'date',
-                            'label': 'Date ',
-                            'type': 'group',
                         }
                     }
                 }

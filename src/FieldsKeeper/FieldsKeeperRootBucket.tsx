@@ -83,15 +83,29 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
         const scopedItemsMap = currentItems.reduce((acc, curr) => {
             const itemFolders = curr.folders ?? [];
-            let shouldSkipLeafEntry = false;
         
-            if (itemFolders.length > 0) {
+            if(curr.folderScope) {
+                const folderScope = curr.folderScope ?? defaultFolderScope;
+                const folderScopeLabel = curr.folderScopeLabel ?? 'Default';
+                if (!acc.has(folderScope)) {
+                    acc.set(folderScope, {
+                        folderScope: folderScope,
+                        folderScopeLabel: folderScopeLabel,
+                        folderScopeItems: [],
+                        type: 'folder',
+                        folders: [],
+                        id: folderScope,
+                        itemLabel: folderScopeLabel,
+                    });
+                }
+            } else if (itemFolders.length > 0) {
                 itemFolders.forEach((folderName, folderIndex) => {
                     const folderMeta = foldersMeta?.[folderName];
                     const folderId = folderMeta?.id as string;
         
                     if (!acc.has(folderName)) {
                         acc.set(folderName, {
+                            folderScope: folderName,
                             folderScopeLabel: folderMeta?.label as string,
                             folderScopeItems: [],
                             type: folderMeta?.type,
@@ -101,27 +115,35 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             id: folderId,
                             itemLabel: folderMeta?.label as string,
                         });
-                    }
-        
-                    if (folderMeta?.type === 'group') {
-                        shouldSkipLeafEntry = true;
-                        acc.get(folderId)?.folderScopeItems?.push({
-                            type: 'leaf',
-                            folders: [...itemFolders],
-                            id: curr.id,
-                            label: curr.label,
-                            group: folderId,
-                            groupLabel: folderMeta?.label,
-                            groupOrder: curr.groupOrder,
-                        });
-                    }
+                    } 
+                    
                 });
             }
-        
-            if (!acc.has(curr.id) && !shouldSkipLeafEntry) {
+            if(curr.group && curr.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID){
+                if(!acc.has(curr.group)){
+                    acc.set(curr.group, {
+                        folderScopeLabel: curr.groupLabel as string,
+                        folderScopeItems: [],
+                        type: 'group',
+                        folders: curr.folderScope ? [curr.folderScope] : [...itemFolders],
+                        id: curr.group,
+                        itemLabel: curr.groupLabel,
+                    });
+                }
+                const currentGroup = acc.get(curr.group);
+                currentGroup?.folderScopeItems?.push({
+                    type: 'leaf',
+                    folders: curr.folderScope ? [curr.folderScope] : [...itemFolders],
+                    id: curr.id,
+                    label: curr.label,
+                    group: curr.group,
+                    groupLabel: curr.groupLabel,
+                    groupOrder: curr.groupOrder,
+                });
+            } else if (!acc.has(curr.id)) {
                 acc.set(curr.id, {
                     type: 'leaf',
-                    folders: [...itemFolders],
+                    folders: curr.folderScope ? [curr.folderScope] : [...itemFolders],
                     id: curr.id,
                     itemLabel: curr.label,
                 });
@@ -129,7 +151,6 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         
             return acc;
         }, new Map<string, IFolderScopedItem>());
-        
 
         const scopeItemValues = Array.from(scopedItemsMap.values());
         const newRefactorFolderScopedItems = scopeItemValues.map(({ folders, type, id, itemLabel, groupId, folderScopeItems }) => {
@@ -284,7 +305,7 @@ function FolderScopeItemRenderer(
 ) {
     // props
     const {
-        folderScopedItem: { id, itemLabel, type, folders, groupId, folderScopeItems},
+        folderScopedItem: { id, itemLabel, type, folders, groupId, folderScopeItems },
         showFlatFolderScope,
         hasSearchQuery,
         folderScopedItemsArray,
@@ -319,14 +340,14 @@ function FolderScopeItemRenderer(
         useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
     const { buckets, accentColor } = useStoreState(instanceId);
-    const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray : folderScopedItemsArray.filter((groupedItem) => groupedItem.folders?.includes(folders?.[folders?.length - 1]) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folders.length > folders?.length );
+    const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray.filter((groupItem) => groupItem.id === id || groupItem.folders.includes(id)) : folderScopedItemsArray.filter((groupedItem) => groupedItem.folders?.includes(folders?.[folders?.length - 1]) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folders.length > folders?.length );
 
     const hasActiveSelection = useMemo(() => {
         const isItemActive = (itemId: string) =>
           buckets.some((bucket) => bucket.items.some((item) => item.id === itemId));
       
         return updatedFolderScopeItems.some((groupedItem) =>
-          groupedItem.type === 'group'
+            groupedItem.folderScopeItems?.length
             ? groupedItem.folderScopeItems?.some((group) =>
                 group.items.some((groupItem) => isItemActive(groupItem.id))
               )

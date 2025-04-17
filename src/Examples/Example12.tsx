@@ -25,25 +25,29 @@ export default function Example12() {
         {
             id: 'date.quarter',
             label: 'Quarter',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 1,
         },
         {
             id: 'date.year',
             label: 'Year',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 0,
         },
         {
             id: 'date.month',
             label: 'Month',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 2,
         },
         {
             id: 'date.day',
             label: 'Day',
-            folders: ['date'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 3,
         },
     ];
@@ -73,15 +77,6 @@ export default function Example12() {
                 onUpdate={(state) => {
                     console.log(state);
                 }}
-                foldersMeta={
-                    {   
-                        'date': {
-                            'id': 'date',
-                            'label': 'Date long group header sample pass',
-                            'type': 'group',
-                        } 
-                    }
-                }
             >
                 <div className="keeper-container-large">
                     <div className="root-bucket-container">

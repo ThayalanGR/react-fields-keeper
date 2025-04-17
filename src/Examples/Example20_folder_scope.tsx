@@ -33,25 +33,33 @@ export default function Example20() {
         {
             id: 'date.quarter',
             label: 'Quarter',
-            folders: ['folder_2', 'date'],
+            folders: ['folder_2'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 1,
         },
         {
             id: 'date.year',
             label: 'Year',
-            folders: ['folder_2', 'date'],
+            folders: ['folder_2'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 0,
         },
         {
             id: 'date.month',
             label: 'Month',
-            folders: ['folder_2', 'date'],
+            folders: ['folder_2'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 2,
         },
         {
             id: 'date.day',
             label: 'Day',
-            folders: ['folder_2', 'date'],
+            folders: ['folder_2'],
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 3,
         },
     ];
@@ -101,12 +109,6 @@ export default function Example20() {
                             'label': 'Folder 4',
                             'type': 'folder',
                         },
-                        'date':
-                        {
-                            'id': 'date',
-                            'label': 'Date long group header sample pass',
-                            'type': 'group',
-                        }
                     }
                 }            
             >

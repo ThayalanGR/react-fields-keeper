@@ -14,10 +14,8 @@ export interface IFieldsKeeperFolder {
     label: string;
 
     /** Optional icon or React node shown before the label */
-    prefixNode?: 'measure-icon' | ReactNode;
+    prefixNodeIcon?: 'folder-icon' |  'multi-calculator-icon' | 'hierarchy-icon' | 'table-icon' | 'calendar-icon' | 'globe-icon' |  ReactNode;
 
-    /** Type of the item: can be folder, group, leaf, or table */
-    type: 'folder' | 'group' | 'leaf' | 'table';
 }
 
 export interface IFieldsKeeperItem<T = any> {
@@ -99,7 +97,7 @@ export interface IFieldsKeeperItem<T = any> {
      * pass 'measure-icon' to show default measure icon
      *
      */
-    prefixNode?: 'measure-icon' | ReactNode;
+    prefixNode?: 'measure-icon' | 'calculator-icon' | 'date-icon' | ReactNode;
 
     /**
      * useful for matching the field item type with corresponding bucket type
@@ -264,6 +262,8 @@ export interface IFieldsKeeperRootBucketProps {
 
     /** Message to show when there is no data. */
     emptyDataMessage?: string;
+
+    fontSize?: number;
 }
 
 /**
@@ -359,6 +359,7 @@ export interface IFieldsKeeperBucketProps {
     /** Suffix node displayed at the end of the bucket */
     suffixNode?: ReactNode;
 
+
     /** Placeholder text when no fields are present */
     emptyFieldPlaceholder?: string;
 
@@ -406,6 +407,11 @@ export interface IFieldsKeeperBucketProps {
     onFieldItemLabelClick?: (
         fieldItemClickProps: IFieldItemLabelClickProps,
     ) => void;
+
+    /**
+     * Optional custom styling for field item's padding and font size 
+     */
+    fieldItemStyle?: Pick<React.CSSProperties, 'padding' | 'fontSize'>;
 }
 
 export interface IFieldItemLabelClickProps {
@@ -538,10 +544,5 @@ export interface IFolderScopedItem<T = IFieldsKeeperItem> {
     folderScopeLabel?: string;
     folderScopeItems?: T[];
     type?: 'folder' | 'group' | 'leaf' | 'table';
-    folders: string[];
-    itemLabel?: string;
-    id: string;
-    groupId?: string;
-    group?: string;
-    groupLabel?: string;
+    folderScopeItem?: IFieldsKeeperItem
 }

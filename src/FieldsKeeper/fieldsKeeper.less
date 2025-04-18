@@ -216,7 +216,7 @@
                     cursor: pointer;
                     user-select: none;
                     i {
-                        font-size: 7px !important;
+                        font-size: 10px !important;
                     }
                     &:hover {
                         background-color: #e4e4e4;
@@ -248,7 +248,6 @@
 .react-fields-keeper-tooltip-wrapper {
     width: auto;
     height: auto;
-    padding-bottom: 3px;
 
     &.react-fields-keeper-tooltip-disabled-pointer {
         cursor: not-allowed;
@@ -324,7 +323,8 @@
                     padding-right: 3px;
 
                     .folder-scope-label-table-icon {
-                        fill: var(--root-bucket-accent-color)
+                        fill: var(--root-bucket-accent-color);
+                        color: var(--root-bucket-accent-color);
                     }
                 }
 
@@ -594,6 +594,7 @@
 .react-fields-keeper-mapping-column-content-prefix {
     .folder-scope-label-measure-icon{
         fill: var(--root-bucket-accent-color);
+        color: var(--root-bucket-accent-color);
     }
 }
 
@@ -622,7 +623,7 @@
 // icons
 @font-face {
     font-family: 'FabricMDL2Icons_fields_keeper';
-    src: url('../assets/fabric-icons-6d358099.woff') format('woff');
+    src: url('../assets/fabric-icons-ee938fa0.woff') format('woff');
 }
 
 .fk-ms-Icon {
@@ -663,4 +664,22 @@
 }
 .fk-ms-Icon--Org:before { 
     content: "\ECA6"; 
+}
+.fk-ms-Icon--MoreVertical:before { 
+    content: "\F2BC"; 
+}
+.fk-ms-Icon--Globe:before { 
+    content: "\E774"; 
+}
+.fk-ms-Icon--Calculator:before { 
+    content: "\E8EF"; 
+}
+.fk-ms-Icon--CalculatorGroup:before { 
+    content: "\E462"; 
+}
+.fk-ms-Icon--Calendar:before { 
+    content: "\E787"; 
+}
+.fk-ms-Icon--ContactCard:before { 
+    content: "\EEBD"; 
 }

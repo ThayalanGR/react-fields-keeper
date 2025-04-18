@@ -58,7 +58,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         allowDuplicates,
         receiveFieldItemsFromInstances = [],
         accentColor,
-        foldersMeta
     } = useStoreState(instanceId);
 
     // compute
@@ -68,25 +67,12 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     }>(() => {
         const bucket = buckets.find((bucket) => bucket.id === id);
         if (!bucket) return { groupedItems: [], currentBucket: bucket };
-        const items = bucket.items.map((item) => {
-        const lastFolderId = item.folders?.[item.folders.length - 1] ?? 0;
-            const folder = foldersMeta?.[lastFolderId];
-        
-            if (folder?.type === 'group') {
-            return {
-                ...item,
-                group: folder.id,
-                groupLabel: folder.label,
-            };
-            }
-            return item;
-        });
         
         return {
             currentBucket: bucket,
-            groupedItems: getGroupedItems(items),
+            groupedItems: getGroupedItems(bucket.items),
         };
-    }, [buckets, id, foldersMeta]);
+    }, [buckets, id]);
 
     if (!currentBucket) return null;
     const { maxItems = Number.MAX_SAFE_INTEGER } = currentBucket;
@@ -368,6 +354,7 @@ const GroupedItemRenderer = (
         fieldItemIndex,
         activeDraggedElementRef,
         onFieldItemLabelClick,
+        fieldItemStyle
     } = props;
 
     // state
@@ -594,6 +581,7 @@ const GroupedItemRenderer = (
                             setEditableItemId(fieldItem.id);
                         }
                     }}
+                    style={{paddingBottom: fieldItemStyle?.padding ?? '3px', fontSize: fieldItemStyle?.fontSize}}
                 >
                     <div
                         className={classNames(
@@ -747,7 +735,6 @@ export function assignFieldItems(props: {
         dropIndex = -1,
         isPointerAboveCenter = false,
     } = props;
-        console.log("🚀 ~ removeIndex:", removeIndex)
 
     const newBuckets = [...buckets];
     let draggedIndex = removeIndex !== undefined ? removeIndex : -1;

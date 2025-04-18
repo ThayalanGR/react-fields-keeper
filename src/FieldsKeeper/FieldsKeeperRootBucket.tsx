@@ -1,6 +1,7 @@
 // imports
 import React, {
     CSSProperties,
+    ReactNode,
     useContext,
     useEffect,
     useMemo,
@@ -93,9 +94,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         folderScopeLabel: folderScopeLabel,
                         folderScopeItems: [],
                         type: 'folder',
-                        folders: [],
-                        id: folderScope,
-                        itemLabel: folderScopeLabel,
+                        folderScopeItem: {...curr, folders: [] }
                     });
                 }
             } else if (itemFolders.length > 0) {
@@ -108,12 +107,10 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             folderScope: folderName,
                             folderScopeLabel: folderMeta?.label as string,
                             folderScopeItems: [],
-                            type: folderMeta?.type,
-                            folders: itemFolders.length > 1 && acc.size > 0
+                            type: 'folder',
+                            folderScopeItem: {...curr, id: folderId, folders: itemFolders.length > 1 && acc.size > 0
                                 ? itemFolders.slice(0, folderIndex)
-                                : [],
-                            id: folderId,
-                            itemLabel: folderMeta?.label as string,
+                                : [], prefixNode: folderMeta.prefixNodeIcon }
                         });
                     } 
                     
@@ -125,27 +122,15 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         folderScopeLabel: curr.groupLabel as string,
                         folderScopeItems: [],
                         type: 'group',
-                        folders: curr.folderScope ? [curr.folderScope] : [...itemFolders],
-                        id: curr.group,
-                        itemLabel: curr.groupLabel,
+                        folderScopeItem: {...curr, folders: curr.folderScope ? [curr.folderScope] : [...itemFolders] }
                     });
                 }
                 const currentGroup = acc.get(curr.group);
-                currentGroup?.folderScopeItems?.push({
-                    type: 'leaf',
-                    folders: curr.folderScope ? [curr.folderScope] : [...itemFolders],
-                    id: curr.id,
-                    label: curr.label,
-                    group: curr.group,
-                    groupLabel: curr.groupLabel,
-                    groupOrder: curr.groupOrder,
-                });
+                currentGroup?.folderScopeItems?.push(curr);
             } else if (!acc.has(curr.id)) {
                 acc.set(curr.id, {
                     type: 'leaf',
-                    folders: curr.folderScope ? [curr.folderScope] : [...itemFolders],
-                    id: curr.id,
-                    itemLabel: curr.label,
+                    folderScopeItem: {...curr, folders:curr.folderScope ? [curr.folderScope] : [...itemFolders] }
                 });
             }
         
@@ -153,15 +138,12 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         }, new Map<string, IFolderScopedItem>());
 
         const scopeItemValues = Array.from(scopedItemsMap.values());
-        const newRefactorFolderScopedItems = scopeItemValues.map(({ folders, type, id, itemLabel, groupId, folderScopeItems }) => {
+        const newRefactorFolderScopedItems = scopeItemValues.map(({ type,  folderScopeItems, folderScopeItem }) => {
             
             return {
-                folders, 
-                type,
-                id,
-                itemLabel,
-                groupId, 
-                folderScopeItems: getGroupedItems(folderScopeItems ?? []) ?? []
+                type, 
+                folderScopeItems: getGroupedItems(folderScopeItems ?? []) ?? [],
+                folderScopeItem
             } satisfies IFolderScopedItem<IGroupedFieldsKeeperItem>;
         });
 
@@ -305,7 +287,7 @@ function FolderScopeItemRenderer(
 ) {
     // props
     const {
-        folderScopedItem: { id, itemLabel, type, folders, groupId, folderScopeItems },
+        folderScopedItem: { type, folderScopeItem, folderScopeItems },
         showFlatFolderScope,
         hasSearchQuery,
         folderScopedItemsArray,
@@ -314,6 +296,7 @@ function FolderScopeItemRenderer(
         ...rootBucketProps
     } = props;
     
+    const {  id, label: itemLabel, folders, group, prefixNode } = folderScopeItem as IFieldsKeeperItem;
     // state
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
@@ -340,7 +323,7 @@ function FolderScopeItemRenderer(
         useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
     const { buckets, accentColor } = useStoreState(instanceId);
-    const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray.filter((groupItem) => groupItem.id === id || groupItem.folders.includes(id)) : folderScopedItemsArray.filter((groupedItem) => groupedItem.folders?.includes(folders?.[folders?.length - 1]) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folders.length > folders?.length );
+    const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray.filter((groupItem) => groupItem.folderScopeItem?.id === id || groupItem.folderScopeItem?.folders?.includes(id)) : folderScopedItemsArray.filter((groupedItem) => groupedItem.folderScopeItem?.folders?.includes(folders?.[folders?.length - 1] as string) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folderScopeItem.folders.length > (folders?.length ?? 0) );
 
     const hasActiveSelection = useMemo(() => {
         const isItemActive = (itemId: string) =>
@@ -351,7 +334,7 @@ function FolderScopeItemRenderer(
             ? groupedItem.folderScopeItems?.some((group) =>
                 group.items.some((groupItem) => isItemActive(groupItem.id))
               )
-            : isItemActive(groupedItem.id)
+            : isItemActive(groupedItem.folderScopeItem?.id as string)
         );
       }, [buckets, updatedFolderScopeItems]);
     
@@ -374,18 +357,18 @@ function FolderScopeItemRenderer(
             </>
         );
     
-    const { group, groupLabel } = (() => {
+    const { groupName, groupLabel } = (() => {
         let resolvedGroupLabel = 'NO_GROUP';
         if (type === 'group') {
             resolvedGroupLabel = folderScopedItemsArray
-                .filter((item) => item.id === groupId)?.[0]?.itemLabel as string;
+                .filter((item) => item.folderScopeItem?.id === group)?.[0]?.folderScopeItem?.label as string;
         }
-        return { group: resolvedGroupLabel, groupLabel: resolvedGroupLabel };
+        return { groupName: resolvedGroupLabel, groupLabel: resolvedGroupLabel };
     })();
 
     const checkIsFolderCollapsed = () => {
         let isCollapsed = false;
-        folders.forEach((folder) => {
+        folders?.forEach((folder) => {
             if (collapsedNodes[folder]) {
                 isCollapsed = true;
             } 
@@ -393,10 +376,26 @@ function FolderScopeItemRenderer(
         return isCollapsed;
     }
 
+    const getPrefixNodeIcon = (prefixNodeIcon: ReactNode) => {
+        if(prefixNodeIcon === 'folder-icon') {
+            return <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} />
+        } else if(prefixNodeIcon === 'table-icon') {
+            return <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} />
+        } else if(prefixNodeIcon === 'multi-calculator-icon') {
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--CalculatorGroup" style={accentColorStyle} />
+        } else if(prefixNodeIcon === 'calendar-icon') {
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--Calculator" style={accentColorStyle} />
+        } else if(prefixNodeIcon){
+             return <div className='folder-scope-label-table-icon' style={accentColorStyle}>{prefixNodeIcon}</div>;
+        } else {
+            return null;
+        }
+    }
+
     return (
         <div
             className="folder-scope-wrapper"
-            id={`folder-scope-${folders[folders.length - 1]}`}
+            id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{paddingLeft: 13 * (folders ? folders?.length : 0)}}
         >   
             {!checkIsFolderCollapsed() && ((type === 'folder' || type === 'table') ?
@@ -407,7 +406,7 @@ function FolderScopeItemRenderer(
                     title={itemLabel ?? ''}
                 >
                     <div className="folder-scope-label-icon">
-                        { type === 'folder' ? <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} /> : <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} /> }
+                        { getPrefixNodeIcon(prefixNode) }
                         {hasActiveSelection && (
                             <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
                         )}
@@ -437,7 +436,7 @@ function FolderScopeItemRenderer(
                     </div> : 
                     <GroupedItemRenderer
                         {...rootBucketProps}
-                        groupedItems={{ "group": group, "groupLabel": groupLabel, items: [{ id, type, folders, label: itemLabel as string }]}}
+                        groupedItems={{ "group": groupName, "groupLabel": groupLabel, items: [folderScopeItem ??{ id, type, folders, label: itemLabel as string }]}}
                     />
                 )
             )}
@@ -462,6 +461,7 @@ function GroupedItemRenderer(
         toggleCheckboxOnLabelClick = false,
         prefixNode: prefixNodeConfig,
         disableAssignments = false,
+        fontSize
     } = props;
 
     const {
@@ -601,9 +601,36 @@ function GroupedItemRenderer(
 
         // style
         const accentColorStyle = {
-            '--root-bucket-accent-color': accentColor ?? '#007bff',
+            '--root-bucket-accent-color': accentColor ?? '#fffff',
             '--search-highlight-text-color': accentHighlightColor ?? '#ffffff',
         } as CSSProperties;
+
+        const getPrefixNodeIconElement = (prefixNodeIcon: string) => {
+            if(prefixNodeIcon === 'measure-icon') {
+                return <Icons.measure
+                        className="folder-scope-label-measure-icon"
+                        style={{
+                            transform:
+                                'translateX(-3px)',
+                            ...accentColorStyle,
+                        }}
+                    />
+            } else if(prefixNodeIcon === 'calculator-icon') {
+                return <i className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--Calculator" 
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            } else if(prefixNodeIcon === 'date-icon') {
+                return <i className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--ContactCard" 
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            } else {
+                 return null
+            }
+        }
 
         // paint
         return fieldItems.map((fieldItem) => {
@@ -700,7 +727,7 @@ function GroupedItemRenderer(
                                 />
                             </div>
                         )}
-                        <div className="react-fields-keeper-mapping-column-content-wrapper">
+                        <div className="react-fields-keeper-mapping-column-content-wrapper" style={{fontSize: `${fontSize}px`}}>
                             {allowPrefixNode ? (
                                 (fieldItem.prefixNode !== undefined ||
                                     prefixNodeReserveSpace) && (
@@ -711,17 +738,7 @@ function GroupedItemRenderer(
                                             maxWidth: prefixNodeReservedWidth,
                                         }}
                                     >
-                                        {fieldItem.prefixNode ===
-                                        'measure-icon' ? (
-                                            <Icons.measure
-                                                className="folder-scope-label-measure-icon"
-                                                style={{
-                                                    transform:
-                                                        'translateX(-3px)',
-                                                    ...accentColorStyle,
-                                                }}
-                                            />
-                                        ) : (
+                                        {getPrefixNodeIconElement(fieldItem.prefixNode as string) ?? (
                                             fieldItem.prefixNode ??
                                             (isGroupHeader &&
                                             !fieldItem.hideHierarchyIcon ? (

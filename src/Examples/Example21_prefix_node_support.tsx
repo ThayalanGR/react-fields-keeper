@@ -42,6 +42,8 @@ export default function Example21() {
         {
             id: 'date.quarter',
             label: 'Quarter',
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 1,
             folders: ['folder_2'],
         },
@@ -57,12 +59,16 @@ export default function Example21() {
             id: 'date.month',
             label: 'Month long string test pass',
             groupOrder: 2,
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             folders: ['folder_2'],
             prefixNode: 'measure-icon',
         },
         {
             id: 'date.day',
             label: 'Day',
+            group: 'date',
+            groupLabel: 'Date long group header sample pass',
             groupOrder: 3,
             folders: ['folder_2'],
         },
@@ -93,15 +99,15 @@ export default function Example21() {
                     {
                         'folder_1': 
                         {
-                            'id': 'folder_1',
-                            'label': 'Folder 1',
-                            'type': 'folder',
+                            id: 'folder_1',
+                            label: 'Folder 1',
+                            prefixNodeIcon: 'folder-icon',
                         },
                         'folder_2': 
                         {
-                            'id': 'folder_2',
-                            'label': 'Folder 2',
-                            'type': 'folder',
+                            id: 'folder_2',
+                            label: 'Folder 2',
+                            prefixNodeIcon: 'folder-icon',
                         },
                     }
                 }

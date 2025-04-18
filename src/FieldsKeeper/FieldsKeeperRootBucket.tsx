@@ -497,14 +497,14 @@ function GroupedItemRenderer(
             );
             e.dataTransfer.setData(
                 instanceId,
-                fieldItems.map((item) => item.id).join(','),
+                fieldItems.map((item) => item.id).join(',') + '***' + fieldItems.map((item) => item.sourceId).join(','),
             );
         };
 
     // handlers
     const checkIsFieldItemAssigned = (fieldItem: IFieldsKeeperItem) => {
         return buckets.some((bucket) =>
-            bucket.items.some((item) => item.id === fieldItem.id),
+            bucket.items.some((item) => (item.sourceId ?? item.id) === fieldItem.id),
         );
     };
 

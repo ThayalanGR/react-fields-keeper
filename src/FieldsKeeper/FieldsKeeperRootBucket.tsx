@@ -461,6 +461,7 @@ function GroupedItemRenderer(
         toggleCheckboxOnLabelClick = false,
         prefixNode: prefixNodeConfig,
         disableAssignments = false,
+        fontSize
     } = props;
 
     const {
@@ -726,7 +727,7 @@ function GroupedItemRenderer(
                                 />
                             </div>
                         )}
-                        <div className="react-fields-keeper-mapping-column-content-wrapper">
+                        <div className="react-fields-keeper-mapping-column-content-wrapper" style={{fontSize: `${fontSize}px`}}>
                             {allowPrefixNode ? (
                                 (fieldItem.prefixNode !== undefined ||
                                     prefixNodeReserveSpace) && (

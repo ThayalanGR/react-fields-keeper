@@ -40,6 +40,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         wrapperClassName,
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
+        fieldItemStyle
     } = props;
 
     // state
@@ -354,6 +355,7 @@ const GroupedItemRenderer = (
         fieldItemIndex,
         activeDraggedElementRef,
         onFieldItemLabelClick,
+        fieldItemStyle
     } = props;
 
     // state
@@ -580,6 +582,7 @@ const GroupedItemRenderer = (
                             setEditableItemId(fieldItem.id);
                         }
                     }}
+                    style={{paddingBottom: fieldItemStyle?.padding ?? '3px', fontSize: fieldItemStyle?.fontSize}}
                 >
                     <div
                         className={classNames(

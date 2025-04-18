@@ -262,6 +262,8 @@ export interface IFieldsKeeperRootBucketProps {
 
     /** Message to show when there is no data. */
     emptyDataMessage?: string;
+
+    fontSize?: number;
 }
 
 /**
@@ -357,7 +359,6 @@ export interface IFieldsKeeperBucketProps {
     /** Suffix node displayed at the end of the bucket */
     suffixNode?: ReactNode;
 
-    displayContextMenuOptions?: boolean;
 
     /** Placeholder text when no fields are present */
     emptyFieldPlaceholder?: string;
@@ -406,6 +407,11 @@ export interface IFieldsKeeperBucketProps {
     onFieldItemLabelClick?: (
         fieldItemClickProps: IFieldItemLabelClickProps,
     ) => void;
+
+    /**
+     * Optional custom styling for field item's padding and font size 
+     */
+    fieldItemStyle?: Pick<React.CSSProperties, 'padding' | 'fontSize'>;
 }
 
 export interface IFieldItemLabelClickProps {
@@ -538,11 +544,5 @@ export interface IFolderScopedItem<T = IFieldsKeeperItem> {
     folderScopeLabel?: string;
     folderScopeItems?: T[];
     type?: 'folder' | 'group' | 'leaf' | 'table';
-    // folders: string[];
-    // itemLabel?: string;
-    // id: string;
-    // groupId?: string;
-    // group?: string;
-    // groupLabel?: string;
     folderScopeItem?: IFieldsKeeperItem
 }

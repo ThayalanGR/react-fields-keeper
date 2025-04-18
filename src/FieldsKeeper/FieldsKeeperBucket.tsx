@@ -40,7 +40,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         wrapperClassName,
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
-        fieldItemStyle
     } = props;
 
     // state
@@ -736,7 +735,6 @@ export function assignFieldItems(props: {
         dropIndex = -1,
         isPointerAboveCenter = false,
     } = props;
-        console.log("🚀 ~ removeIndex:", removeIndex)
 
     const newBuckets = [...buckets];
     let draggedIndex = removeIndex !== undefined ? removeIndex : -1;

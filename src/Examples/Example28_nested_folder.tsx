@@ -118,27 +118,28 @@ export default function Example28() {
                     {
                         'folder_1': 
                         {
-                            'id': 'folder_1',
-                            'label': 'Folder 1',
-                            'type': 'folder',
+                            id: 'folder_1',
+                            label: 'Folder 1',
+                            prefixNodeIcon: 'folder-icon'
+
                         },
                         'folder_2': 
                         {
-                            'id': 'folder_2',
-                            'label': 'Folder 2',
-                            'type': 'folder',
+                            id: 'folder_2',
+                            label: 'Folder 2',
+                            prefixNodeIcon: 'table-icon'
                         },
                         'folder_3': 
                         {
-                            'id': 'folder_3',
-                            'label': 'Folder 3',
-                            'type': 'folder',
+                            id: 'folder_3',
+                            label: 'Folder 3',
+                            prefixNodeIcon: 'multi-calculator-icon'
                         },
                         'folder_4':
                         {
-                            'id': 'folder_4',
-                            'label': 'Folder 4',
-                            'type': 'folder',
+                            id: 'folder_4',
+                            label: 'Folder 4',
+                            prefixNodeIcon: 'calendar-icon'
                         }
                     }
                 }

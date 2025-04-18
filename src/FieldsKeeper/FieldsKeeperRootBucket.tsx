@@ -1,6 +1,7 @@
 // imports
 import React, {
     CSSProperties,
+    ReactNode,
     useContext,
     useEffect,
     useMemo,
@@ -106,10 +107,10 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             folderScope: folderName,
                             folderScopeLabel: folderMeta?.label as string,
                             folderScopeItems: [],
-                            type: folderMeta?.type,
+                            type: 'folder',
                             folderScopeItem: {...curr, id: folderId, folders: itemFolders.length > 1 && acc.size > 0
                                 ? itemFolders.slice(0, folderIndex)
-                                : [] }
+                                : [], prefixNode: folderMeta.prefixNodeIcon }
                         });
                     } 
                     
@@ -295,7 +296,7 @@ function FolderScopeItemRenderer(
         ...rootBucketProps
     } = props;
     
-    const {  id, label: itemLabel, folders, group } = folderScopeItem as IFieldsKeeperItem;
+    const {  id, label: itemLabel, folders, group, prefixNode } = folderScopeItem as IFieldsKeeperItem;
     // state
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
@@ -375,6 +376,22 @@ function FolderScopeItemRenderer(
         return isCollapsed;
     }
 
+    const getPrefixNodeIcon = (prefixNodeIcon: ReactNode) => {
+        if(prefixNodeIcon === 'folder-icon') {
+            return <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} />
+        } else if(prefixNodeIcon === 'table-icon') {
+            return <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} />
+        } else if(prefixNodeIcon === 'multi-calculator-icon') {
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--CalculatorGroup" style={accentColorStyle} />
+        } else if(prefixNodeIcon === 'calendar-icon') {
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--Calculator" style={accentColorStyle} />
+        } else if(prefixNodeIcon){
+             return <div className='folder-scope-label-table-icon' style={accentColorStyle}>{prefixNodeIcon}</div>;
+        } else {
+            return null;
+        }
+    }
+
     return (
         <div
             className="folder-scope-wrapper"
@@ -389,7 +406,7 @@ function FolderScopeItemRenderer(
                     title={itemLabel ?? ''}
                 >
                     <div className="folder-scope-label-icon">
-                        { type === 'folder' ? <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} /> : <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} /> }
+                        { getPrefixNodeIcon(prefixNode) }
                         {hasActiveSelection && (
                             <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
                         )}
@@ -583,12 +600,38 @@ function GroupedItemRenderer(
 
         // style
         const accentColorStyle = {
-            '--root-bucket-accent-color': accentColor ?? '#007bff',
+            '--root-bucket-accent-color': accentColor ?? '#fffff',
             '--search-highlight-text-color': accentHighlightColor ?? '#ffffff',
         } as CSSProperties;
 
+        const getPrefixNodeIconElement = (prefixNodeIcon: string) => {
+            if(prefixNodeIcon === 'measure-icon') {
+                return <Icons.measure
+                        className="folder-scope-label-measure-icon"
+                        style={{
+                            transform:
+                                'translateX(-3px)',
+                            ...accentColorStyle,
+                        }}
+                    />
+            } else if(prefixNodeIcon === 'calculator-icon') {
+                return <i className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--Calculator" 
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            } else if(prefixNodeIcon === 'date-icon') {
+                return <i className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--ContactCard" 
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            } else {
+                 return null
+            }
+        }
+
         // paint
-            console.log("🚀 ~ returnfieldItems.map ~ fieldItems:", fieldItems)
         return fieldItems.map((fieldItem) => {
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
@@ -694,17 +737,7 @@ function GroupedItemRenderer(
                                             maxWidth: prefixNodeReservedWidth,
                                         }}
                                     >
-                                        {fieldItem.prefixNode ===
-                                        'measure-icon' ? (
-                                            <Icons.measure
-                                                className="folder-scope-label-measure-icon"
-                                                style={{
-                                                    transform:
-                                                        'translateX(-3px)',
-                                                    ...accentColorStyle,
-                                                }}
-                                            />
-                                        ) : (
+                                        {getPrefixNodeIconElement(fieldItem.prefixNode as string) ?? (
                                             fieldItem.prefixNode ??
                                             (isGroupHeader &&
                                             !fieldItem.hideHierarchyIcon ? (

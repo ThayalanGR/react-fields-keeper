@@ -14,10 +14,8 @@ export interface IFieldsKeeperFolder {
     label: string;
 
     /** Optional icon or React node shown before the label */
-    prefixNode?: 'measure-icon' | ReactNode;
+    prefixNodeIcon?: 'folder-icon' |  'multi-calculator-icon' | 'hierarchy-icon' | 'table-icon' | 'calendar-icon' | 'globe-icon' |  ReactNode;
 
-    /** Type of the item: can be folder, group, leaf, or table */
-    type: 'folder' | 'group' | 'leaf' | 'table';
 }
 
 export interface IFieldsKeeperItem<T = any> {
@@ -99,7 +97,7 @@ export interface IFieldsKeeperItem<T = any> {
      * pass 'measure-icon' to show default measure icon
      *
      */
-    prefixNode?: 'measure-icon' | ReactNode;
+    prefixNode?: 'measure-icon' | 'calculator-icon' | 'date-icon' | ReactNode;
 
     /**
      * useful for matching the field item type with corresponding bucket type

@@ -87,15 +87,15 @@ export default function Example23() {
                     {
                         'folder_1': 
                         {
-                            'id': 'folder_1',
-                            'label': 'Folder 1',
-                            'type': 'folder',
+                            id: 'folder_1',
+                            label: 'Folder 1',
+                            prefixNodeIcon: 'folder-icon',
                         },
                         'folder_2': 
                         {
-                            'id': 'folder_2',
-                            'label': 'Folder 2',
-                            'type': 'folder',
+                            id: 'folder_2',
+                            label: 'Folder 2',
+                            prefixNodeIcon: 'folder-icon',
                         },
                     }
                 }

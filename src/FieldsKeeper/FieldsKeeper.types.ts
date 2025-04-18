@@ -359,6 +359,8 @@ export interface IFieldsKeeperBucketProps {
     /** Suffix node displayed at the end of the bucket */
     suffixNode?: ReactNode;
 
+    displayContextMenuOptions?: boolean;
+
     /** Placeholder text when no fields are present */
     emptyFieldPlaceholder?: string;
 
@@ -538,10 +540,11 @@ export interface IFolderScopedItem<T = IFieldsKeeperItem> {
     folderScopeLabel?: string;
     folderScopeItems?: T[];
     type?: 'folder' | 'group' | 'leaf' | 'table';
-    folders: string[];
-    itemLabel?: string;
-    id: string;
-    groupId?: string;
-    group?: string;
-    groupLabel?: string;
+    // folders: string[];
+    // itemLabel?: string;
+    // id: string;
+    // groupId?: string;
+    // group?: string;
+    // groupLabel?: string;
+    folderScopeItem?: IFieldsKeeperItem
 }

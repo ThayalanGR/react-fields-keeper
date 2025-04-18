@@ -7,7 +7,7 @@ export const SuffixNode = (props: ISuffixNodeProps) => {
     return (
         <ContextMenu contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick}>
             <i
-                className="fk-ms-Icon fk-ms-Icon--ChevronDown"
+                className="fk-ms-Icon fk-ms-Icon--MoreVertical"
                 style={{ cursor: "pointer" }}
             />
         </ContextMenu>

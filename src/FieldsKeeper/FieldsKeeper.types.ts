@@ -24,6 +24,11 @@ export interface IFieldsKeeperItem<T = any> {
     /** Unique identifier for the item */
     id: string;
 
+    /**
+     * Optional unique identifier for the item, which can be used in case of duplicates
+     */
+    sourceId?: string;
+
     /** Display label for the item */
     label: string;
 

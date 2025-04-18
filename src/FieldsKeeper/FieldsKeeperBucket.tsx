@@ -213,21 +213,42 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         const foundInstanceIdChunk = foundInstanceId
             ? e.dataTransfer.getData(foundInstanceId)
             : '';
+        
+        const [idsChunk, sourceIdsChunk] = foundInstanceIdChunk.split('***') 
+        const fieldItemIds = (idsChunk ?? '').split(',');
+        const fieldSourceIds = (sourceIdsChunk ?? '').split(',');
 
-        const fieldItemIds = (foundInstanceIdChunk ?? '').split(',');
-
-        return { fieldItemIds, fromBucket, fieldItemIndex };
+        return { fieldItemIds, fromBucket, fieldItemIndex, fieldSourceIds };
     };
 
     const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
-        const { fromBucket, fieldItemIds, fieldItemIndex } = getFieldItemIds(e);
+        const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } = getFieldItemIds(e);
         const dropIndex = Number(
             (e.target as HTMLDivElement).getAttribute('data-index'),
         );
-
-        const fieldItems = allItems.filter((item) =>
-            fieldItemIds.some((fieldItemId) => item.id === fieldItemId),
+        const currentBucket = buckets.find((b) => b.id === fromBucket);
+        const currentBucketfieldItems = currentBucket?.items?.filter?.((item) =>
+            fieldItemIds.some((fieldItemId) => (item.id) === fieldItemId)
         );
+
+        const fieldItemsRaw = currentBucketfieldItems ?? allItems.filter((item) =>
+            fieldItemIds.some((fieldItemId) => (item.id) === fieldItemId) ||  fieldSourceIds.some((fieldSourceId) => (item.sourceId) === fieldSourceId)
+        );
+
+        const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        const destinationBucket = buckets.find((b) => b.id === id);
+        const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
+
+        const fieldItems = fieldItemsRaw.map((item) => {
+            if (allowDuplicates && destinationItemIds.includes(item.id)) {
+                return {
+                    ...item,
+                    id: generateUniqueId(item.id),
+                };
+            }
+            return item;
+        });
+
         if (fieldItems.length)
             assignFieldItems({
                 instanceId,
@@ -409,7 +430,7 @@ const GroupedItemRenderer = (
             );
             e.dataTransfer.setData(
                 instanceId,
-                fieldItems.map((item) => item.id).join(','),
+                fieldItems.map((item) => (item.id)).join(',') + '***' + fieldItems.map((item) => (item.sourceId)).join(','),
             );
             activeDraggedElementRef.current = e.target as HTMLDivElement;
         };
@@ -726,6 +747,7 @@ export function assignFieldItems(props: {
         dropIndex = -1,
         isPointerAboveCenter = false,
     } = props;
+        console.log("🚀 ~ removeIndex:", removeIndex)
 
     const newBuckets = [...buckets];
     let draggedIndex = removeIndex !== undefined ? removeIndex : -1;
@@ -745,7 +767,7 @@ export function assignFieldItems(props: {
             bucket.items = bucket.items.filter((item, itemIndex) => {
                 const shouldKeepItem =
                     requiredFieldItems.some(
-                        (fieldItem) => fieldItem.id === item.id,
+                        (fieldItem) => (fieldItem.sourceId ?? fieldItem.id) === (item.sourceId ?? item.id),
                     ) === false ||
                     restrictedItems.some(
                         (fieldItem) => fieldItem.id === item.id,

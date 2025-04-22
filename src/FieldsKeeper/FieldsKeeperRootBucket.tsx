@@ -108,7 +108,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             folderScopeLabel: folderMeta?.label as string,
                             folderScopeItems: [],
                             type: 'folder',
-                            folderScopeItem: {...curr, id: folderId, folders: itemFolders.length > 1 && acc.size > 0
+                            folderScopeItem: {...curr, id: folderId, label: folderMeta?.label as string, folders: itemFolders.length > 1 && acc.size > 0
                                 ? itemFolders.slice(0, folderIndex)
                                 : [], prefixNode: folderMeta.prefixNodeIcon }
                         });
@@ -377,7 +377,9 @@ function FolderScopeItemRenderer(
     }
 
     const getPrefixNodeIcon = (prefixNodeIcon: ReactNode) => {
-        if(prefixNodeIcon === 'folder-icon') {
+        if(React.isValidElement(prefixNode)){
+            return prefixNodeIcon
+        }else if(prefixNodeIcon === 'folder-icon') {
             return <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} />
         } else if(prefixNodeIcon === 'table-icon') {
             return <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} />
@@ -392,11 +394,16 @@ function FolderScopeItemRenderer(
         }
     }
 
+    const setIndentation = (folders: string[]) => {
+        const indentSize = folders.length * 13;
+        return `${indentSize}px`;
+    }
+
     return (
         <div
             className="folder-scope-wrapper"
             id={`folder-scope-${folders?.[folders.length - 1]}`}
-            style={{paddingLeft: 13 * (folders ? folders?.length : 0)}}
+            style={{paddingLeft: setIndentation(folders ?? [])}}
         >   
             {!checkIsFolderCollapsed() && ((type === 'folder' || type === 'table') ?
                 <div
@@ -436,7 +443,7 @@ function FolderScopeItemRenderer(
                     </div> : 
                     <GroupedItemRenderer
                         {...rootBucketProps}
-                        groupedItems={{ "group": groupName, "groupLabel": groupLabel, items: [folderScopeItem ??{ id, type, folders, label: itemLabel as string }]}}
+                        groupedItems={{ "group": groupName, "groupLabel": groupLabel, items: [folderScopeItem ?? { id, type, folders, label: itemLabel as string }]}}
                     />
                 )
             )}
@@ -451,7 +458,7 @@ function GroupedItemRenderer(
 ) {
     // props
     const {
-        groupedItems: { group, groupLabel, items: filteredItems },
+        groupedItems: { group, groupLabel, groupIcon, flatGroup, flatGroupLabel, flatGroupIcon, items: filteredItems },
         sortGroupOrderWiseOnAssignment = true,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromProps,
         instanceId: instanceIdFromProps,
@@ -483,6 +490,7 @@ function GroupedItemRenderer(
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
+    const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
 
     // compute
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
@@ -584,6 +592,7 @@ function GroupedItemRenderer(
         fieldItems,
         isGroupItem,
         groupHeader,
+        hasMasterGroup
     }: IGroupedItemRenderer) => {
         const { suffixNodeRenderer } = props;
         // compute
@@ -594,7 +603,7 @@ function GroupedItemRenderer(
             isGroupHeader
                 ? {
                       '--root-bucket-group-items-count':
-                          groupHeader.groupItems.length + 1.5,
+                          groupHeader.groupItems.length + (groupHeader.isFlatGroupHeader ? 2 : 1),
                   }
                 : {}
         ) as CSSProperties;
@@ -605,8 +614,10 @@ function GroupedItemRenderer(
             '--search-highlight-text-color': accentHighlightColor ?? '#ffffff',
         } as CSSProperties;
 
-        const getPrefixNodeIconElement = (prefixNodeIcon: string) => {
-            if(prefixNodeIcon === 'measure-icon') {
+        const getPrefixNodeIconElement = (prefixNodeIcon: string | ReactNode) => {
+            if(React.isValidElement(prefixNodeIcon)) {
+                return prefixNodeIcon;
+            } else if(prefixNodeIcon === 'measure-icon') {
                 return <Icons.measure
                         className="folder-scope-label-measure-icon"
                         style={{
@@ -627,6 +638,18 @@ function GroupedItemRenderer(
                         ...accentColorStyle,
                     }}
                 />
+            } else if(prefixNodeIcon === 'hierarchy-icon') {
+                return <i className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--Org tilt-left" 
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            } else if(prefixNodeIcon === 'contact-card') {
+                return <i className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--ContactCard" 
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
             } else {
                  return null
             }
@@ -634,6 +657,7 @@ function GroupedItemRenderer(
 
         // paint
         return fieldItems.map((fieldItem) => {
+            const groupIcon = fieldItem.flatGroupIcon || fieldItem.groupIcon;
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
                 : checkIsFieldItemAssigned(fieldItem);
@@ -670,7 +694,7 @@ function GroupedItemRenderer(
                             fieldItem.rootBucketActiveNodeClassName,
                             {
                                 'react-fields-keeper-mapping-column-content-offset':
-                                    isGroupItem,
+                                    isGroupItem || (isGroupHeader && hasMasterGroup),
                                 'react-fields-keeper-mapping-column-content-group-header':
                                     isGroupHeader &&
                                     !groupHeader.isGroupCollapsed,
@@ -680,6 +704,8 @@ function GroupedItemRenderer(
                                     ignoreCheckBox && isGroupItem,
                                 'react-fields-keeper-mapping-content-disabled':
                                     disableAssignments,
+                                'react-fields-keeper-mapping-column-content-offset-with-master':
+                                    isGroupItem && hasMasterGroup
                             },
                         )}
                         style={itemStyle}
@@ -729,7 +755,7 @@ function GroupedItemRenderer(
                         )}
                         <div className="react-fields-keeper-mapping-column-content-wrapper" style={{fontSize: `${fontSize}px`}}>
                             {allowPrefixNode ? (
-                                (fieldItem.prefixNode !== undefined ||
+                                (groupIcon !== undefined ||
                                     prefixNodeReserveSpace) && (
                                     <div
                                         className="react-fields-keeper-mapping-column-content-prefix"
@@ -738,13 +764,7 @@ function GroupedItemRenderer(
                                             maxWidth: prefixNodeReservedWidth,
                                         }}
                                     >
-                                        {getPrefixNodeIconElement(fieldItem.prefixNode as string) ?? (
-                                            fieldItem.prefixNode ??
-                                            (isGroupHeader &&
-                                            !fieldItem.hideHierarchyIcon ? (
-                                                <i className="fk-ms-Icon fk-ms-Icon--Org tilt-left" />
-                                            ) : null)
-                                        )}
+                                        {isGroupHeader ? getPrefixNodeIconElement(groupIcon) : getPrefixNodeIconElement(fieldItem.prefixNode)}
                                     </div>
                                 )
                             ) : (
@@ -810,30 +830,58 @@ function GroupedItemRenderer(
             id: group,
             group,
             groupLabel,
+            groupIcon,
             rootDisabled,
         };
 
+        const flatGroupHeaderItem: IFieldsKeeperItem = {
+            label: flatGroupLabel as string,
+            id: flatGroup as string,
+            group,
+            groupLabel,
+            flatGroupIcon,
+            rootDisabled,
+        };
+
+        const isChildrenAssignedFound = filteredItems.some(
+            (item) =>
+                item.rootDisabled?.active !== true &&
+                checkIsFieldItemAssigned(item),
+        ) || checkIsFieldItemAssigned(groupHeaderFieldItem);
+
         return (
             <>
-                {renderFieldItems({
+                {flatGroup && flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && renderFieldItems({
+                    fieldItems: [flatGroupHeaderItem],
+                    groupHeader: {
+                        isGroupHeaderSelected: isChildrenAssignedFound || checkIsFieldItemAssigned(flatGroupHeaderItem),
+                        groupItems: filteredItems,
+                        isGroupCollapsed: isMasterGroupCollapsed,
+                        onGroupHeaderToggle: () => {
+                            setIsMasterGroupCollapsed(!isMasterGroupCollapsed)
+                            setIsGroupCollapsed(!isGroupCollapsed)
+                        },
+                        isFlatGroupHeader: true
+                    },
+                })}
+            
+                {!isMasterGroupCollapsed && renderFieldItems({
                     fieldItems: [groupHeaderFieldItem],
                     groupHeader: {
-                        isGroupHeaderSelected:
-                            filteredItems.some(
-                                (item) =>
-                                    item.rootDisabled?.active !== true &&
-                                    checkIsFieldItemAssigned(item),
-                            ) || checkIsFieldItemAssigned(groupHeaderFieldItem),
+                        isGroupHeaderSelected: isChildrenAssignedFound,
                         groupItems: filteredItems,
                         isGroupCollapsed,
                         onGroupHeaderToggle: () =>
                             setIsGroupCollapsed(!isGroupCollapsed),
                     },
+                    hasMasterGroup: (flatGroup && flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
                 })}
-                {!isGroupCollapsed &&
+
+                {!isMasterGroupCollapsed && !isGroupCollapsed &&
                     renderFieldItems({
                         fieldItems: filteredItems,
                         isGroupItem: true,
+                        hasMasterGroup: (flatGroup && flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
                     })}
             </>
         );

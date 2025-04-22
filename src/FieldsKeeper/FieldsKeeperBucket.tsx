@@ -389,7 +389,7 @@ const GroupedItemRenderer = (
                     item.group &&
                     item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
                 ) {
-                    newLabels[item.group] = item.groupLabel as string;
+                    newLabels[item.group] = item.flatGroupLabel ?? item.groupLabel as string;
                 }
             });
             return newLabels;
@@ -497,7 +497,7 @@ const GroupedItemRenderer = (
                 );
                 const isSuffixNodeRendererValid =
                     typeof suffixNodeRenderer === 'function';
-                const suffixNodeRendererOutput = isSuffixNodeRendererValid
+                const suffixNodeRendererOutput = isSuffixNodeRendererValid && !fieldItem.flatGroup 
                     ? suffixNodeRenderer({
                           bucketId: currentBucket.id,
                           fieldItem,

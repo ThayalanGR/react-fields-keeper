@@ -34,7 +34,11 @@ export function getGroupedItems(
                     group: item.group ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
                     groupLabel:
                         item.groupLabel ?? FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
+                    groupIcon: item.groupIcon ?? '',
                     items: [{ ...item, _fieldItemIndex: fieldItemIndex }],
+                    flatGroup: item.flatGroup ?? '',
+                    flatGroupLabel: item.flatGroupLabel ?? '',
+                    flatGroupIcon: item.flatGroupIcon ?? ''
                 });
             }
             return acc;

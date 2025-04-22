@@ -14,7 +14,7 @@ export interface IFieldsKeeperFolder {
     label: string;
 
     /** Optional icon or React node shown before the label */
-    prefixNodeIcon?: 'folder-icon' |  'multi-calculator-icon' | 'hierarchy-icon' | 'table-icon' | 'calendar-icon' | 'globe-icon' |  ReactNode;
+    prefixNodeIcon?: 'folder-icon' |  'multi-calculator-icon' | 'contact-card' | 'hierarchy-icon' | 'table-icon' | 'calendar-icon' | 'globe-icon' |  ReactNode;
 
 }
 
@@ -47,6 +47,24 @@ export interface IFieldsKeeperItem<T = any> {
 
     /** Display label for the item's group */
     groupLabel?: string;
+
+    /**
+     * Icon for the group, either a specific icon name or a custom React node.
+     * @type {'hierarchy-icon' | ReactNode}
+     */
+    groupIcon?: 'hierarchy-icon' | ReactNode;
+
+    /** Identifier for grouping items */
+    flatGroup?: string;
+
+    /** Display label for the item's group */
+    flatGroupLabel?: string;
+
+    /**
+     * Icon for the flat group, either a specific icon name or a custom React node.
+     * @type {'contact-card' | ReactNode}
+     */
+    flatGroupIcon?: 'contact-card' | ReactNode;
 
     /** Order for grouping; lower numbers appear first */
     groupOrder?: number;
@@ -103,12 +121,6 @@ export interface IFieldsKeeperItem<T = any> {
      * useful for matching the field item type with corresponding bucket type
      */
     type?: string;
-
-    /**
-     * Determines whether to display hierarchy icon for 'Group Elements'
-     * Defaults to false
-     */
-    hideHierarchyIcon?: boolean;
 }
 
 /**
@@ -524,18 +536,23 @@ export interface IFieldItemCustomRendererProps<T = unknown> {
 export interface IGroupedFieldsKeeperItem {
     group: string;
     groupLabel: string;
+    groupIcon?: 'hierarchy-icon' | ReactNode;
+    flatGroup?: string; 
+    flatGroupLabel?: string;
+    flatGroupIcon?: 'contact-card' | ReactNode;
     items: IFieldsKeeperItem[];
 }
 
 export interface IGroupedItemRenderer {
     fieldItems: IFieldsKeeperItem[];
     isGroupItem?: boolean;
-
+    hasMasterGroup?: boolean;
     groupHeader?: {
         groupItems: IFieldsKeeperItem[];
         isGroupCollapsed: boolean;
         onGroupHeaderToggle: () => void;
         isGroupHeaderSelected?: boolean;
+        isFlatGroupHeader?: boolean;
     };
 }
 
@@ -543,6 +560,6 @@ export interface IFolderScopedItem<T = IFieldsKeeperItem> {
     folderScope?: string;
     folderScopeLabel?: string;
     folderScopeItems?: T[];
-    type?: 'folder' | 'group' | 'leaf' | 'table';
+    type?: 'folder' | 'group' | 'leaf' | 'table' | 'hierarchy';
     folderScopeItem?: IFieldsKeeperItem
 }

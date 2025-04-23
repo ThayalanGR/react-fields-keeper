@@ -712,6 +712,7 @@ function GroupedItemRenderer(
                             ...(customClassNames?.customGroupItemClassName && { [customClassNames.customGroupItemClassName]: isGroupItem || isGroupHeader})
                             }
                         )}
+                        style={itemStyle}
                         draggable={
                             allowDragging &&
                             !disableAssignments &&

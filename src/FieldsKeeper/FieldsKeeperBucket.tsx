@@ -40,6 +40,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         wrapperClassName,
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
+        customClassNames
     } = props;
 
     // state
@@ -318,6 +319,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                             onFieldItemRemove={onFieldItemRemove}
                             fieldItemIndex={index}
                             activeDraggedElementRef={activeDraggedElementRef}
+                            customClassNames={customClassNames}
                         />
                     ))}
                 {(groupedItems.length === 0 ||
@@ -354,7 +356,7 @@ const GroupedItemRenderer = (
         fieldItemIndex,
         activeDraggedElementRef,
         onFieldItemLabelClick,
-        fieldItemStyle
+        customClassNames
     } = props;
 
     // state
@@ -529,7 +531,7 @@ const GroupedItemRenderer = (
                                 autoFocus
                             />
                         ) : (
-                            <div className="react-fields-keeper-mapping-content-input-filled-value">
+                            <div className={classNames('react-fields-keeper-mapping-content-input-filled-value', customClassNames?.customLabelClassName)}>
                                 {editedLabels[fieldItem.id]}
                             </div>
                         )}
@@ -581,7 +583,6 @@ const GroupedItemRenderer = (
                             setEditableItemId(fieldItem.id);
                         }
                     }}
-                    style={{paddingBottom: fieldItemStyle?.padding ?? '3px', fontSize: fieldItemStyle?.fontSize}}
                 >
                     <div
                         className={classNames(
@@ -597,6 +598,7 @@ const GroupedItemRenderer = (
                                 'react-fields-keeper-mapping-content-input-filled-custom-renderer':
                                     customItemRenderer !== undefined,
                             },
+                            customClassNames?.customFieldItemContainerClassName
                         )}
                         style={itemStyle}
                         draggable
@@ -646,6 +648,7 @@ const GroupedItemRenderer = (
                             orientation === 'horizontal',
                         'group-wrap': horizontalFillOverflowType === 'wrap',
                     },
+                    customClassNames?.customGroupContainerClassName
                 )}
             >
                 {/* group header */}

@@ -275,7 +275,25 @@ export interface IFieldsKeeperRootBucketProps {
     /** Message to show when there is no data. */
     emptyDataMessage?: string;
 
-    fontSize?: number;
+    /**
+     * Optional object to specify custom class names for different UI components.
+     */
+    customClassNames?: {
+        /**
+         * Class name applied to the label element.
+         */
+        customLabelClassName?: string;
+
+        /**
+         * Class name applied to the individual field items.
+         */
+        customFieldItemClassName?: string;
+
+        /**
+         * Class name applied to a group.
+         */
+        customGroupItemClassName?: string
+    }
 }
 
 /**
@@ -421,9 +439,25 @@ export interface IFieldsKeeperBucketProps {
     ) => void;
 
     /**
-     * Optional custom styling for field item's padding and font size 
+     * Optional object to specify custom class names for different UI components.
      */
-    fieldItemStyle?: Pick<React.CSSProperties, 'padding' | 'fontSize'>;
+    customClassNames?: {
+        /**
+         * Class name applied to the label element.
+         */
+        customLabelClassName?: string;
+
+        /**
+         * Class name applied to the individual field items.
+         */
+        customFieldItemContainerClassName?: string;
+
+        /**
+         * Class name applied to a group.
+         */
+        customGroupContainerClassName?: string; // New
+        
+    }
 }
 
 export interface IFieldItemLabelClickProps {

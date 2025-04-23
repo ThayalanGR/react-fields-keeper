@@ -293,6 +293,7 @@ function FolderScopeItemRenderer(
         folderScopedItemsArray,
         collapsedNodes,
         setCollapsedNodes,
+        customClassNames,
         ...rootBucketProps
     } = props;
     
@@ -401,7 +402,7 @@ function FolderScopeItemRenderer(
 
     return (
         <div
-            className="folder-scope-wrapper"
+            className={classNames('folder-scope-wrapper', customClassNames?.customFieldItemClassName)}
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{paddingLeft: setIndentation(folders ?? [])}}
         >   
@@ -419,7 +420,7 @@ function FolderScopeItemRenderer(
                         )}
                     </div>
                     
-                    <div className="folder-scope-label-text" style={accentColorStyle}>
+                    <div className={classNames("folder-scope-label-text", customClassNames?.customLabelClassName)} style={accentColorStyle}>
                         {itemLabel}
                     </div>
                     <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={accentColorStyle}>
@@ -438,12 +439,14 @@ function FolderScopeItemRenderer(
                                 {...rootBucketProps}
                                 key={index}
                                 groupedItems={groupedItems}
+                                customClassNames={customClassNames}
                             />
                         ))}
                     </div> : 
                     <GroupedItemRenderer
                         {...rootBucketProps}
                         groupedItems={{ "group": groupName, "groupLabel": groupLabel, items: [folderScopeItem ?? { id, type, folders, label: itemLabel as string }]}}
+                        customClassNames={customClassNames}
                     />
                 )
             )}
@@ -468,7 +471,7 @@ function GroupedItemRenderer(
         toggleCheckboxOnLabelClick = false,
         prefixNode: prefixNodeConfig,
         disableAssignments = false,
-        fontSize
+        customClassNames
     } = props;
 
     const {
@@ -705,8 +708,9 @@ function GroupedItemRenderer(
                                 'react-fields-keeper-mapping-content-disabled':
                                     disableAssignments,
                                 'react-fields-keeper-mapping-column-content-offset-with-master':
-                                    isGroupItem && hasMasterGroup
-                            },
+                                    isGroupItem && hasMasterGroup,
+                            ...(customClassNames?.customGroupItemClassName && { [customClassNames.customGroupItemClassName]: isGroupItem || isGroupHeader})
+                            }
                         )}
                         style={itemStyle}
                         draggable={
@@ -753,7 +757,7 @@ function GroupedItemRenderer(
                                 />
                             </div>
                         )}
-                        <div className="react-fields-keeper-mapping-column-content-wrapper" style={{fontSize: `${fontSize}px`}}>
+                        <div className="react-fields-keeper-mapping-column-content-wrapper">
                             {allowPrefixNode ? (
                                 (groupIcon !== undefined ||
                                     prefixNodeReserveSpace) && (
@@ -771,7 +775,9 @@ function GroupedItemRenderer(
                                 <div /> /** grid skeleton placeholder */
                             )}
                             <div
-                                className="react-fields-keeper-mapping-column-content-label"
+                                className={classNames(
+                                    "react-fields-keeper-mapping-column-content-label", customClassNames?.customLabelClassName,
+                                )}
                                 style={accentColorStyle}
                             >
                                 <span>{fieldItem.label}</span>

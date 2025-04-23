@@ -72,11 +72,13 @@ export interface IFieldsKeeperItem<T = any> {
     /**
      * Scope within folders. Items are displayed based on this scope.
      * Defaults to a flat view if unspecified.
+     * @deprecated
      */
     folderScope?: string;
 
     /**
      * Display label for the folder scope, used for grouping or categorization.
+     * @deprecated
      */
     folderScopeLabel?: string;
 
@@ -455,7 +457,7 @@ export interface IFieldsKeeperBucketProps {
         /**
          * Class name applied to a group.
          */
-        customGroupContainerClassName?: string; // New
+        customGroupContainerClassName?: string;
         
     }
 }

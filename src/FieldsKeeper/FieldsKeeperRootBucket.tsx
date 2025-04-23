@@ -94,7 +94,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         folderScopeLabel: folderScopeLabel,
                         folderScopeItems: [],
                         type: 'folder',
-                        folderScopeItem: {...curr, id: folderScope, label: folderScopeLabel, folders: [], prefixNode: curr.prefixNode ?? 'folder-icon' }
+                        folderScopeItem: {...curr, id: folderScope, label: folderScopeLabel, folders: [], prefixNode: 'folder-icon' }
                     });
                 }
             } else if (itemFolders.length > 0) {
@@ -495,6 +495,7 @@ function GroupedItemRenderer(
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
 
+    const [groupHeight, setGroupHeight] = useState(0);
     // compute
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
@@ -606,7 +607,7 @@ function GroupedItemRenderer(
             isGroupHeader
                 ? {
                       '--root-bucket-group-items-count':
-                          groupHeader.groupItems.length + (groupHeader.isFlatGroupHeader ? 2 : 1),
+                      groupHeight,
                   }
                 : {}
         ) as CSSProperties;
@@ -681,6 +682,10 @@ function GroupedItemRenderer(
                         {
                             'react-fields-keeper-tooltip-disabled-pointer':
                                 fieldItem.rootDisabled?.active,
+                            'react-fields-keeper-mapping-column-content-group-item':
+                                isGroupItem || groupHeader,
+                            'react-fields-keeper-master-group-header':
+                                groupHeader?.isFlatGroupHeader,
                         },
                     )}
                     title={
@@ -735,6 +740,24 @@ function GroupedItemRenderer(
                                   )
                                 : undefined
                         }
+                        onMouseOver={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+                            if (isGroupHeader) {
+                                const folderWrapper = e.currentTarget.closest('.folder-scope-wrapper');
+                                const folderRect = folderWrapper?.getClientRects();
+                    
+                                if (groupHeader?.isFlatGroupHeader) {
+                                    setGroupHeight(folderRect?.[0].height ?? 0);
+                                } else {
+                                    let masterHeaderHeight =  0;
+                                    const hasMasterHeader = folderWrapper?.querySelector('.react-fields-keeper-master-group-header') !== null;
+                                    if(hasMasterHeader){
+                                        const masterHeader = document.getElementsByClassName('react-fields-keeper-master-group-header')[0];
+                                        masterHeaderHeight = masterHeader?.getClientRects()?.[0]?.height ?? 0;
+                                    }
+                                    setGroupHeight((folderRect?.[0].height ?? 0) - masterHeaderHeight);
+                                }
+                            }
+                        }}
                     >
                         {!ignoreCheckBox && (
                             <div className="react-fields-keeper-mapping-column-content-checkbox">

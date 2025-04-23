@@ -94,7 +94,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         folderScopeLabel: folderScopeLabel,
                         folderScopeItems: [],
                         type: 'folder',
-                        folderScopeItem: {...curr, folders: [] }
+                        folderScopeItem: {...curr, id: folderScope, label: folderScopeLabel, folders: [], prefixNode: curr.prefixNode ?? 'folder-icon' }
                     });
                 }
             } else if (itemFolders.length > 0) {
@@ -130,7 +130,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
             } else if (!acc.has(curr.id)) {
                 acc.set(curr.id, {
                     type: 'leaf',
-                    folderScopeItem: {...curr, folders:curr.folderScope ? [curr.folderScope] : [...itemFolders] }
+                    folderScopeItem: {...curr, folders: curr.folderScope ? [curr.folderScope] : [...itemFolders] }
                 });
             }
         

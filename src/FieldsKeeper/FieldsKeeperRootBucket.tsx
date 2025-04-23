@@ -94,7 +94,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         folderScopeLabel: folderScopeLabel,
                         folderScopeItems: [],
                         type: 'folder',
-                        folderScopeItem: {...curr, id: folderScope, label: folderScopeLabel, folders: [], prefixNode: curr.prefixNode ?? 'folder-icon' }
+                        folderScopeItem: {...curr, id: folderScope, label: folderScopeLabel, folders: [], prefixNode: 'folder-icon' }
                     });
                 }
             } else if (itemFolders.length > 0) {

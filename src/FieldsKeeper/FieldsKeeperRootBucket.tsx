@@ -110,7 +110,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             type: 'folder',
                             folderScopeItem: {...curr, id: folderId, label: folderMeta?.label as string, folders: itemFolders.length > 1 && acc.size > 0
                                 ? itemFolders.slice(0, folderIndex)
-                                : [], prefixNode: folderMeta.prefixNodeIcon }
+                                : [], prefixNode: folderMeta?.prefixNodeIcon }
                         });
                     } 
                     

@@ -1,0 +1,79 @@
+/* Root Bucket - Label Styling */
+.custom-label-class-name {
+    font-size: 18px;
+    font-weight: 500;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Root Bucket - Field Item Styling */
+.custom-field-item-class-name {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-field-item-class-name:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Root Bucket - Group Item Styling */
+.custom-group-item-class-name {
+    background-color: #edf2f7;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.custom-group-item-class-name:hover {
+    background-color: #e2e8f0;
+}
+
+/* Field Bucket - Label Styling*/
+.custom-bucket-label-class-name {
+    font-size: 18px;
+    font-weight: 500;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Field Bucket - Group Item Styling */
+.custom-bucket-group-item-class-name {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.custom-bucket-group-item-class-name:hover {
+    background-color: #e2e8f0;
+}
+
+
+/* Field Bucket - Field Item Styling */
+.custom-bucket-field-item-class-name {
+    background-color: #edf2f7 !important;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-bucket-field-item-class-name:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.custom-bucket-field-item-class-name:active {
+    cursor: grabbing;
+    transform: scale(0.98);
+}
+

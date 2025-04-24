@@ -473,7 +473,7 @@ export interface IFieldItemLabelClickProps {
     oldValue: string;
 
     /** Updated value of the field item */
-    newvalue: string;
+    newValue: string;
 }
 
 /**

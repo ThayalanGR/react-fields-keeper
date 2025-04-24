@@ -306,9 +306,16 @@ function FolderScopeItemRenderer(
 
     // effects
     useEffect(() => {
-        if (rootBucketProps.collapseFoldersOnMount !== undefined)
+        if (rootBucketProps.collapseFoldersOnMount !== undefined){
             setIsFolderCollapsed(rootBucketProps.collapseFoldersOnMount);
-    }, [rootBucketProps.collapseFoldersOnMount]);
+            if(rootBucketProps.collapseFoldersOnMount) {
+                setCollapsedNodes((prevState) => ({
+                    ...prevState,
+                    [id]: true
+                }))
+            }
+        }
+    }, [rootBucketProps.collapseFoldersOnMount, id, setCollapsedNodes]);
 
     // handlers
     const toggleFolderCollapse = (id: string) => {

@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
 import {
     FieldsKeeperProvider,
     FieldsKeeperBucket,
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
 } from '..';
+import './Styling/Example31_CustomStyling.css';
 
 export default function Example31() {
 
@@ -97,44 +97,6 @@ export default function Example31() {
         { id: 'bucket3', items: [allItems[0], allItems[1], allItems[4], allItems[5], allItems[6], allItems[7], allItems[8], allItems[9]]  },
     ];
 
-    useEffect(() => {
-        const customLabelElements = document.getElementsByClassName('custom-label-class-name');
-        if (customLabelElements) {
-            Array.from(customLabelElements).forEach((element) => {
-                element.setAttribute('style', 'font-size: 20px;');
-            })
-        }
-        const customBucketLabelElements = document.getElementsByClassName('custom-bucket-label-class-name');
-        if (customBucketLabelElements) {
-            Array.from(customBucketLabelElements).forEach((element) => {
-                element.setAttribute('style', 'font-size: 20px; color: red;');
-            })
-        }
-        const customBucketFieldItemElements = document.getElementsByClassName('custom-bucket-field-item-class-name');
-        if (customBucketFieldItemElements) {
-            Array.from(customBucketFieldItemElements).forEach((element) => {
-                element.setAttribute('style', 'font-size: 14px; text-align: center; padding: 15px 0px; border-radius: 2px;');
-            })
-        }
-        const customFieldItemElements = document.getElementsByClassName('custom-field-item-class-name');
-        if (customFieldItemElements) {
-            Array.from(customFieldItemElements).forEach((element) => {
-                element.setAttribute('style', 'font-size: 14px; text-align: center; padding: 5px 0px; border-radius: 2px;');
-            })
-        }
-        const customBucketGroupItemElements = document.getElementsByClassName('custom-bucket-group-item-class-name');
-        if (customBucketGroupItemElements) {
-            Array.from(customBucketGroupItemElements).forEach((element) => {
-                element.setAttribute('style', 'font-size: 14px;  padding: 15px 0px; border-radius: 2px;');
-            })
-        }
-        const customGroupItemElements = document.getElementsByClassName('custom-group-item-class-name');
-        if (customGroupItemElements) {
-            Array.from(customGroupItemElements).forEach((element) => {
-                element.setAttribute('style', 'font-size: 14px;  padding: 15px 0px; border-radius: 2px;');
-            })
-        }
-      }, []);
 
     return (
         <div className="example-container">

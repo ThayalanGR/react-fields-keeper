@@ -385,7 +385,7 @@
                 );
 
                 border-radius: 2px;
-                z-index: -1;
+                z-index: 0;
                 top: -1px; // to avoid scroll that caused for hierarchical fields
             }
         }
@@ -413,6 +413,8 @@
             height: 100%;
             display: grid;
             place-items: center;
+            position: relative;
+            z-index: 1;
 
             input {
                 cursor: pointer;
@@ -427,6 +429,8 @@
             max-width: 100%;
             overflow: hidden;
             grid-template-columns: auto 1fr auto auto;
+            position: relative;
+            z-index: 1;
 
             .react-fields-keeper-mapping-column-content-prefix {
                 height: 100%;

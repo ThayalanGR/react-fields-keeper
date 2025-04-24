@@ -451,7 +451,7 @@ const GroupedItemRenderer = (
                 bucketId: currentBucket.id,
                 fieldItem: updatedFieldItem,
                 oldValue,
-                newvalue: editedLabels[fieldItem.id],
+                newValue: editedLabels[fieldItem.id],
             });
             setEditableItemId(null);
         }

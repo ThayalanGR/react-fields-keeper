@@ -510,12 +510,15 @@ function GroupedItemRenderer(
     const onDragStartHandler =
         (...fieldItems: IFieldsKeeperItem[]) =>
         (e: React.DragEvent<HTMLDivElement>) => {
-            if (e.currentTarget) {
-                const parent = e.currentTarget.closest('.folder-scope-wrapper') as HTMLElement;
-                if (parent) {
-                  parent.style.overflow = 'hidden';
-                }
-            }
+
+            // suspicious - 1
+            // if (e.currentTarget) {
+            //     const parent = e.currentTarget.closest('.folder-scope-wrapper') as HTMLElement;
+            //     if (parent) {
+            //       parent.style.overflow = 'hidden';
+            //     }
+            // }
+            
             e.dataTransfer.setData(
                 FIELDS_KEEPER_CONSTANTS.FROM_BUCKET,
                 FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,

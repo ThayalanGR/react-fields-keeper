@@ -210,9 +210,18 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
     const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
         const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } = getFieldItemIds(e);
-        const dropIndex = Number(
-            (e.target as HTMLDivElement).getAttribute('data-index'),
-        );
+        
+        const destinationBucket = buckets.find((b) => b.id === id);
+        const getDropIndex = () => {
+            if((e.target as HTMLDivElement).classList.contains('react-fields-keeper-mapping-content-input')){
+                return (destinationBucket?.items.length ?? 0);
+            } else {
+                return Number(
+                    (e.target as HTMLDivElement).getAttribute('data-index'),
+                );
+            }
+        }
+        const dropIndex = getDropIndex();
         const currentBucket = buckets.find((b) => b.id === fromBucket);
         const currentBucketfieldItems = currentBucket?.items?.filter?.((item) =>
             fieldItemIds.some((fieldItemId) => (item.id) === fieldItemId)
@@ -223,7 +232,6 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         );
 
         const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-        const destinationBucket = buckets.find((b) => b.id === id);
         const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
 
         const fieldItems = fieldItemsRaw.map((item) => {

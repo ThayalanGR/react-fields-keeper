@@ -80,7 +80,7 @@ export default function Example26() {
         const {
             bucketId,
             fieldItem,
-            newValue: newvalue,
+            newValue: newValue,
         } = fieldItemLabelClickProps;
         const updateAllItems = buckets.map((bucket) => {
             if (bucket.id === bucketId) {
@@ -88,10 +88,10 @@ export default function Example26() {
                     ...bucket,
                     items: bucket.items.map((item) => {
                         if (item.group === fieldItem.id) {
-                            return { ...item, groupLabel: newvalue };
+                            return { ...item, groupLabel: newValue };
                         }
                         if (item.id === fieldItem.id) {
-                            return { ...item, label: newvalue };
+                            return { ...item, label: newValue };
                         }
                         return item;
                     }),

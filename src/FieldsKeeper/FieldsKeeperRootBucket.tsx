@@ -677,7 +677,7 @@ function GroupedItemRenderer(
 
         // paint
         return fieldItems.map((fieldItem) => {
-            const groupIcon = fieldItem.flatGroupIcon || fieldItem.groupIcon;
+            const prefixNodeIcon = isGroupHeader ? (fieldItem.flatGroupIcon ?? fieldItem.groupIcon) : fieldItem.prefixNode;
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
                 : checkIsFieldItemAssigned(fieldItem);
@@ -798,7 +798,7 @@ function GroupedItemRenderer(
                         )}
                         <div className="react-fields-keeper-mapping-column-content-wrapper">
                             {allowPrefixNode ? (
-                                (groupIcon !== undefined ||
+                                ((prefixNodeIcon !== undefined && prefixNodeIcon != '') ||
                                     prefixNodeReserveSpace) && (
                                     <div
                                         className="react-fields-keeper-mapping-column-content-prefix"
@@ -807,7 +807,7 @@ function GroupedItemRenderer(
                                             maxWidth: prefixNodeReservedWidth,
                                         }}
                                     >
-                                        {isGroupHeader ? getPrefixNodeIconElement(groupIcon) : getPrefixNodeIconElement(fieldItem.prefixNode)}
+                                        {getPrefixNodeIconElement(prefixNodeIcon)}
                                     </div>
                                 )
                             ) : (

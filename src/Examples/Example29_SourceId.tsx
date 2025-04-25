@@ -12,10 +12,10 @@ import {
 export default function Example29() {
     // compute
     const allItems: IFieldsKeeperItem[] = [
-        { id: 'a',  sourceId: 'a',  label: 'a' },
-        { id: 'b',  sourceId : 'b', label: 'b' },
-        { id: 'c',  sourceId: 'c',  label: 'c' },
-        { id: 'd',  sourceId: 'd',  label: 'd' },
+        { id: 'a', sourceId: 'a', label: 'a' },
+        { id: 'b', sourceId: 'b', label: 'b' },
+        { id: 'c', sourceId: 'c', label: 'c' },
+        { id: 'd', sourceId: 'd', label: 'd' },
         {
             id: 'date.quarter',
             label: 'Quarter',
@@ -46,12 +46,14 @@ export default function Example29() {
         },
     ];
 
-    const [contextMenuOptions, setContextMenuOptions] = useState<IContextMenuOption[]>([
-            { label: "Sum", id: "sum" },
-            { label: 'Average', id: 'avg' }
-        ]);
+    const [contextMenuOptions, setContextMenuOptions] = useState<
+        IContextMenuOption[]
+    >([
+        { label: 'Sum', id: 'sum' },
+        { label: 'Average', id: 'avg' },
+    ]);
 
-    const [buckets, setBuckets]= useState<IFieldsKeeperBucket[]>([
+    const [buckets, setBuckets] = useState<IFieldsKeeperBucket[]>([
         { id: 'bucket1', items: [allItems[0]] },
         {
             id: 'bucket2',
@@ -63,9 +65,7 @@ export default function Example29() {
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">
-                29. Source Id
-            </div>
+            <div className="example-container-title">29. Source Id</div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
@@ -82,57 +82,110 @@ export default function Example29() {
                             allowRemoveFields
                             suffixNodeRenderer={({ fieldItem, bucketId }) => {
                                 let selectedOptionLabel = '';
-                                const updateIsActive = (options: IContextMenuOption[], id: string, parentId?: string): IContextMenuOption[] => {
-                                    return options.map(option => {
-                                        if (parentId && option.id === parentId && option.subMenuOptions) {
+                                const updateIsActive = (
+                                    options: IContextMenuOption[],
+                                    id: string,
+                                    parentId?: string,
+                                ): IContextMenuOption[] => {
+                                    return options.map((option) => {
+                                        if (
+                                            parentId &&
+                                            option.id === parentId &&
+                                            option.subMenuOptions
+                                        ) {
                                             return {
                                                 ...option,
-                                                subMenuOptions: option.subMenuOptions.map(subOption =>
-                                                    subOption.id === id ? { ...subOption, isActive: true } : { ...subOption, isActive: false }
-                                                ),
+                                                subMenuOptions:
+                                                    option.subMenuOptions.map(
+                                                        (subOption) =>
+                                                            subOption.id === id
+                                                                ? {
+                                                                      ...subOption,
+                                                                      isActive:
+                                                                          true,
+                                                                  }
+                                                                : {
+                                                                      ...subOption,
+                                                                      isActive:
+                                                                          false,
+                                                                  },
+                                                    ),
                                             };
                                         }
                                         if (!parentId) {
-                                            if(option.id === id){
-                                                selectedOptionLabel = option.label;
-                                                return { ...option, isActive: true };
+                                            if (option.id === id) {
+                                                selectedOptionLabel =
+                                                    option.label;
+                                                return {
+                                                    ...option,
+                                                    isActive: true,
+                                                };
                                             }
-                                            return { ...option, isActive: false };
+                                            return {
+                                                ...option,
+                                                isActive: false,
+                                            };
                                         }
                                         if (option.subMenuOptions) {
                                             return {
                                                 ...option,
-                                                subMenuOptions: updateIsActive(option.subMenuOptions, id, parentId),
+                                                subMenuOptions: updateIsActive(
+                                                    option.subMenuOptions,
+                                                    id,
+                                                    parentId,
+                                                ),
                                             };
                                         }
                                         return option;
                                     });
                                 };
 
-                                const onOptionClick = (id: string, parentId?: string) => {
-                                    setContextMenuOptions(prevOptions => {
-                                        const updatedOption = updateIsActive(prevOptions, id, parentId)
-                                        const updateAllItems = buckets.map((bucket) => {
-                                            if(bucket.id === bucketId) {
-                                                return {
-                                                    ...bucket,
-                                                    items: bucket.items.map((item) => {
-                                                        if(item.id === fieldItem.id) {
-                                                            return { ...item, label: `${selectedOptionLabel} of ${item.label}`  };
-                                                        }
-                                                        return item;
-                                                    }),
-                                                };
-                                            }
-                                            return bucket;
-                                        })
-                                
-                                        setBuckets([...updateAllItems])
+                                const onOptionClick = (
+                                    id: string,
+                                    parentId?: string,
+                                ) => {
+                                    setContextMenuOptions((prevOptions) => {
+                                        const updatedOption = updateIsActive(
+                                            prevOptions,
+                                            id,
+                                            parentId,
+                                        );
+                                        const updateAllItems = buckets.map(
+                                            (bucket) => {
+                                                if (bucket.id === bucketId) {
+                                                    return {
+                                                        ...bucket,
+                                                        items: bucket.items.map(
+                                                            (item) => {
+                                                                if (
+                                                                    item.id ===
+                                                                    fieldItem.id
+                                                                ) {
+                                                                    return {
+                                                                        ...item,
+                                                                        label: `${selectedOptionLabel} of ${item.label}`,
+                                                                    };
+                                                                }
+                                                                return item;
+                                                            },
+                                                        ),
+                                                    };
+                                                }
+                                                return bucket;
+                                            },
+                                        );
+
+                                        setBuckets([...updateAllItems]);
                                         return updatedOption;
                                     });
                                 };
 
-                                return <SuffixNode contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick} />;
+                                return (
+                                    <SuffixNode
+                                        contextMenuOptions={contextMenuOptions}
+                                        onOptionClick={onOptionClick}
+                                    />
+                                );
                             }}
                         />
                         <FieldsKeeperBucket

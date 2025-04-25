@@ -7,8 +7,6 @@ import {
 import './Styling/Example31_CustomStyling.css';
 
 export default function Example31() {
-
-
     const allItems: IFieldsKeeperItem[] = [
         { id: 'a', label: 'a', folders: ['folder_1'] },
         { id: 'b', label: 'b', folders: ['folder_1'] },
@@ -24,7 +22,7 @@ export default function Example31() {
             groupOrder: 1,
             flatGroup: 'date',
             flatGroupLabel: 'Date',
-            flatGroupIcon: 'contact-card'
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.year',
@@ -36,7 +34,7 @@ export default function Example31() {
             groupOrder: 0,
             flatGroup: 'date',
             flatGroupLabel: 'Date',
-            flatGroupIcon: 'contact-card'
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.month',
@@ -48,7 +46,7 @@ export default function Example31() {
             groupOrder: 2,
             flatGroup: 'date',
             flatGroupLabel: 'Date',
-            flatGroupIcon: 'contact-card'
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.day',
@@ -60,7 +58,7 @@ export default function Example31() {
             groupOrder: 3,
             flatGroup: 'date',
             flatGroupLabel: 'Date',
-            flatGroupIcon: 'contact-card'
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.time',
@@ -72,7 +70,7 @@ export default function Example31() {
             groupOrder: 4,
             flatGroup: 'date',
             flatGroupLabel: 'Date',
-            flatGroupIcon: 'contact-card'
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.seconds',
@@ -84,7 +82,7 @@ export default function Example31() {
             groupOrder: 5,
             flatGroup: 'date',
             flatGroupLabel: 'Date',
-            flatGroupIcon: 'contact-card'
+            flatGroupIcon: 'contact-card',
         },
     ];
 
@@ -94,13 +92,26 @@ export default function Example31() {
             items: [],
         },
         { id: 'bucket2', items: [] },
-        { id: 'bucket3', items: [allItems[0], allItems[1], allItems[4], allItems[5], allItems[6], allItems[7], allItems[8], allItems[9]]  },
+        {
+            id: 'bucket3',
+            items: [
+                allItems[0],
+                allItems[1],
+                allItems[4],
+                allItems[5],
+                allItems[6],
+                allItems[7],
+                allItems[8],
+                allItems[9],
+            ],
+        },
     ];
-
 
     return (
         <div className="example-container">
-            <div className="example-container-title">31. Custom Styling using custom classname </div>
+            <div className="example-container-title">
+                31. Custom Styling using custom classname{' '}
+            </div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
@@ -127,16 +138,23 @@ export default function Example31() {
                             label="Bucket 1"
                             allowRemoveFields
                         />
-                        <FieldsKeeperBucket id="bucket2" label="Bucket 2" allowRemoveFields />
-                        <FieldsKeeperBucket id="bucket3" label="Bucket 3" allowRemoveFields 
-                            customClassNames=
-                                {
-                                    {
-                                        customLabelClassName: 'custom-bucket-label-class-name',
-                                        customFieldItemContainerClassName:'custom-bucket-field-item-class-name',
-                                        customGroupContainerClassName: 'custom-bucket-group-item-class-name'
-                                    }
-                                }
+                        <FieldsKeeperBucket
+                            id="bucket2"
+                            label="Bucket 2"
+                            allowRemoveFields
+                        />
+                        <FieldsKeeperBucket
+                            id="bucket3"
+                            label="Bucket 3"
+                            allowRemoveFields
+                            customClassNames={{
+                                customLabelClassName:
+                                    'custom-bucket-label-class-name',
+                                customFieldItemContainerClassName:
+                                    'custom-bucket-field-item-class-name',
+                                customGroupContainerClassName:
+                                    'custom-bucket-group-item-class-name',
+                            }}
                         />
                     </div>
                     <div className="root-bucket-container">
@@ -144,13 +162,13 @@ export default function Example31() {
                             label="Root Bucket"
                             collapseFoldersOnMount={false}
                             prefixNode={{ allow: true, reserveSpace: true }}
-                            customClassNames={
-                                {
-                                    customLabelClassName: 'custom-label-class-name',
-                                    customFieldItemClassName: 'custom-field-item-class-name',
-                                    customGroupItemClassName: 'custom-group-item-class-name',
-                                }
-                            }
+                            customClassNames={{
+                                customLabelClassName: 'custom-label-class-name',
+                                customFieldItemClassName:
+                                    'custom-field-item-class-name',
+                                customGroupItemClassName:
+                                    'custom-group-item-class-name',
+                            }}
                         />
                     </div>
                 </div>

@@ -14,8 +14,15 @@ export interface IFieldsKeeperFolder {
     label: string;
 
     /** Optional icon or React node shown before the label */
-    prefixNodeIcon?: 'folder-icon' |  'multi-calculator-icon' | 'contact-card' | 'hierarchy-icon' | 'table-icon' | 'calendar-icon' | 'globe-icon' |  ReactNode;
-
+    prefixNodeIcon?:
+        | 'folder-icon'
+        | 'multi-calculator-icon'
+        | 'contact-card'
+        | 'hierarchy-icon'
+        | 'table-icon'
+        | 'calendar-icon'
+        | 'globe-icon'
+        | ReactNode;
 }
 
 export interface IFieldsKeeperItem<T = any> {
@@ -35,8 +42,8 @@ export interface IFieldsKeeperItem<T = any> {
      */
     value?: T;
 
-    /** 
-     * Names of folders where this item is placed 
+    /**
+     * Names of folders where this item is placed
      * */
     folders?: string[];
 
@@ -269,7 +276,7 @@ export interface IFieldsKeeperRootBucketProps {
     suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?:  <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+    onContextMenuRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
 
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;
@@ -297,8 +304,8 @@ export interface IFieldsKeeperRootBucketProps {
         /**
          * Class name applied to a group.
          */
-        customGroupItemClassName?: string
-    }
+        customGroupItemClassName?: string;
+    };
 }
 
 /**
@@ -343,10 +350,10 @@ export interface IFieldsKeeperState {
     /** Color for icons */
     iconColor?: string;
 
-    /** 
-     * A list of folders with folder name as key and folder details as value 
+    /**
+     * A list of folders with folder name as key and folder details as value
      */
-    foldersMeta?: Record<string, IFieldsKeeperFolder>
+    foldersMeta?: Record<string, IFieldsKeeperFolder>;
 }
 
 /**
@@ -396,7 +403,6 @@ export interface IFieldsKeeperBucketProps {
 
     /** Suffix node displayed at the end of the bucket */
     suffixNode?: ReactNode;
-
 
     /** Placeholder text when no fields are present */
     emptyFieldPlaceholder?: string;
@@ -467,8 +473,7 @@ export interface IFieldsKeeperBucketProps {
          * Class name applied to a group.
          */
         customGroupContainerClassName?: string;
-        
-    }
+    };
 }
 
 export interface IFieldItemLabelClickProps {
@@ -542,7 +547,7 @@ export interface IDropdownOption {
     showSeparator?: boolean;
 
     /**
-     * Indicates whether the option is active. If true, a checkmark is displayed.
+     * Indicates whether the option is active. If true, a check-mark is displayed.
      */
     isActive?: boolean;
 }
@@ -582,7 +587,7 @@ export interface IGroupedFieldsKeeperItem {
     group: string;
     groupLabel: string;
     groupIcon?: 'hierarchy-icon' | ReactNode;
-    flatGroup?: string; 
+    flatGroup?: string;
     flatGroupLabel?: string;
     flatGroupIcon?: 'contact-card' | ReactNode;
     items: IFieldsKeeperItem[];
@@ -606,5 +611,5 @@ export interface IFolderScopedItem<T = IFieldsKeeperItem> {
     folderScopeLabel?: string;
     folderScopeItems?: T[];
     type?: 'folder' | 'group' | 'leaf' | 'table' | 'hierarchy';
-    folderScopeItem?: IFieldsKeeperItem
+    folderScopeItem?: IFieldsKeeperItem;
 }

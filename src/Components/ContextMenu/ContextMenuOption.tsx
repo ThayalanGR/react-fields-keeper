@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { usePopper } from 'react-popper';
-import { IContextMenuOption } from "../../FieldsKeeper/FieldsKeeper.types";
+import { IContextMenuOption } from '../../FieldsKeeper/FieldsKeeper.types';
 
 export interface IContextMenuOptionProps {
     option: IContextMenuOption;
     contextMenuOptions?: IContextMenuOption[];
     isSubMenu: boolean;
     subMenuOptionIdHovered?: string;
-    onOptionClickHandler: (option: IContextMenuOption, parentId?: string) => void;
+    onOptionClickHandler: (
+        option: IContextMenuOption,
+        parentId?: string,
+    ) => void;
     onMouseOver: (
         e: React.MouseEvent<HTMLDivElement, MouseEvent>,
         option: IContextMenuOption,
-        isSubMenuHover: boolean
+        isSubMenuHover: boolean,
     ) => void;
 }
 
@@ -25,8 +28,11 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
         onMouseOver,
     } = props;
 
-    const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
-    const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
+    const [referenceElement, setReferenceElement] =
+        useState<HTMLDivElement | null>(null);
+    const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
+        null,
+    );
 
     const { styles, attributes } = usePopper(referenceElement, popperElement, {
         placement: 'right-start',
@@ -47,7 +53,8 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
             onMouseOver={(e) => onMouseOver(e, option, isSubMenu)}
             onMouseLeave={(e) => {
                 if (e?.currentTarget?.style) {
-                    e.currentTarget.style.backgroundColor = "rgb(255, 255, 255)";
+                    e.currentTarget.style.backgroundColor =
+                        'rgb(255, 255, 255)';
                 }
             }}
         >
@@ -55,16 +62,16 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
                 option.isActive ? (
                     <i
                         className="fk-ms-Icon fk-ms-Icon--CheckMark"
-                        style={{ paddingRight: "4px", fontSize: "10px" }}
+                        style={{ paddingRight: '4px', fontSize: '10px' }}
                     />
                 ) : (
-                    <span style={{ width: "16px" }}></span>
+                    <span style={{ width: '16px' }}></span>
                 )
             ) : null}
-            
+
             <span
                 className="react-fields-keeper-context-menu-option-label"
-                style={{ paddingLeft: isActiveMarker ? "5px" : "1px" }}
+                style={{ paddingLeft: isActiveMarker ? '5px' : '1px' }}
             >
                 {option.label}
             </span>
@@ -86,13 +93,20 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
                                 <div key={subMenuOption.id}>
                                     <ContextMenuOption
                                         option={subMenuOption}
-                                        contextMenuOptions={option.subMenuOptions}
+                                        contextMenuOptions={
+                                            option.subMenuOptions
+                                        }
                                         onMouseOver={onMouseOver}
                                         onOptionClickHandler={() =>
-                                            onOptionClickHandler(subMenuOption, option.id)
+                                            onOptionClickHandler(
+                                                subMenuOption,
+                                                option.id,
+                                            )
                                         }
                                         isSubMenu={true}
-                                        subMenuOptionIdHovered={subMenuOptionIdHovered}
+                                        subMenuOptionIdHovered={
+                                            subMenuOptionIdHovered
+                                        }
                                     />
                                 </div>
                             ))}

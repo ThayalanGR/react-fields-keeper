@@ -95,22 +95,18 @@ export default function Example21() {
                 onUpdate={(state) => {
                     console.log(state);
                 }}
-                foldersMeta={
-                    {
-                        'folder_1': 
-                        {
-                            id: 'folder_1',
-                            label: 'Folder 1',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                        'folder_2': 
-                        {
-                            id: 'folder_2',
-                            label: 'Folder 2',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                    }
-                }
+                foldersMeta={{
+                    folder_1: {
+                        id: 'folder_1',
+                        label: 'Folder 1',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                    folder_2: {
+                        id: 'folder_2',
+                        label: 'Folder 2',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                }}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

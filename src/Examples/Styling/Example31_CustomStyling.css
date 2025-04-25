@@ -6,7 +6,6 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-
 /* Root Bucket - Field Item Styling */
 .custom-field-item-class-name {
     background-color: #ffffff;
@@ -55,7 +54,6 @@
     background-color: #e2e8f0;
 }
 
-
 /* Field Bucket - Field Item Styling */
 .custom-bucket-field-item-class-name {
     background-color: #edf2f7 !important;
@@ -76,4 +74,3 @@
     cursor: grabbing;
     transform: scale(0.98);
 }
-

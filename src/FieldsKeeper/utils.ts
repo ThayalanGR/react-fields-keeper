@@ -38,7 +38,7 @@ export function getGroupedItems(
                     items: [{ ...item, _fieldItemIndex: fieldItemIndex }],
                     flatGroup: item.flatGroup ?? '',
                     flatGroupLabel: item.flatGroupLabel ?? '',
-                    flatGroupIcon: item.flatGroupIcon ?? ''
+                    flatGroupIcon: item.flatGroupIcon ?? '',
                 });
             }
             return acc;

@@ -18,44 +18,43 @@ export default function Example28() {
             id: 'd',
             label: 'd',
             prefixNode: 'measure-icon',
-            folders: ['folder_1', 'folder_2']
+            folders: ['folder_1', 'folder_2'],
         },
         {
             id: 'e',
             label: 'e',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3']
+            folders: ['folder_1', 'folder_2', 'folder_3'],
         },
         {
             id: 'f',
             label: 'f',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3']
+            folders: ['folder_1', 'folder_2', 'folder_3'],
         },
         {
             id: 'g',
             label: 'g',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3']
-
+            folders: ['folder_1', 'folder_2', 'folder_3'],
         },
         {
             id: 'k',
             label: 'k',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+            folders: ['folder_1', 'folder_2', 'folder_3', 'folder_4'],
         },
         {
             id: 'l',
             label: 'l',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+            folders: ['folder_1', 'folder_2', 'folder_3', 'folder_4'],
         },
         {
             id: 'm',
             label: 'm',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+            folders: ['folder_1', 'folder_2', 'folder_3', 'folder_4'],
         },
         {
             id: 'date.quarter',
@@ -63,7 +62,7 @@ export default function Example28() {
             groupOrder: 1,
             group: 'date',
             groupLabel: 'Date',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+            folders: ['folder_1', 'folder_2', 'folder_3', 'folder_4'],
         },
         {
             id: 'date.year',
@@ -71,7 +70,7 @@ export default function Example28() {
             groupOrder: 0,
             group: 'date',
             groupLabel: 'Date',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+            folders: ['folder_1', 'folder_2', 'folder_3', 'folder_4'],
         },
         {
             id: 'date.month',
@@ -80,7 +79,7 @@ export default function Example28() {
             group: 'date',
             groupLabel: 'Date',
             prefixNode: 'measure-icon',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+            folders: ['folder_1', 'folder_2', 'folder_3', 'folder_4'],
         },
         {
             id: 'date.day',
@@ -88,9 +87,9 @@ export default function Example28() {
             groupOrder: 3,
             group: 'date',
             groupLabel: 'Date',
-            folders: ['folder_1','folder_2','folder_3', 'folder_4']
+            folders: ['folder_1', 'folder_2', 'folder_3', 'folder_4'],
         },
-    ]
+    ];
 
     const buckets: IFieldsKeeperBucket[] = [
         { id: 'bucket1', items: [allItems[0]] },
@@ -104,9 +103,7 @@ export default function Example28() {
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">
-                28. Nested Folder
-            </div>
+            <div className="example-container-title">28. Nested Folder</div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
@@ -114,35 +111,28 @@ export default function Example28() {
                     console.log(state);
                 }}
                 accentColor={'#117865'}
-                foldersMeta={
-                    {
-                        'folder_1': 
-                        {
-                            id: 'folder_1',
-                            label: 'Folder 1',
-                            prefixNodeIcon: 'folder-icon'
-
-                        },
-                        'folder_2': 
-                        {
-                            id: 'folder_2',
-                            label: 'Folder 2',
-                            prefixNodeIcon: 'table-icon'
-                        },
-                        'folder_3': 
-                        {
-                            id: 'folder_3',
-                            label: 'Folder 3',
-                            prefixNodeIcon: 'multi-calculator-icon'
-                        },
-                        'folder_4':
-                        {
-                            id: 'folder_4',
-                            label: 'Folder 4',
-                            prefixNodeIcon: 'calendar-icon'
-                        }
-                    }
-                }
+                foldersMeta={{
+                    folder_1: {
+                        id: 'folder_1',
+                        label: 'Folder 1',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                    folder_2: {
+                        id: 'folder_2',
+                        label: 'Folder 2',
+                        prefixNodeIcon: 'table-icon',
+                    },
+                    folder_3: {
+                        id: 'folder_3',
+                        label: 'Folder 3',
+                        prefixNodeIcon: 'multi-calculator-icon',
+                    },
+                    folder_4: {
+                        id: 'folder_4',
+                        label: 'Folder 4',
+                        prefixNodeIcon: 'calendar-icon',
+                    },
+                }}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

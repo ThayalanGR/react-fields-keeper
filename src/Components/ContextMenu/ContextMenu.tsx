@@ -6,7 +6,7 @@ import {
     IContextMenuProps,
 } from '../../FieldsKeeper/FieldsKeeper.types';
 import { ContextMenuOption } from './ContextMenuOption';
-import './contextMenuStyle.less';
+import './Styles/contextMenuStyle.less';
 
 export const ContextMenu = (props: IContextMenuProps) => {
     const { children, contextMenuOptions, onOptionClick } = props;

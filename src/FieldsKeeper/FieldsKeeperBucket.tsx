@@ -13,6 +13,7 @@ import {
     IFieldsKeeperBucket,
     IFieldsKeeperBucketProps,
     IFieldsKeeperItem,
+    ISuffixNodeRendererProps,
 } from './FieldsKeeper.types';
 import { IGroupedFieldsKeeperItem, IGroupedItemRenderer } from '..';
 import {
@@ -374,6 +375,7 @@ const GroupedItemRenderer = (
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const { accentColor } = useStoreState(instanceId);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
     // State to manage editable field items and their labels
     const [editableItemId, setEditableItemId] = useState<string | null>(null);
@@ -390,6 +392,18 @@ const GroupedItemRenderer = (
             return acc;
         }, {} as Record<string, string>),
     );
+
+    useEffect(() => {
+        if (isContextMenuOpen) {
+            const handleClick = () => {
+                setIsContextMenuOpen(false);
+            };
+            document.addEventListener('mousedown', handleClick);
+            return () => {
+                document.removeEventListener('mousedown', handleClick);
+            };
+        }
+    }, [isContextMenuOpen]);
 
     useEffect(() => {
         setEditedLabels((prev) => {
@@ -458,13 +472,24 @@ const GroupedItemRenderer = (
         }
     };
 
+    const getFieldRendererOutput = (
+        renderer: unknown,
+        arg: ISuffixNodeRendererProps,
+        additionalCondition = true,
+    ) => {
+        const isRendererValid = typeof renderer === 'function';
+        const rendererElement = isRendererValid && additionalCondition ? renderer(arg) : null;
+        const isValidElement = rendererElement !== undefined && rendererElement !== null;
+        return { rendererElement, isValidElement };
+    };
+
     const renderFieldItems = ({
         fieldItems,
         isGroupItem,
         groupHeader,
     }: IGroupedItemRenderer) => {
         // compute
-        const { suffixNodeRenderer } = props;
+        const { suffixNodeRenderer, onContextMenuRenderer } = props;
 
         const isGroupHeader = groupHeader !== undefined;
 
@@ -506,19 +531,29 @@ const GroupedItemRenderer = (
                         )}
                     </div>
                 );
-                const isSuffixNodeRendererValid =
-                    typeof suffixNodeRenderer === 'function';
-                const suffixNodeRendererOutput = isSuffixNodeRendererValid && !fieldItem.flatGroup 
-                    ? suffixNodeRenderer({
-                          bucketId: currentBucket.id,
-                          fieldItem,
-                          isGroupHeader,
-                          groupFieldItems: groupHeader?.groupItems,
-                      })
-                    : null;
-                const isSuffixNodeValid =
-                    suffixNodeRendererOutput !== undefined &&
-                    suffixNodeRendererOutput !== null;
+
+                const { rendererElement: suffixNodeRendererOutput, isValidElement: isSuffixNodeValid } = getFieldRendererOutput(
+                    suffixNodeRenderer,
+                    {
+                        bucketId: currentBucket.id,
+                        fieldItem,
+                        isGroupHeader,
+                        groupFieldItems: groupHeader?.groupItems,
+                    },
+                    !fieldItem.flatGroup,
+                );
+                
+                const { rendererElement: contextMenuRendererOutput, isValidElement: isContextMenuValid } = getFieldRendererOutput(
+                    onContextMenuRenderer,
+                    {
+                        bucketId: currentBucket.id,
+                        fieldItem,
+                        isGroupHeader,
+                        groupFieldItems: groupHeader?.groupItems,
+                    },
+                    !fieldItem.flatGroup,
+                );
+                
                 return (
                     <Fragment>
                         {editableItemId ===
@@ -566,6 +601,11 @@ const GroupedItemRenderer = (
                                 ))}
                             {orientation === 'horizontal' &&
                                 groupCollapseButton}
+                            {isContextMenuOpen && isContextMenuValid  && (
+                                <div className='react-fields-keeper-bucket-mapping-content-action-context-menu' style={{paddingLeft: '10px !important'}}>
+                                    {contextMenuRendererOutput}
+                                </div>
+                            )}
                         </div>
                     </Fragment>
                 );
@@ -591,6 +631,10 @@ const GroupedItemRenderer = (
                         if (onFieldItemLabelClick) {
                             setEditableItemId(fieldItem.id);
                         }
+                    }}
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        setIsContextMenuOpen(true);
                     }}
                 >
                     <div

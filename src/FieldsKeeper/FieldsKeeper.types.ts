@@ -268,6 +268,9 @@ export interface IFieldsKeeperRootBucketProps {
     /**  Function to customize suffix node rendering **/
     suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
 
+    /**  Function to render context menu on right click **/
+    onContextMenuRenderer?:  <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;
 
@@ -426,6 +429,9 @@ export interface IFieldsKeeperBucketProps {
      */
     suffixNodeRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
 
+    /**  Function to render context menu on right click **/
+    onContextMenuRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
+
     /** Layout orientation for items within the bucket */
     orientation?: 'vertical' | 'horizontal';
 
@@ -543,7 +549,7 @@ export interface IDropdownOption {
  */
 export interface IContextMenuProps {
     /** Child elements to be rendered inside the context menu. */
-    children: ReactElement;
+    children?: ReactElement;
 
     /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
     contextMenuOptions: IContextMenuOption[];

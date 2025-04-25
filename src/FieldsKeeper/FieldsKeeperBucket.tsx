@@ -373,7 +373,7 @@ const GroupedItemRenderer = (
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { accentColor, iconColor } = useStoreState(instanceId);
+    const { iconColor } = useStoreState(instanceId);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 

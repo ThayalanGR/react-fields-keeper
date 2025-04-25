@@ -334,15 +334,14 @@ function FolderScopeItemRenderer(
     const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray.filter((groupItem) => groupItem.folderScopeItem?.id === id || groupItem.folderScopeItem?.folders?.includes(id)) : folderScopedItemsArray.filter((groupedItem) => groupedItem.folderScopeItem?.folders?.includes(folders?.[folders?.length - 1] as string) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folderScopeItem.folders.length > (folders?.length ?? 0) );
 
     const hasActiveSelection = useMemo(() => {
-        const isItemActive = (itemId: string) =>
-          buckets.some((bucket) => bucket.items.some((item) => item.id === itemId));
-      
+    const isItemActive = (itemId: string) =>
+        buckets.some((bucket) => bucket.items.some((item) => (item.sourceId ?? item.id) === itemId));
+    
         return updatedFolderScopeItems.some((groupedItem) =>
             groupedItem.folderScopeItems?.length
             ? groupedItem.folderScopeItems?.some((group) =>
-                group.items.some((groupItem) => isItemActive(groupItem.id))
-              )
-            : isItemActive(groupedItem.folderScopeItem?.id as string)
+                group.items.some((groupItem) => isItemActive((groupItem.sourceId ?? groupItem.id))))
+            : isItemActive( (groupedItem.folderScopeItem?.sourceId ?? groupedItem.folderScopeItem?.id) as string)
         );
       }, [buckets, updatedFolderScopeItems]);
     
@@ -630,7 +629,7 @@ function GroupedItemRenderer(
 
         // style
         const accentColorStyle = {
-            '--root-bucket-accent-color': accentColor ?? '#fffff',
+            '--root-bucket-accent-color': accentColor ?? '#007bff',
             '--search-highlight-text-color': accentHighlightColor ?? '#ffffff',
         } as CSSProperties;
 

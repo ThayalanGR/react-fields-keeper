@@ -232,7 +232,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         );
 
         // const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-        const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
+        // const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
 
         const fieldItems = fieldItemsRaw;
         // const fieldItems = fieldItemsRaw.map((item) => {

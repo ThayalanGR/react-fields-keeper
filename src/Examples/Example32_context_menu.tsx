@@ -6,10 +6,11 @@ import {
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
     IContextMenuOption,
+    ContextMenu,
 } from '..';
 import { SuffixNode } from '../Components/SuffixNode';
 
-export default function Example18() {
+export default function Example32() {
 
     const [contextMenuOptions, setContextMenuOptions] = useState<IContextMenuOption[]>([
         { label: "Option 1", id: "option1"},
@@ -89,7 +90,7 @@ export default function Example18() {
     return (
         <div className="example-container">
             <div className="example-container-title">
-                18. Suffix nodes support for Root bucket items
+                32. Context Menu on right click
             </div>
             <FieldsKeeperProvider
                 allItems={allItems}
@@ -103,7 +104,7 @@ export default function Example18() {
                             label="Bucket 1"
                             allowRemoveFields
                             suffixNodeRenderer={({ fieldItem, bucketId }) => {
-                                console.log("🚀 ~ Example18 ~ fieldItem:", fieldItem, bucketId);
+                                console.log("🚀 ~ Example32 ~ fieldItem:", fieldItem, bucketId);
 
                                 const updateIsActive = (options: IContextMenuOption[], id: string, parentId?: string): IContextMenuOption[] => {
                                     return options.map(option => {
@@ -137,6 +138,41 @@ export default function Example18() {
 
                                 return <SuffixNode contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick} />;
                             }}
+                            onContextMenuRenderer={({ fieldItem, bucketId }) => {
+                                console.log("🚀 ~ Example32 ~ Context Menu Clicked:", fieldItem, bucketId);
+
+                                const updateIsActive = (options: IContextMenuOption[], id: string, parentId?: string): IContextMenuOption[] => {
+                                    return options.map(option => {
+                                        if (parentId && option.id === parentId && option.subMenuOptions) {
+                                            return {
+                                                ...option,
+                                                subMenuOptions: option.subMenuOptions.map(subOption =>
+                                                    subOption.id === id ? { ...subOption, isActive: true } : { ...subOption, isActive: false }
+                                                ),
+                                            };
+                                        }
+                                        if (!parentId) {
+                                            if(option.id === id){
+                                                return { ...option, isActive: true };
+                                            }
+                                            return { ...option, isActive: false };
+                                        }
+                                        if (option.subMenuOptions) {
+                                            return {
+                                                ...option,
+                                                subMenuOptions: updateIsActive(option.subMenuOptions, id, parentId),
+                                            };
+                                        }
+                                        return option;
+                                    });
+                                };
+
+                                const onOptionClick = (id: string, parentId?: string) => {
+                                    setContextMenuOptions(prevOptions => updateIsActive(prevOptions, id, parentId));
+                                };
+
+                                return <ContextMenu contextMenuOptions={contextMenuOptions} onOptionClick={onOptionClick} />;
+                            }}
                         />
                         <FieldsKeeperBucket
                             id="bucket2"
@@ -164,6 +200,19 @@ export default function Example18() {
                                 };
 
                                 return <SuffixNode contextMenuOptions={contextMenuRootOptions} onOptionClick={onOptionClick} />;
+                            }}
+                            onContextMenuRenderer={({ id: fieldId }) => {
+                                const contextMenuRootOptions: IContextMenuOption[] = [
+                                    { label: "Option 1", id: "option1" },
+                                    { label: "Option 2", id: "option2" },
+                                    { label: "Option 3", id: "option3" },
+                                ];
+                                
+                                const onOptionClick = (id: string) => {
+                                    console.log("onContextMenuClick", id, fieldId);
+                                };
+
+                                return <ContextMenu contextMenuOptions={contextMenuRootOptions} onOptionClick={onOptionClick} />;
                             }}
                         />
                     </div>

@@ -23,7 +23,7 @@ export const ContextMenu = (props: IContextMenuProps) => {
         placement: 'right-start',
     });
 
-    const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
+    const [isContextMenuVisible, setIsContextMenuVisible] = useState(children === undefined ? true : false);
     const [subMenuOptionIdHovered, setSubMenuOptionIdHovered] = useState('');
 
     const onOutsideClick = () => {
@@ -95,7 +95,7 @@ export const ContextMenu = (props: IContextMenuProps) => {
 
     return (
         <>
-            {React.cloneElement(children, {
+            {React.cloneElement(children ?? <div></div>, {
                 ref: setReferenceElement,
                 onClick: () => {
                     onContextMenuClick();

@@ -506,6 +506,20 @@ function GroupedItemRenderer(
     const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
 
     const [groupHeight, setGroupHeight] = useState(0);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+
+    useEffect(() => {
+        if (isContextMenuOpen) {
+            const handleClick = () => {
+                setIsContextMenuOpen(false);
+            };
+            document.addEventListener('mousedown', handleClick);
+            return () => {
+                document.removeEventListener('mousedown', handleClick);
+            };
+        }
+    }, [isContextMenuOpen]);
+
     // compute
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
@@ -610,6 +624,17 @@ function GroupedItemRenderer(
             });
         };
 
+    const getNodeRendererOutput = (
+        renderer: unknown,
+        item: IFieldsKeeperItem,
+        additionalCondition = true,
+    ) => {
+        const isRendererValid = typeof renderer === 'function';
+        const rendererOutput = isRendererValid && additionalCondition ? renderer(item) : null;
+        const isValidElement = rendererOutput !== undefined && rendererOutput !== null;
+        return { rendererOutput, isValidElement };
+    }
+
     // paint
     const renderFieldItems = ({
         fieldItems,
@@ -617,7 +642,7 @@ function GroupedItemRenderer(
         groupHeader,
         hasMasterGroup
     }: IGroupedItemRenderer) => {
-        const { suffixNodeRenderer } = props;
+        const { suffixNodeRenderer, onContextMenuRenderer } = props;
         // compute
         const isGroupHeader = groupHeader !== undefined;
 
@@ -684,14 +709,17 @@ function GroupedItemRenderer(
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
                 : checkIsFieldItemAssigned(fieldItem);
-            const isSuffixNodeRendererValid =
-                typeof suffixNodeRenderer === 'function';
-            const suffixNodeRendererOutput = isSuffixNodeRendererValid
-                ? suffixNodeRenderer(fieldItem)
-                : null;
-            const isSuffixNodeValid =
-                suffixNodeRendererOutput !== undefined &&
-                suffixNodeRendererOutput !== null;
+
+            const { rendererOutput: suffixNodeRendererOutput, isValidElement: isSuffixNodeValid } = getNodeRendererOutput(
+                suffixNodeRenderer,
+                fieldItem,
+            );
+
+            const { rendererOutput: contextMenuRendererOutput, isValidElement: isContextMenuValid } = getNodeRendererOutput(
+                onContextMenuRenderer,
+                fieldItem,
+                !fieldItem.flatGroup && fieldItem._fieldItemIndex == undefined,
+            );
 
             return (
                 <div
@@ -714,6 +742,11 @@ function GroupedItemRenderer(
                         fieldItem.rootTooltip ??
                         fieldItem.label
                     }
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsContextMenuOpen(true);
+                    }}
                 >
                     <div
                         className={classNames(
@@ -850,6 +883,11 @@ function GroupedItemRenderer(
                                 <div />
                             )}
                         </div>
+                        {isContextMenuOpen && isContextMenuValid && (
+                                <div className='react-fields-keeper-root-mapping-content-action-context-menu'>
+                                    {contextMenuRendererOutput}
+                                </div>
+                            )}
                     </div>
                 </div>
             );

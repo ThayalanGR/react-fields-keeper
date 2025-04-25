@@ -5,7 +5,7 @@ export interface IFieldsKeeperSearcherProps {
     searchQuery: string;
     searchPlaceholder?: string;
     className?: string;
-    accentColorStyle?: React.CSSProperties;
+    iconColorStyle?: React.CSSProperties;
     onSearchQueryChange: (value: string) => void;
 }
 
@@ -18,7 +18,7 @@ export const FieldsKeeperSearcher = forwardRef<
         className,
         searchPlaceholder,
         searchQuery,
-        accentColorStyle = {},
+        iconColorStyle = {},
         onSearchQueryChange,
     } = props;
 
@@ -45,7 +45,7 @@ export const FieldsKeeperSearcher = forwardRef<
         >
             <div
                 className="react-fields-keeper-mapping-column-searcher-prefix"
-                style={accentColorStyle}
+                style={iconColorStyle}
             >
                 <span className="fk-ms-Icon fk-ms-Icon--Search" />
             </div>
@@ -62,7 +62,7 @@ export const FieldsKeeperSearcher = forwardRef<
                     className="react-fields-keeper-mapping-column-searcher-clear"
                     role="button"
                     onClick={onClearSearchQuery}
-                    style={accentColorStyle}
+                    style={iconColorStyle}
                 >
                     <span className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                 </div>

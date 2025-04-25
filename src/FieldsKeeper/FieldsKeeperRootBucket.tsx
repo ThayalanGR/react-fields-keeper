@@ -59,7 +59,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { allItems: allOriginalItems, accentColor, foldersMeta } =
+    const { allItems: allOriginalItems, accentColor, iconColor, foldersMeta } =
         useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
     const allItems = useMemo(() => {
@@ -185,7 +185,11 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
     // style
     const accentColorStyle = (
-        accentColor ? { '--root-bucket-accent-color': accentColor } : {}
+        accentColor ? { '--bucket-accent-color': accentColor } : {}
+    ) as CSSProperties;
+
+    const iconColorStyle = (
+        iconColor ? { '--bucket-icon-color': iconColor } : {}
     ) as CSSProperties;
 
     // paint
@@ -218,7 +222,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                     searchPlaceholder={searchPlaceholder}
                     searchQuery={searchQuery}
                     onSearchQueryChange={setSearchQuery}
-                    accentColorStyle={accentColorStyle}
+                    iconColorStyle={iconColorStyle}
                 />
             ) : (
                 <div />
@@ -330,24 +334,32 @@ function FolderScopeItemRenderer(
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
-    const { buckets, accentColor } = useStoreState(instanceId);
+    const { buckets, accentColor, iconColor } = useStoreState(instanceId);
     const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray.filter((groupItem) => groupItem.folderScopeItem?.id === id || groupItem.folderScopeItem?.folders?.includes(id)) : folderScopedItemsArray.filter((groupedItem) => groupedItem.folderScopeItem?.folders?.includes(folders?.[folders?.length - 1] as string) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folderScopeItem.folders.length > (folders?.length ?? 0) );
 
     const hasActiveSelection = useMemo(() => {
-    const isItemActive = (itemId: string) =>
-        buckets.some((bucket) => bucket.items.some((item) => (item.sourceId ?? item.id) === itemId));
+    const isItemActive = (itemId: string, flatGroupId?: string) =>{
+        return buckets.some((bucket) => bucket.items.some((item) => {
+            const defaultId = item.sourceId ?? item.id;
+            return defaultId === itemId || defaultId === flatGroupId
+        }));
+    }
     
         return updatedFolderScopeItems.some((groupedItem) =>
             groupedItem.folderScopeItems?.length
             ? groupedItem.folderScopeItems?.some((group) =>
-                group.items.some((groupItem) => isItemActive((groupItem.sourceId ?? groupItem.id))))
+                group.items.some((groupItem) => isItemActive((groupItem.sourceId || groupItem.id), groupItem.flatGroup)))
             : isItemActive( (groupedItem.folderScopeItem?.sourceId ?? groupedItem.folderScopeItem?.id) as string)
         );
       }, [buckets, updatedFolderScopeItems]);
     
     // style
     const accentColorStyle = (
-        accentColor ? { '--root-bucket-accent-color': accentColor } : {}
+        accentColor ? { '--bucket-accent-color': accentColor } : {}
+    ) as CSSProperties;
+
+    const iconColorStyle = (
+        iconColor ? { '--bucket-icon-color': iconColor } : {}
     ) as CSSProperties;
 
     // paint
@@ -387,15 +399,15 @@ function FolderScopeItemRenderer(
         if(React.isValidElement(prefixNode)){
             return prefixNodeIcon
         }else if(prefixNodeIcon === 'folder-icon') {
-            return <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} />
+            return <Icons.folder className="folder-scope-label-table-icon" style={iconColorStyle} />
         } else if(prefixNodeIcon === 'table-icon') {
-            return <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} />
+            return <Icons.table className="folder-scope-label-table-icon" style={iconColorStyle} />
         } else if(prefixNodeIcon === 'multi-calculator-icon') {
-            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--CalculatorGroup" style={accentColorStyle} />
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--CalculatorGroup" style={iconColorStyle} />
         } else if(prefixNodeIcon === 'calendar-icon') {
-            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--Calculator" style={accentColorStyle} />
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--Calculator" style={iconColorStyle} />
         } else if(prefixNodeIcon){
-             return <div className='folder-scope-label-table-icon' style={accentColorStyle}>{prefixNodeIcon}</div>;
+             return <div className='folder-scope-label-table-icon' style={iconColorStyle}>{prefixNodeIcon}</div>;
         } else {
             return null;
         }
@@ -422,14 +434,14 @@ function FolderScopeItemRenderer(
                     <div className="folder-scope-label-icon">
                         { getPrefixNodeIcon(prefixNode) }
                         {hasActiveSelection && (
-                            <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
+                            <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={iconColorStyle} />
                         )}
                     </div>
                     
                     <div className={classNames("folder-scope-label-text", customClassNames?.customLabelClassName)} style={accentColorStyle}>
                         {itemLabel}
                     </div>
-                    <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={accentColorStyle}>
+                    <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={iconColorStyle}>
                         {isFolderCollapsed ? (
                             <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
                         ) : (
@@ -496,12 +508,27 @@ function GroupedItemRenderer(
         allowDuplicates,
         accentColor,
         accentHighlightColor,
+        iconColor
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
 
     const [groupHeight, setGroupHeight] = useState(0);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+
+    useEffect(() => {
+        if (isContextMenuOpen) {
+            const handleClick = () => {
+                setIsContextMenuOpen(false);
+            };
+            document.addEventListener('mousedown', handleClick);
+            return () => {
+                document.removeEventListener('mousedown', handleClick);
+            };
+        }
+    }, [isContextMenuOpen]);
+
     // compute
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
@@ -606,6 +633,17 @@ function GroupedItemRenderer(
             });
         };
 
+    const getNodeRendererOutput = (
+        renderer: unknown,
+        item: IFieldsKeeperItem,
+        additionalCondition = true,
+    ) => {
+        const isRendererValid = typeof renderer === 'function';
+        const rendererOutput = isRendererValid && additionalCondition ? renderer(item) : null;
+        const isValidElement = rendererOutput !== undefined && rendererOutput !== null;
+        return { rendererOutput, isValidElement };
+    }
+
     // paint
     const renderFieldItems = ({
         fieldItems,
@@ -613,7 +651,7 @@ function GroupedItemRenderer(
         groupHeader,
         hasMasterGroup
     }: IGroupedItemRenderer) => {
-        const { suffixNodeRenderer } = props;
+        const { suffixNodeRenderer, onContextMenuRenderer } = props;
         // compute
         const isGroupHeader = groupHeader !== undefined;
 
@@ -629,8 +667,9 @@ function GroupedItemRenderer(
 
         // style
         const accentColorStyle = {
-            '--root-bucket-accent-color': accentColor ?? '#007bff',
-            '--search-highlight-text-color': accentHighlightColor ?? '#ffffff',
+            '--bucket-accent-color': accentColor ?? '#007bff',
+            '--highlight-element-color': accentHighlightColor ?? '#ffffff',
+            '--bucket-icon-color': iconColor ?? '#000000',
         } as CSSProperties;
 
         const getPrefixNodeIconElement = (prefixNodeIcon: string | ReactNode) => {
@@ -680,14 +719,17 @@ function GroupedItemRenderer(
             const isFieldItemAssigned = isGroupHeader
                 ? groupHeader?.isGroupHeaderSelected
                 : checkIsFieldItemAssigned(fieldItem);
-            const isSuffixNodeRendererValid =
-                typeof suffixNodeRenderer === 'function';
-            const suffixNodeRendererOutput = isSuffixNodeRendererValid
-                ? suffixNodeRenderer(fieldItem)
-                : null;
-            const isSuffixNodeValid =
-                suffixNodeRendererOutput !== undefined &&
-                suffixNodeRendererOutput !== null;
+
+            const { rendererOutput: suffixNodeRendererOutput, isValidElement: isSuffixNodeValid } = getNodeRendererOutput(
+                suffixNodeRenderer,
+                fieldItem,
+            );
+
+            const { rendererOutput: contextMenuRendererOutput, isValidElement: isContextMenuValid } = getNodeRendererOutput(
+                onContextMenuRenderer,
+                fieldItem,
+                !fieldItem.flatGroup && fieldItem._fieldItemIndex == undefined,
+            );
 
             return (
                 <div
@@ -710,6 +752,11 @@ function GroupedItemRenderer(
                         fieldItem.rootTooltip ??
                         fieldItem.label
                     }
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsContextMenuOpen(true);
+                    }}
                 >
                     <div
                         className={classNames(
@@ -846,6 +893,11 @@ function GroupedItemRenderer(
                                 <div />
                             )}
                         </div>
+                        {isContextMenuOpen && isContextMenuValid && (
+                                <div className='react-fields-keeper-root-mapping-content-action-context-menu'>
+                                    {contextMenuRendererOutput}
+                                </div>
+                            )}
                     </div>
                 </div>
             );

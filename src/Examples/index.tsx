@@ -29,6 +29,7 @@ import Example28_nested_folder from './Example28_nested_folder';
 import Example29_SourceId from './Example29_SourceId';
 import Example30_flat_group from './Example30_flat_group';
 import Example31_Custom_Styling_ClassName from './Example31_CustomStyling';
+import Example32_context_menu from './Example32_context_menu'
 
 export const examples = {
     Example1_sample_usecase,
@@ -61,5 +62,6 @@ export const examples = {
     Example28_nested_folder,
     Example29_SourceId,
     Example30_flat_group,
-    Example31_Custom_Styling_ClassName
+    Example31_Custom_Styling_ClassName,
+    Example32_context_menu
 };

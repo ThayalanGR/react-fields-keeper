@@ -268,6 +268,9 @@ export interface IFieldsKeeperRootBucketProps {
     /**  Function to customize suffix node rendering **/
     suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
 
+    /**  Function to render context menu on right click **/
+    onContextMenuRenderer?:  <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;
 
@@ -336,6 +339,9 @@ export interface IFieldsKeeperState {
      * Allows setting a highlight color for text.
      */
     accentHighlightColor?: string;
+
+    /** Color for icons */
+    iconColor?: string;
 
     /** 
      * A list of folders with folder name as key and folder details as value 
@@ -425,6 +431,9 @@ export interface IFieldsKeeperBucketProps {
      * Custom function for rendering suffix items specific to this bucket
      */
     suffixNodeRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
+
+    /**  Function to render context menu on right click **/
+    onContextMenuRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
 
     /** Layout orientation for items within the bucket */
     orientation?: 'vertical' | 'horizontal';
@@ -543,7 +552,7 @@ export interface IDropdownOption {
  */
 export interface IContextMenuProps {
     /** Child elements to be rendered inside the context menu. */
-    children: ReactElement;
+    children?: ReactElement;
 
     /** List of options available in the context menu, each with a label, ID and subMenuOptions . */
     contextMenuOptions: IContextMenuOption[];

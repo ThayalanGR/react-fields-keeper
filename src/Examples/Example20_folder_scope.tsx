@@ -12,23 +12,22 @@ export default function Example20() {
         {
             id: 'a',
             label: 'a',
-            folders: ['folder_1']
+            folders: ['folder_1'],
         },
         {
             id: 'b',
             label: 'b',
-            folders: ['folder_1']
+            folders: ['folder_1'],
         },
         {
             id: 'c',
             label: 'c',
-            folders: ['folder_2']
+            folders: ['folder_2'],
         },
         {
             id: 'd',
             label: 'd',
-            folders: ['folder_2']
-
+            folders: ['folder_2'],
         },
         {
             id: 'date.quarter',
@@ -83,34 +82,28 @@ export default function Example20() {
                 onUpdate={(state) => {
                     console.log(state);
                 }}
-                foldersMeta={
-                    {
-                        'folder_1': 
-                        {
-                            id: 'folder_1',
-                            label: 'Folder 1',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                        'folder_2': 
-                        {
-                            id: 'folder_2',
-                            label: 'Folder 2',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                        'folder_3': 
-                        {
-                            id: 'folder_3',
-                            label: 'Folder 3',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                        'folder_4':
-                        {
-                            id: 'folder_4',
-                            label: 'Folder 4',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                    }
-                }            
+                foldersMeta={{
+                    folder_1: {
+                        id: 'folder_1',
+                        label: 'Folder 1',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                    folder_2: {
+                        id: 'folder_2',
+                        label: 'Folder 2',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                    folder_3: {
+                        id: 'folder_3',
+                        label: 'Folder 3',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                    folder_4: {
+                        id: 'folder_4',
+                        label: 'Folder 4',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                }}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

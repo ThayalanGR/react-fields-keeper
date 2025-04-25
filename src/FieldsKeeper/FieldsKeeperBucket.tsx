@@ -41,7 +41,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         wrapperClassName,
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
-        customClassNames
+        customClassNames,
     } = props;
 
     // state
@@ -69,7 +69,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     }>(() => {
         const bucket = buckets.find((bucket) => bucket.id === id);
         if (!bucket) return { groupedItems: [], currentBucket: bucket };
-        
+
         return {
             currentBucket: bucket,
             groupedItems: getGroupedItems(bucket.items),
@@ -201,8 +201,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         const foundInstanceIdChunk = foundInstanceId
             ? e.dataTransfer.getData(foundInstanceId)
             : '';
-        
-        const [idsChunk, sourceIdsChunk] = foundInstanceIdChunk.split('***') 
+
+        const [idsChunk, sourceIdsChunk] = foundInstanceIdChunk.split('***');
         const fieldItemIds = (idsChunk ?? '').split(',');
         const fieldSourceIds = (sourceIdsChunk ?? '').split(',');
 
@@ -210,27 +210,40 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     };
 
     const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
-        const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } = getFieldItemIds(e);
-        
+        const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } =
+            getFieldItemIds(e);
+
         const destinationBucket = buckets.find((b) => b.id === id);
         const getDropIndex = () => {
-            if((e.target as HTMLDivElement).classList.contains('react-fields-keeper-mapping-content-input')){
-                return (destinationBucket?.items.length ?? 0);
+            if (
+                (e.target as HTMLDivElement).classList.contains(
+                    'react-fields-keeper-mapping-content-input',
+                )
+            ) {
+                return destinationBucket?.items.length ?? 0;
             } else {
                 return Number(
                     (e.target as HTMLDivElement).getAttribute('data-index'),
                 );
             }
-        }
+        };
         const dropIndex = getDropIndex();
         const currentBucket = buckets.find((b) => b.id === fromBucket);
         const currentBucketFieldItems = currentBucket?.items?.filter?.((item) =>
-            fieldItemIds.some((fieldItemId) => (item.id) === fieldItemId)
+            fieldItemIds.some((fieldItemId) => item.id === fieldItemId),
         );
 
-        const fieldItemsRaw = currentBucketFieldItems ?? allItems.filter((item) =>
-            fieldItemIds.some((fieldItemId) => (item.id) === fieldItemId) ||  fieldSourceIds.some((fieldSourceId) => (item.sourceId) === fieldSourceId)
-        );
+        const fieldItemsRaw =
+            currentBucketFieldItems ??
+            allItems.filter(
+                (item) =>
+                    fieldItemIds.some(
+                        (fieldItemId) => item.id === fieldItemId,
+                    ) ||
+                    fieldSourceIds.some(
+                        (fieldSourceId) => item.sourceId === fieldSourceId,
+                    ),
+            );
 
         // const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
         // const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
@@ -366,7 +379,7 @@ const GroupedItemRenderer = (
         fieldItemIndex,
         activeDraggedElementRef,
         onFieldItemLabelClick,
-        customClassNames
+        customClassNames,
     } = props;
 
     // state
@@ -414,7 +427,8 @@ const GroupedItemRenderer = (
                     item.group &&
                     item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
                 ) {
-                    newLabels[item.group] = item.flatGroupLabel ?? item.groupLabel as string;
+                    newLabels[item.group] =
+                        item.flatGroupLabel ?? (item.groupLabel as string);
                 }
             });
             return newLabels;
@@ -442,7 +456,9 @@ const GroupedItemRenderer = (
             );
             e.dataTransfer.setData(
                 instanceId,
-                fieldItems.map((item) => (item.id)).join(',') + '***' + fieldItems.map((item) => (item.sourceId)).join(','),
+                fieldItems.map((item) => item.id).join(',') +
+                    '***' +
+                    fieldItems.map((item) => item.sourceId).join(','),
             );
             activeDraggedElementRef.current = e.target as HTMLDivElement;
         };
@@ -478,8 +494,10 @@ const GroupedItemRenderer = (
         additionalCondition = true,
     ) => {
         const isRendererValid = typeof renderer === 'function';
-        const rendererElement = isRendererValid && additionalCondition ? renderer(arg) : null;
-        const isValidElement = rendererElement !== undefined && rendererElement !== null;
+        const rendererElement =
+            isRendererValid && additionalCondition ? renderer(arg) : null;
+        const isValidElement =
+            rendererElement !== undefined && rendererElement !== null;
         return { rendererElement, isValidElement };
     };
 
@@ -532,7 +550,10 @@ const GroupedItemRenderer = (
                     </div>
                 );
 
-                const { rendererElement: suffixNodeRendererOutput, isValidElement: isSuffixNodeValid } = getFieldRendererOutput(
+                const {
+                    rendererElement: suffixNodeRendererOutput,
+                    isValidElement: isSuffixNodeValid,
+                } = getFieldRendererOutput(
                     suffixNodeRenderer,
                     {
                         bucketId: currentBucket.id,
@@ -542,8 +563,11 @@ const GroupedItemRenderer = (
                     },
                     !fieldItem.flatGroup,
                 );
-                
-                const { rendererElement: contextMenuRendererOutput, isValidElement: isContextMenuValid } = getFieldRendererOutput(
+
+                const {
+                    rendererElement: contextMenuRendererOutput,
+                    isValidElement: isContextMenuValid,
+                } = getFieldRendererOutput(
                     onContextMenuRenderer,
                     {
                         bucketId: currentBucket.id,
@@ -553,7 +577,7 @@ const GroupedItemRenderer = (
                     },
                     !fieldItem.flatGroup,
                 );
-                
+
                 return (
                     <Fragment>
                         {editableItemId ===
@@ -575,14 +599,25 @@ const GroupedItemRenderer = (
                                 autoFocus
                             />
                         ) : (
-                            <div className={classNames('react-fields-keeper-mapping-content-input-filled-value', customClassNames?.customLabelClassName)}>
+                            <div
+                                className={classNames(
+                                    'react-fields-keeper-mapping-content-input-filled-value',
+                                    customClassNames?.customLabelClassName,
+                                )}
+                            >
                                 {editedLabels[fieldItem.id]}
                             </div>
                         )}
-                        <div className="react-fields-keeper-mapping-content-action-buttons" style={iconColorStyle}>
+                        <div
+                            className="react-fields-keeper-mapping-content-action-buttons"
+                            style={iconColorStyle}
+                        >
                             {orientation === 'vertical' && groupCollapseButton}
                             {isSuffixNodeValid && (
-                                <div className="react-fields-keeper-mapping-content-action-suffixNode" style={iconColorStyle}>
+                                <div
+                                    className="react-fields-keeper-mapping-content-action-suffixNode"
+                                    style={iconColorStyle}
+                                >
                                     {suffixNodeRendererOutput}
                                 </div>
                             )}
@@ -601,8 +636,11 @@ const GroupedItemRenderer = (
                                 ))}
                             {orientation === 'horizontal' &&
                                 groupCollapseButton}
-                            {isContextMenuOpen && isContextMenuValid  && (
-                                <div className='react-fields-keeper-bucket-mapping-content-action-context-menu' style={{paddingLeft: '10px !important'}}>
+                            {isContextMenuOpen && isContextMenuValid && (
+                                <div
+                                    className="react-fields-keeper-bucket-mapping-content-action-context-menu"
+                                    style={{ paddingLeft: '10px !important' }}
+                                >
                                     {contextMenuRendererOutput}
                                 </div>
                             )}
@@ -651,7 +689,7 @@ const GroupedItemRenderer = (
                                 'react-fields-keeper-mapping-content-input-filled-custom-renderer':
                                     customItemRenderer !== undefined,
                             },
-                            customClassNames?.customFieldItemContainerClassName
+                            customClassNames?.customFieldItemContainerClassName,
                         )}
                         style={itemStyle}
                         draggable
@@ -701,7 +739,7 @@ const GroupedItemRenderer = (
                             orientation === 'horizontal',
                         'group-wrap': horizontalFillOverflowType === 'wrap',
                     },
-                    customClassNames?.customGroupContainerClassName
+                    customClassNames?.customGroupContainerClassName,
                 )}
             >
                 {/* group header */}
@@ -810,7 +848,9 @@ export function assignFieldItems(props: {
             bucket.items = bucket.items.filter((item, itemIndex) => {
                 const shouldKeepItem =
                     requiredFieldItems.some(
-                        (fieldItem) => (fieldItem.sourceId ?? fieldItem.id) === (item.sourceId ?? item.id),
+                        (fieldItem) =>
+                            (fieldItem.sourceId ?? fieldItem.id) ===
+                            (item.sourceId ?? item.id),
                     ) === false ||
                     restrictedItems.some(
                         (fieldItem) => fieldItem.id === item.id,

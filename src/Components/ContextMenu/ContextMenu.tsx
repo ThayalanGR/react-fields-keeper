@@ -1,9 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
-import { createPortal } from "react-dom";
-import { IContextMenuOption, IContextMenuProps } from "../../FieldsKeeper/FieldsKeeper.types";
-import { ContextMenuOption } from "./ContextMenuOption";
-import './contextMenustyle.less';
+import { createPortal } from 'react-dom';
+import {
+    IContextMenuOption,
+    IContextMenuProps,
+} from '../../FieldsKeeper/FieldsKeeper.types';
+import { ContextMenuOption } from './ContextMenuOption';
+import './contextMenuStyle.less';
 
 export const ContextMenu = (props: IContextMenuProps) => {
     const { children, contextMenuOptions, onOptionClick } = props;
@@ -11,8 +14,11 @@ export const ContextMenu = (props: IContextMenuProps) => {
     const menuRef = useRef<HTMLDivElement | null>(null);
     const overlayRef = useRef<HTMLDivElement | null>(null);
 
-    const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
-    const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
+    const [referenceElement, setReferenceElement] =
+        useState<HTMLDivElement | null>(null);
+    const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
+        null,
+    );
 
     const setMenuRef = (node: HTMLDivElement | null) => {
         menuRef.current = node;
@@ -23,7 +29,9 @@ export const ContextMenu = (props: IContextMenuProps) => {
         placement: 'right-start',
     });
 
-    const [isContextMenuVisible, setIsContextMenuVisible] = useState(children === undefined ? true : false);
+    const [isContextMenuVisible, setIsContextMenuVisible] = useState(
+        children === undefined ? true : false,
+    );
     const [subMenuOptionIdHovered, setSubMenuOptionIdHovered] = useState('');
 
     const onOutsideClick = () => {
@@ -31,7 +39,10 @@ export const ContextMenu = (props: IContextMenuProps) => {
         setSubMenuOptionIdHovered('');
     };
 
-    const onOptionClickHandler = (option: IContextMenuOption, parentId?: string) => {
+    const onOptionClickHandler = (
+        option: IContextMenuOption,
+        parentId?: string,
+    ) => {
         if (option.subMenuOptions?.length) return false;
         onOptionClick(option.id, parentId);
         setIsContextMenuVisible(false);
@@ -44,13 +55,13 @@ export const ContextMenu = (props: IContextMenuProps) => {
     const onMouseOver = (
         e: React.MouseEvent<HTMLDivElement, MouseEvent>,
         option: IContextMenuOption,
-        isSubMenuHover = false
+        isSubMenuHover = false,
     ) => {
         e.persist();
         const target = e.currentTarget;
 
         if (target?.style) {
-            target.style.backgroundColor = "rgb(243, 242, 241)";
+            target.style.backgroundColor = 'rgb(243, 242, 241)';
         }
 
         if (option.subMenuOptions?.length && !isSubMenuHover) {
@@ -72,24 +83,31 @@ export const ContextMenu = (props: IContextMenuProps) => {
 
     useEffect(() => {
         const handleOutsideClick = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target as Node)
+            ) {
                 onOutsideClick();
             }
         };
 
         const overlay = overlayRef.current;
         if (overlay) {
-            overlay.addEventListener("wheel", preventScroll, { passive: false });
-            overlay.addEventListener("touchmove", preventScroll, { passive: false });
+            overlay.addEventListener('wheel', preventScroll, {
+                passive: false,
+            });
+            overlay.addEventListener('touchmove', preventScroll, {
+                passive: false,
+            });
         }
 
-        document.addEventListener("mousedown", handleOutsideClick);
+        document.addEventListener('mousedown', handleOutsideClick);
         return () => {
             if (overlay) {
-                overlay.removeEventListener("wheel", preventScroll);
-                overlay.removeEventListener("touchmove", preventScroll);
+                overlay.removeEventListener('wheel', preventScroll);
+                overlay.removeEventListener('touchmove', preventScroll);
             }
-            document.removeEventListener("mousedown", handleOutsideClick);
+            document.removeEventListener('mousedown', handleOutsideClick);
         };
     }, []);
 
@@ -102,37 +120,46 @@ export const ContextMenu = (props: IContextMenuProps) => {
                 },
             })}
 
-            {isContextMenuVisible && createPortal(
-                <div
-                    ref={overlayRef}
-                    className="react-fields-keeper-context-menu-underlay"
-                    onWheel={onOverlayScroll}
-                    onTouchMove={onOverlayScroll}
-                >
+            {isContextMenuVisible &&
+                createPortal(
                     <div
-                        ref={setMenuRef}
-                        className="react-fields-keeper-context-menu-node"
-                        style={styles.popper}
-                        {...attributes.popper}
+                        ref={overlayRef}
+                        className="react-fields-keeper-context-menu-underlay"
+                        onWheel={onOverlayScroll}
+                        onTouchMove={onOverlayScroll}
                     >
-                        {contextMenuOptions.map((option) => (
-                            <div key={option.id}>
-                                <ContextMenuOption
-                                    key={option.id}
-                                    option={option}
-                                    onMouseOver={onMouseOver}
-                                    onOptionClickHandler={onOptionClickHandler}
-                                    isSubMenu={false}
-                                    subMenuOptionIdHovered={subMenuOptionIdHovered}
-                                    contextMenuOptions={contextMenuOptions}
-                                />
-                                { option.showSeparator ? <div className="react-fields-keeper-separator"> </div> : null }
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                , document.body
-            )}
+                        <div
+                            ref={setMenuRef}
+                            className="react-fields-keeper-context-menu-node"
+                            style={styles.popper}
+                            {...attributes.popper}
+                        >
+                            {contextMenuOptions.map((option) => (
+                                <div key={option.id}>
+                                    <ContextMenuOption
+                                        key={option.id}
+                                        option={option}
+                                        onMouseOver={onMouseOver}
+                                        onOptionClickHandler={
+                                            onOptionClickHandler
+                                        }
+                                        isSubMenu={false}
+                                        subMenuOptionIdHovered={
+                                            subMenuOptionIdHovered
+                                        }
+                                        contextMenuOptions={contextMenuOptions}
+                                    />
+                                    {option.showSeparator ? (
+                                        <div className="react-fields-keeper-separator">
+                                            {' '}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ))}
+                        </div>
+                    </div>,
+                    document.body,
+                )}
         </>
     );
 };

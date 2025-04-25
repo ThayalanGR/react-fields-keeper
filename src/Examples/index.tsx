@@ -1,4 +1,4 @@
-import Example1_sample_usecase from './Example1_sample_usecase';
+import Example1_sample_use_case from './Example1_sample_use_case';
 import Example2_highlight_targeted_items from './Example2_highlight_targeted_items';
 import Example3_grouping_items from './Example3_grouping_items';
 import Example4_custom_bucket_priority from './Example4_custom_bucket_priority';
@@ -29,10 +29,10 @@ import Example28_nested_folder from './Example28_nested_folder';
 import Example29_SourceId from './Example29_SourceId';
 import Example30_flat_group from './Example30_flat_group';
 import Example31_Custom_Styling_ClassName from './Example31_CustomStyling';
-import Example32_context_menu from './Example32_context_menu'
+import Example32_context_menu from './Example32_context_menu';
 
 export const examples = {
-    Example1_sample_usecase,
+    Example1_sample_use_case,
     Example2_highlight_targeted_items,
     Example3_grouping_items,
     Example4_custom_bucket_priority,
@@ -63,5 +63,5 @@ export const examples = {
     Example29_SourceId,
     Example30_flat_group,
     Example31_Custom_Styling_ClassName,
-    Example32_context_menu
+    Example32_context_menu,
 };

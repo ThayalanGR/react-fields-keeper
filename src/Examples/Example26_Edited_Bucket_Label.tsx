@@ -14,23 +14,22 @@ export default function Example26() {
         {
             id: 'a',
             label: 'a',
-            folders: ['folder_1']
+            folders: ['folder_1'],
         },
         {
             id: 'b',
             label: 'b',
-            folders: ['folder_1']
+            folders: ['folder_1'],
         },
         {
             id: 'c',
             label: 'c',
-            folders: ['folder_2']
+            folders: ['folder_2'],
         },
         {
             id: 'd',
             label: 'd',
-            folders: ['folder_2']
-
+            folders: ['folder_2'],
         },
         {
             id: 'date.quarter',
@@ -66,7 +65,7 @@ export default function Example26() {
         },
     ];
 
-    const [ buckets, setBuckets ] = useState<IFieldsKeeperBucket[]>([
+    const [buckets, setBuckets] = useState<IFieldsKeeperBucket[]>([
         { id: 'bucket1', items: [allItems[0]] },
         {
             id: 'bucket2',
@@ -75,17 +74,23 @@ export default function Example26() {
         { id: 'bucket3', items: [] },
     ]);
 
-    const updateFieldLabel = (fieldItemLabelClickProps: IFieldItemLabelClickProps)=> {
-        const { bucketId, fieldItem, newValue: newvalue } = fieldItemLabelClickProps;
+    const updateFieldLabel = (
+        fieldItemLabelClickProps: IFieldItemLabelClickProps,
+    ) => {
+        const {
+            bucketId,
+            fieldItem,
+            newValue: newvalue,
+        } = fieldItemLabelClickProps;
         const updateAllItems = buckets.map((bucket) => {
-            if(bucket.id === bucketId) {
+            if (bucket.id === bucketId) {
                 return {
                     ...bucket,
                     items: bucket.items.map((item) => {
-                        if(item.group === fieldItem.id) {
+                        if (item.group === fieldItem.id) {
                             return { ...item, groupLabel: newvalue };
                         }
-                        if(item.id === fieldItem.id) {
+                        if (item.id === fieldItem.id) {
                             return { ...item, label: newvalue };
                         }
                         return item;
@@ -93,17 +98,15 @@ export default function Example26() {
                 };
             }
             return bucket;
-        })
+        });
 
-        setBuckets([...updateAllItems])
-    }
+        setBuckets([...updateAllItems]);
+    };
 
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">
-                26. Edit Field Label
-            </div>
+            <div className="example-container-title">26. Edit Field Label</div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={buckets}
@@ -111,22 +114,18 @@ export default function Example26() {
                     console.log(state);
                 }}
                 accentColor={'#117865'}
-                foldersMeta={
-                    {
-                        'folder_1': 
-                        {
-                            id: 'folder_1',
-                            label: 'Folder 1',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                        'folder_2': 
-                        {
-                            id: 'folder_2',
-                            label: 'Folder 2',
-                            prefixNodeIcon: 'folder-icon',
-                        },
-                    }
-                }
+                foldersMeta={{
+                    folder_1: {
+                        id: 'folder_1',
+                        label: 'Folder 1',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                    folder_2: {
+                        id: 'folder_2',
+                        label: 'Folder 2',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                }}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">
@@ -134,7 +133,9 @@ export default function Example26() {
                             id="bucket1"
                             label="Bucket 1"
                             allowRemoveFields
-                            onFieldItemLabelClick={(fieldItemLabelClickProps: IFieldItemLabelClickProps) => {
+                            onFieldItemLabelClick={(
+                                fieldItemLabelClickProps: IFieldItemLabelClickProps,
+                            ) => {
                                 updateFieldLabel(fieldItemLabelClickProps);
                             }}
                         />
@@ -142,7 +143,9 @@ export default function Example26() {
                             id="bucket2"
                             label="Bucket 2"
                             allowRemoveFields
-                            onFieldItemLabelClick={(fieldItemLabelClickProps: IFieldItemLabelClickProps) => {
+                            onFieldItemLabelClick={(
+                                fieldItemLabelClickProps: IFieldItemLabelClickProps,
+                            ) => {
                                 updateFieldLabel(fieldItemLabelClickProps);
                             }}
                         />
@@ -150,7 +153,9 @@ export default function Example26() {
                             id="bucket3"
                             label="Bucket 3"
                             allowRemoveFields
-                            onFieldItemLabelClick={(fieldItemLabelClickProps: IFieldItemLabelClickProps) => {
+                            onFieldItemLabelClick={(
+                                fieldItemLabelClickProps: IFieldItemLabelClickProps,
+                            ) => {
                                 updateFieldLabel(fieldItemLabelClickProps);
                             }}
                         />

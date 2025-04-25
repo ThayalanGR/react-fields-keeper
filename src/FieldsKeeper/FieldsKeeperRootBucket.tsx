@@ -59,7 +59,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { allItems: allOriginalItems, accentColor, foldersMeta } =
+    const { allItems: allOriginalItems, accentColor, iconColor, foldersMeta } =
         useStoreState(instanceId);
     const [searchQuery, setSearchQuery] = useState('');
     const allItems = useMemo(() => {
@@ -185,7 +185,11 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
     // style
     const accentColorStyle = (
-        accentColor ? { '--root-bucket-accent-color': accentColor } : {}
+        accentColor ? { '--bucket-accent-color': accentColor } : {}
+    ) as CSSProperties;
+
+    const iconColorStyle = (
+        iconColor ? { '--bucket-icon-color': iconColor } : {}
     ) as CSSProperties;
 
     // paint
@@ -218,7 +222,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                     searchPlaceholder={searchPlaceholder}
                     searchQuery={searchQuery}
                     onSearchQueryChange={setSearchQuery}
-                    accentColorStyle={accentColorStyle}
+                    iconColorStyle={iconColorStyle}
                 />
             ) : (
                 <div />
@@ -330,7 +334,7 @@ function FolderScopeItemRenderer(
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
-    const { buckets, accentColor } = useStoreState(instanceId);
+    const { buckets, accentColor, iconColor } = useStoreState(instanceId);
     const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray.filter((groupItem) => groupItem.folderScopeItem?.id === id || groupItem.folderScopeItem?.folders?.includes(id)) : folderScopedItemsArray.filter((groupedItem) => groupedItem.folderScopeItem?.folders?.includes(folders?.[folders?.length - 1] as string) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folderScopeItem.folders.length > (folders?.length ?? 0) );
 
     const hasActiveSelection = useMemo(() => {
@@ -351,7 +355,11 @@ function FolderScopeItemRenderer(
     
     // style
     const accentColorStyle = (
-        accentColor ? { '--root-bucket-accent-color': accentColor } : {}
+        accentColor ? { '--bucket-accent-color': accentColor } : {}
+    ) as CSSProperties;
+
+    const iconColorStyle = (
+        iconColor ? { '--bucket-icon-color': iconColor } : {}
     ) as CSSProperties;
 
     // paint
@@ -391,15 +399,15 @@ function FolderScopeItemRenderer(
         if(React.isValidElement(prefixNode)){
             return prefixNodeIcon
         }else if(prefixNodeIcon === 'folder-icon') {
-            return <Icons.folder className="folder-scope-label-table-icon" style={accentColorStyle} />
+            return <Icons.folder className="folder-scope-label-table-icon" style={iconColorStyle} />
         } else if(prefixNodeIcon === 'table-icon') {
-            return <Icons.table className="folder-scope-label-table-icon" style={accentColorStyle} />
+            return <Icons.table className="folder-scope-label-table-icon" style={iconColorStyle} />
         } else if(prefixNodeIcon === 'multi-calculator-icon') {
-            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--CalculatorGroup" style={accentColorStyle} />
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--CalculatorGroup" style={iconColorStyle} />
         } else if(prefixNodeIcon === 'calendar-icon') {
-            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--Calculator" style={accentColorStyle} />
+            return <i className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--Calculator" style={iconColorStyle} />
         } else if(prefixNodeIcon){
-             return <div className='folder-scope-label-table-icon' style={accentColorStyle}>{prefixNodeIcon}</div>;
+             return <div className='folder-scope-label-table-icon' style={iconColorStyle}>{prefixNodeIcon}</div>;
         } else {
             return null;
         }
@@ -426,14 +434,14 @@ function FolderScopeItemRenderer(
                     <div className="folder-scope-label-icon">
                         { getPrefixNodeIcon(prefixNode) }
                         {hasActiveSelection && (
-                            <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={accentColorStyle} />
+                            <Icons.checkMark className="folder-scope-label-table-icon checkmark-overlay" style={iconColorStyle} />
                         )}
                     </div>
                     
                     <div className={classNames("folder-scope-label-text", customClassNames?.customLabelClassName)} style={accentColorStyle}>
                         {itemLabel}
                     </div>
-                    <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={accentColorStyle}>
+                    <div className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action" style={iconColorStyle}>
                         {isFolderCollapsed ? (
                             <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
                         ) : (
@@ -500,6 +508,7 @@ function GroupedItemRenderer(
         allowDuplicates,
         accentColor,
         accentHighlightColor,
+        iconColor
     } = useStoreState(instanceId);
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
@@ -658,8 +667,9 @@ function GroupedItemRenderer(
 
         // style
         const accentColorStyle = {
-            '--root-bucket-accent-color': accentColor ?? '#007bff',
-            '--search-highlight-text-color': accentHighlightColor ?? '#ffffff',
+            '--bucket-accent-color': accentColor ?? '#007bff',
+            '--highlight-element-color': accentHighlightColor ?? '#ffffff',
+            '--bucket-icon-color': iconColor ?? '#000000',
         } as CSSProperties;
 
         const getPrefixNodeIconElement = (prefixNodeIcon: string | ReactNode) => {

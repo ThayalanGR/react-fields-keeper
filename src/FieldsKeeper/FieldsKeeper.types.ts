@@ -340,6 +340,9 @@ export interface IFieldsKeeperState {
      */
     accentHighlightColor?: string;
 
+    /** Color for icons */
+    iconColor?: string;
+
     /** 
      * A list of folders with folder name as key and folder details as value 
      */

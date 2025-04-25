@@ -205,6 +205,7 @@
                 display: flex;
                 flex-direction: row;
                 gap: 3px;
+                color: var(--bucket-icon-color);
 
                 .react-fields-keeper-mapping-content-action-suffixNode {
                     margin-left: auto;
@@ -221,6 +222,7 @@
                     &:hover {
                         background-color: #e4e4e4;
                     }
+                    color: var(--bucket-icon-color);
                 }
             }
 
@@ -239,7 +241,7 @@
                 &:hover {
                     background-color: #e4e4e4;
                 }
-                color: var(--root-bucket-accent-color);
+                color: var(--bucket-accent-color);
             }
         }
     }
@@ -274,7 +276,7 @@
         font-size: 8px !important;
     }
 
-    color: var(--root-bucket-accent-color);
+    color: var(--bucket-icon-color);
 }
 
 .react-fields-keeper-mapping-container {
@@ -324,8 +326,8 @@
                     padding-right: 3px;
 
                     .folder-scope-label-table-icon {
-                        fill: var(--root-bucket-accent-color);
-                        color: var(--root-bucket-accent-color);
+                        fill: var(--bucket-icon-color);
+                        color: var(--bucket-icon-color);
                     }
                 }
 
@@ -338,13 +340,15 @@
                     text-align: left;
 
                     mark.search-highlight {
-                        background-color: var(--root-bucket-accent-color, #007bff);
-                        color: var(--search-highlight-text-color, #ffffff);
+                        background-color: var(--bucket-accent-color, #007bff);
+                        color: var(--highlight-element-color, #ffffff);
                     }
                 }
 
                 .folder-scope-label-collapse-icon {
                     margin-left: auto;
+                    color: var(--bucket-icon-color);
+                    fill: var(--bucket-icon-color)
                 }
             }
             .folder-scope-items {
@@ -468,8 +472,8 @@
 
         .react-fields-keeper-mapping-clear-search-link {
             margin-top: 5px;
-            border-bottom: 1px solid var(--root-bucket-accent-color);
-            color: var(--root-bucket-accent-color);
+            border-bottom: 1px solid var(--bucket-accent-color);
+            color: var(--bucket-accent-color);
             width: min-content;
             white-space: nowrap;
             cursor: pointer;
@@ -481,8 +485,8 @@
     }
 
     mark.search-highlight {
-        background-color: var(--root-bucket-accent-color, #007bff);
-        color: var(--search-highlight-text-color, #ffffff);
+        background-color: var(--bucket-accent-color, #007bff);
+        color: var(--highlight-element-color, #ffffff);
     }
 }
 
@@ -519,7 +523,7 @@
             font-size: 1em !important;
         }
 
-        color: var(--root-bucket-accent-color);
+        color: var(--bucket-icon-color);
     }
 
     .react-fields-keeper-mapping-column-searcher-clear {
@@ -534,7 +538,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--root-bucket-accent-color);
+        color: var(--bucket-icon-color);
 
         span {
             font-size: 8px !important;
@@ -595,14 +599,14 @@
 
 .react-fields-keeper-mapping-column-content-checkbox {
     .react-fields-keeper-checkbox{
-        accent-color: var(--root-bucket-accent-color);
+        accent-color: var(--bucket-accent-color);
     }
 }
 
 .react-fields-keeper-mapping-column-content-prefix {
     .folder-scope-label-measure-icon{
-        fill: var(--root-bucket-accent-color);
-        color: var(--root-bucket-accent-color);
+        fill: var(--bucket-icon-color);
+        color: var(--bucket-icon-color);
     }
 }
 

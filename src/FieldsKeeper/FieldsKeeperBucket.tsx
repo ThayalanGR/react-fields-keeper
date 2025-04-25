@@ -231,18 +231,19 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             fieldItemIds.some((fieldItemId) => (item.id) === fieldItemId) ||  fieldSourceIds.some((fieldSourceId) => (item.sourceId) === fieldSourceId)
         );
 
-        const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        // const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
         const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
 
-        const fieldItems = fieldItemsRaw.map((item) => {
-            if (allowDuplicates && fromBucket !== id && destinationItemIds.includes(item.id)) {
-                return {
-                    ...item,
-                    id: generateUniqueId(item.id),
-                };
-            }
-            return item;
-        });
+        const fieldItems = fieldItemsRaw;
+        // const fieldItems = fieldItemsRaw.map((item) => {
+        //     if (allowDuplicates && fromBucket !== id && destinationItemIds.includes(item.id)) {
+        //         return {
+        //             ...item,
+        //             id: generateUniqueId(item.id),
+        //         };
+        //     }
+        //     return item;
+        // });
 
         if (fieldItems.length)
             assignFieldItems({

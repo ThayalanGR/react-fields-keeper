@@ -235,7 +235,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
 
         const fieldItems = fieldItemsRaw.map((item) => {
-            if (allowDuplicates && destinationItemIds.includes(item.id)) {
+            if (allowDuplicates && fromBucket !== id && destinationItemIds.includes(item.id)) {
                 return {
                     ...item,
                     id: generateUniqueId(item.id),

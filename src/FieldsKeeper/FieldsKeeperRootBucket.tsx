@@ -334,13 +334,17 @@ function FolderScopeItemRenderer(
     const updatedFolderScopeItems = folders?.length === 0 ? folderScopedItemsArray.filter((groupItem) => groupItem.folderScopeItem?.id === id || groupItem.folderScopeItem?.folders?.includes(id)) : folderScopedItemsArray.filter((groupedItem) => groupedItem.folderScopeItem?.folders?.includes(folders?.[folders?.length - 1] as string) && (groupedItem.type === 'leaf' || groupedItem.type === 'group') && groupedItem.folderScopeItem.folders.length > (folders?.length ?? 0) );
 
     const hasActiveSelection = useMemo(() => {
-    const isItemActive = (itemId: string) =>
-        buckets.some((bucket) => bucket.items.some((item) => (item.sourceId ?? item.id) === itemId));
+    const isItemActive = (itemId: string, flatGroupId?: string) =>{
+        return buckets.some((bucket) => bucket.items.some((item) => {
+            const defaultId = item.sourceId ?? item.id;
+            return defaultId === itemId || defaultId === flatGroupId
+        }));
+    }
     
         return updatedFolderScopeItems.some((groupedItem) =>
             groupedItem.folderScopeItems?.length
             ? groupedItem.folderScopeItems?.some((group) =>
-                group.items.some((groupItem) => isItemActive((groupItem.sourceId ?? groupItem.id))))
+                group.items.some((groupItem) => isItemActive((groupItem.sourceId || groupItem.id), groupItem.flatGroup)))
             : isItemActive( (groupedItem.folderScopeItem?.sourceId ?? groupedItem.folderScopeItem?.id) as string)
         );
       }, [buckets, updatedFolderScopeItems]);

@@ -53,6 +53,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const preHoveredElementRef = useRef<HTMLDivElement | null>(null);
     const activeDraggedElementRef = useRef<HTMLDivElement | null>(null);
     let isPointerAboveCenter = false;
+    let hoveredFieldItemIndex = -1;
 
     const {
         allItems,
@@ -116,6 +117,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const onDragOverHandler = (
         e: React.DragEvent<HTMLDivElement>,
         isParentElement = false,
+        fieldItemIndex?: number
     ) => {
         e.preventDefault();
         e.stopPropagation();
@@ -178,7 +180,9 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
             preHoveredElementRef.current = hoveredTargetElement;
         }
-
+        if (fieldItemIndex != null && fieldItemIndex >= 0) {
+            hoveredFieldItemIndex = fieldItemIndex;
+        }
         onDragEnterHandler();
     };
 
@@ -213,19 +217,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } =
             getFieldItemIds(e);
 
-        const destinationBucket = buckets.find((b) => b.id === id);
         const getDropIndex = () => {
-            if (
-                (e.target as HTMLDivElement).classList.contains(
-                    'react-fields-keeper-mapping-content-input',
-                )
-            ) {
-                return destinationBucket?.items.length ?? 0;
-            } else {
-                return Number(
-                    (e.target as HTMLDivElement).getAttribute('data-index'),
-                );
-            }
+            return hoveredFieldItemIndex;
         };
         const dropIndex = getDropIndex();
         const currentBucket = buckets.find((b) => b.id === fromBucket);
@@ -357,7 +350,7 @@ const GroupedItemRenderer = (
     props: {
         currentBucket: IFieldsKeeperBucket;
         groupedItem: IGroupedFieldsKeeperItem;
-        onDragOverHandler: (e: React.DragEvent<HTMLDivElement>) => void;
+        onDragOverHandler: (e: React.DragEvent<HTMLDivElement>, isParentElement?: boolean, fieldItemIndex?: number) => void;
         onFieldItemRemove: (...fieldItem: IFieldsKeeperItem[]) => () => void;
         fieldItemIndex: number;
         activeDraggedElementRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -698,7 +691,7 @@ const GroupedItemRenderer = (
                                 ? groupHeader.groupItems
                                 : [fieldItem],
                         )}
-                        onDragOver={onDragOverHandler}
+                        onDragOver={(e) => onDragOverHandler(e, false, fieldItemIndex)}
                     >
                         {customItemRenderer !== undefined
                             ? customItemRenderer({

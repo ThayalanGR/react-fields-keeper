@@ -468,7 +468,7 @@ function FolderScopeItemRenderer(
     const checkIsFolderCollapsed = () => {
         let isCollapsed = false;
         folders?.forEach((folder) => {
-            if (collapsedNodes[folder]) {
+            if (collapsedNodes[folder] && !hasSearchQuery) {
                 isCollapsed = true;
             }
         });

@@ -491,11 +491,10 @@ const GroupedItemRenderer = (
     const getFieldRendererOutput = (
         renderer: unknown,
         arg: ISuffixNodeRendererProps,
-        additionalCondition = true,
     ) => {
         const isRendererValid = typeof renderer === 'function';
         const rendererElement =
-            isRendererValid && additionalCondition ? renderer(arg) : null;
+            isRendererValid && (arg.fieldItem.group ? arg.groupFieldItems?.length : true) ? renderer(arg) : null;
         const isValidElement =
             rendererElement !== undefined && rendererElement !== null;
         return { rendererElement, isValidElement };
@@ -560,8 +559,7 @@ const GroupedItemRenderer = (
                         fieldItem,
                         isGroupHeader,
                         groupFieldItems: groupHeader?.groupItems,
-                    },
-                    !fieldItem.flatGroup,
+                    }
                 );
 
                 const {
@@ -574,8 +572,7 @@ const GroupedItemRenderer = (
                         fieldItem,
                         isGroupHeader,
                         groupFieldItems: groupHeader?.groupItems,
-                    },
-                    !fieldItem.flatGroup,
+                    }
                 );
 
                 return (
@@ -849,8 +846,8 @@ export function assignFieldItems(props: {
                 const shouldKeepItem =
                     requiredFieldItems.some(
                         (fieldItem) =>
-                            (fieldItem.sourceId ?? fieldItem.id) ===
-                            (item.sourceId ?? item.id),
+                            ((fieldItem.sourceId ?? fieldItem.id) ===
+                            (item.sourceId ?? item.id)) || (fieldItem.flatGroup === item.id) ,
                     ) === false ||
                     restrictedItems.some(
                         (fieldItem) => fieldItem.id === item.id,

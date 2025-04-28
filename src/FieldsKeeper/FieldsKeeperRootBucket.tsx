@@ -468,7 +468,7 @@ function FolderScopeItemRenderer(
     const checkIsFolderCollapsed = () => {
         let isCollapsed = false;
         folders?.forEach((folder) => {
-            if (collapsedNodes[folder]) {
+            if (collapsedNodes[folder] && !hasSearchQuery) {
                 isCollapsed = true;
             }
         });
@@ -780,11 +780,11 @@ function GroupedItemRenderer(
     const getNodeRendererOutput = (
         renderer: unknown,
         item: IFieldsKeeperItem,
-        additionalCondition = true,
+        isNotGroupItem = true,
     ) => {
         const isRendererValid = typeof renderer === 'function';
         const rendererOutput =
-            isRendererValid && additionalCondition ? renderer(item) : null;
+            isRendererValid && isNotGroupItem ? renderer(item) : null;
         const isValidElement =
             rendererOutput !== undefined && rendererOutput !== null;
         return { rendererOutput, isValidElement };
@@ -893,7 +893,7 @@ function GroupedItemRenderer(
             } = getNodeRendererOutput(
                 onContextMenuRenderer,
                 fieldItem,
-                !fieldItem.flatGroup && fieldItem._fieldItemIndex == undefined,
+                !isGroupItem
             );
 
             return (

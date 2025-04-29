@@ -1009,13 +1009,13 @@ function GroupedItemRenderer(
                         ) => {
                             const currentTargetRect =
                                 e.currentTarget.getClientRects();
-                            const currentTargetY =
+                            const isCursorWithinGroupHeader =
                                 currentTargetRect.length &&
                                 e.clientY >= currentTargetRect[0]?.y &&
                                 e.clientY <=
                                     currentTargetRect[0].y +
                                         currentTargetRect[0].height;
-                            if (isGroupHeader && currentTargetY) {
+                            if (isGroupHeader && isCursorWithinGroupHeader) {
                                 const groupWrapper = e.currentTarget.closest(
                                     '.react-fields-keeper-grouped-item-wrapper',
                                 );

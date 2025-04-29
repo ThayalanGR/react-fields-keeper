@@ -306,6 +306,12 @@ export interface IFieldsKeeperRootBucketProps {
          */
         customGroupItemClassName?: string;
     };
+
+    /**
+     * Determines whether items are sorted based on their folder structure.
+     * @default true
+     */
+    sortBasedOnFolder?: boolean;
 }
 
 /**

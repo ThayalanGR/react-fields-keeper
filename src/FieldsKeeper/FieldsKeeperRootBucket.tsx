@@ -48,6 +48,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         shouldRender = () => true,
         filteredItems,
         emptyDataMessage = 'No data found',
+        sortBasedOnFolder = true,
     } = props;
 
     const [collapsedNodes, setCollapsedNodes] = useState<
@@ -136,17 +137,38 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             },
                         });
                     }
+                    if (
+                        folderIndex === itemFolders.length - 1 &&
+                        sortBasedOnFolder
+                    ) {
+                        const currentFolder = acc.get(folderName);
+                        currentFolder?.folderScopeItems?.push(curr);
+                    }
                 });
             }
-            if (
-                curr.group &&
-                curr.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
-            ) {
-                if (!acc.has(curr.group)) {
-                    acc.set(curr.group, {
-                        folderScopeLabel: curr.groupLabel as string,
-                        folderScopeItems: [],
-                        type: 'group',
+            if (sortBasedOnFolder === false || itemFolders.length === 0) {
+                if (
+                    curr.group &&
+                    curr.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) {
+                    if (!acc.has(curr.group)) {
+                        acc.set(curr.group, {
+                            folderScopeLabel: curr.groupLabel as string,
+                            folderScopeItems: [],
+                            type: 'group',
+                            folderScopeItem: {
+                                ...curr,
+                                folders: curr.folderScope
+                                    ? [curr.folderScope]
+                                    : [...itemFolders],
+                            },
+                        });
+                    }
+                    const currentGroup = acc.get(curr.group);
+                    currentGroup?.folderScopeItems?.push(curr);
+                } else if (!acc.has(curr.id)) {
+                    acc.set(curr.id, {
+                        type: 'leaf',
                         folderScopeItem: {
                             ...curr,
                             folders: curr.folderScope
@@ -155,18 +177,6 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         },
                     });
                 }
-                const currentGroup = acc.get(curr.group);
-                currentGroup?.folderScopeItems?.push(curr);
-            } else if (!acc.has(curr.id)) {
-                acc.set(curr.id, {
-                    type: 'leaf',
-                    folderScopeItem: {
-                        ...curr,
-                        folders: curr.folderScope
-                            ? [curr.folderScope]
-                            : [...itemFolders],
-                    },
-                });
             }
 
             return acc;
@@ -185,7 +195,13 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         );
 
         return newRefactorFolderScopedItems;
-    }, [customSearchQuery, searchQuery, allItems, foldersMeta]);
+    }, [
+        customSearchQuery,
+        searchQuery,
+        allItems,
+        foldersMeta,
+        sortBasedOnFolder,
+    ]);
 
     useEffect(() => {
         if (contentContainerRef.current) {
@@ -341,6 +357,7 @@ function FolderScopeItemRenderer(
         collapsedNodes,
         setCollapsedNodes,
         customClassNames,
+        sortBasedOnFolder = true,
         ...rootBucketProps
     } = props;
 
@@ -536,41 +553,57 @@ function FolderScopeItemRenderer(
         >
             {!checkIsFolderCollapsed() &&
                 (type === 'folder' || type === 'table' ? (
-                    <div
-                        className="folder-scope-label"
-                        role="button"
-                        onClick={() => toggleFolderCollapse(id)}
-                        title={itemLabel ?? ''}
-                    >
-                        <div className="folder-scope-label-icon">
-                            {getPrefixNodeIcon(prefixNode)}
-                            {hasActiveSelection && (
-                                <Icons.checkMark
-                                    className="folder-scope-label-table-icon check-mark-overlay"
-                                    style={iconColorStyle}
-                                />
-                            )}
-                        </div>
+                    <div>
+                        <div
+                            className="folder-scope-label"
+                            role="button"
+                            onClick={() => toggleFolderCollapse(id)}
+                            title={itemLabel ?? ''}
+                        >
+                            <div className="folder-scope-label-icon">
+                                {getPrefixNodeIcon(prefixNode)}
+                                {hasActiveSelection && (
+                                    <Icons.checkMark
+                                        className="folder-scope-label-table-icon check-mark-overlay"
+                                        style={iconColorStyle}
+                                    />
+                                )}
+                            </div>
 
-                        <div
-                            className={classNames(
-                                'folder-scope-label-text',
-                                customClassNames?.customLabelClassName,
-                            )}
-                            style={accentColorStyle}
-                        >
-                            {itemLabel}
+                            <div
+                                className={classNames(
+                                    'folder-scope-label-text',
+                                    customClassNames?.customLabelClassName,
+                                )}
+                                style={accentColorStyle}
+                            >
+                                {itemLabel}
+                            </div>
+                            <div
+                                className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
+                                style={iconColorStyle}
+                            >
+                                {isFolderCollapsed ? (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                                ) : (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                                )}
+                            </div>
                         </div>
-                        <div
-                            className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
-                            style={iconColorStyle}
-                        >
-                            {isFolderCollapsed ? (
-                                <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                            ) : (
-                                <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                            )}
-                        </div>
+                        {!isFolderCollapsed &&
+                        sortBasedOnFolder &&
+                        folderScopeItems?.length ? (
+                            <div className="folder-scope-items">
+                                {folderScopeItems.map((groupedItems, index) => (
+                                    <GroupedItemRenderer
+                                        {...rootBucketProps}
+                                        key={index}
+                                        groupedItems={groupedItems}
+                                        customClassNames={customClassNames}
+                                    />
+                                ))}
+                            </div>
+                        ) : null}
                     </div>
                 ) : folderScopeItems?.length ? (
                     <div>
@@ -974,19 +1007,27 @@ function GroupedItemRenderer(
                         onMouseOver={(
                             e: React.MouseEvent<HTMLDivElement, MouseEvent>,
                         ) => {
-                            if (isGroupHeader) {
-                                const folderWrapper = e.currentTarget.closest(
-                                    '.folder-scope-wrapper',
+                            const currentTargetRect =
+                                e.currentTarget.getClientRects();
+                            const currentTargetY =
+                                currentTargetRect.length &&
+                                e.clientY >= currentTargetRect[0]?.y &&
+                                e.clientY <=
+                                    currentTargetRect[0].y +
+                                        currentTargetRect[0].height;
+                            if (isGroupHeader && currentTargetY) {
+                                const groupWrapper = e.currentTarget.closest(
+                                    '.react-fields-keeper-grouped-item-wrapper',
                                 );
                                 const folderRect =
-                                    folderWrapper?.getClientRects();
+                                    groupWrapper?.getClientRects();
 
                                 if (groupHeader?.isFlatGroupHeader) {
                                     setGroupHeight(folderRect?.[0].height ?? 0);
                                 } else {
                                     let masterHeaderHeight = 0;
                                     const hasMasterHeader =
-                                        folderWrapper?.querySelector(
+                                        groupWrapper?.querySelector(
                                             '.react-fields-keeper-master-group-header',
                                         ) !== null;
                                     if (hasMasterHeader) {
@@ -1003,6 +1044,8 @@ function GroupedItemRenderer(
                                             masterHeaderHeight,
                                     );
                                 }
+                            } else {
+                                setGroupHeight(0);
                             }
                         }}
                     >
@@ -1137,50 +1180,54 @@ function GroupedItemRenderer(
 
         return (
             <>
-                {flatGroup &&
-                    flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
-                    renderFieldItems({
-                        fieldItems: [flatGroupHeaderItem],
-                        groupHeader: {
-                            isGroupHeaderSelected:
-                                isChildrenAssignedFound ||
-                                checkIsFieldItemAssigned(flatGroupHeaderItem),
-                            groupItems: filteredItems,
-                            isGroupCollapsed: isMasterGroupCollapsed,
-                            onGroupHeaderToggle: () => {
-                                setIsMasterGroupCollapsed(
-                                    !isMasterGroupCollapsed,
-                                );
-                                setIsGroupCollapsed(!isGroupCollapsed);
+                <div className="react-fields-keeper-grouped-item-wrapper">
+                    {flatGroup &&
+                        flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                        renderFieldItems({
+                            fieldItems: [flatGroupHeaderItem],
+                            groupHeader: {
+                                isGroupHeaderSelected:
+                                    isChildrenAssignedFound ||
+                                    checkIsFieldItemAssigned(
+                                        flatGroupHeaderItem,
+                                    ),
+                                groupItems: filteredItems,
+                                isGroupCollapsed: isMasterGroupCollapsed,
+                                onGroupHeaderToggle: () => {
+                                    setIsMasterGroupCollapsed(
+                                        !isMasterGroupCollapsed,
+                                    );
+                                    setIsGroupCollapsed(!isGroupCollapsed);
+                                },
+                                isFlatGroupHeader: true,
                             },
-                            isFlatGroupHeader: true,
-                        },
-                    })}
+                        })}
 
-                {!isMasterGroupCollapsed &&
-                    renderFieldItems({
-                        fieldItems: [groupHeaderFieldItem],
-                        groupHeader: {
-                            isGroupHeaderSelected: isChildrenAssignedFound,
-                            groupItems: filteredItems,
-                            isGroupCollapsed,
-                            onGroupHeaderToggle: () =>
-                                setIsGroupCollapsed(!isGroupCollapsed),
-                        },
-                        hasMasterGroup: (flatGroup &&
-                            flatGroup !==
-                                FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
-                    })}
+                    {!isMasterGroupCollapsed &&
+                        renderFieldItems({
+                            fieldItems: [groupHeaderFieldItem],
+                            groupHeader: {
+                                isGroupHeaderSelected: isChildrenAssignedFound,
+                                groupItems: filteredItems,
+                                isGroupCollapsed,
+                                onGroupHeaderToggle: () =>
+                                    setIsGroupCollapsed(!isGroupCollapsed),
+                            },
+                            hasMasterGroup: (flatGroup &&
+                                flatGroup !==
+                                    FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
+                        })}
 
-                {!isMasterGroupCollapsed &&
-                    !isGroupCollapsed &&
-                    renderFieldItems({
-                        fieldItems: filteredItems,
-                        isGroupItem: true,
-                        hasMasterGroup: (flatGroup &&
-                            flatGroup !==
-                                FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
-                    })}
+                    {!isMasterGroupCollapsed &&
+                        !isGroupCollapsed &&
+                        renderFieldItems({
+                            fieldItems: filteredItems,
+                            isGroupItem: true,
+                            hasMasterGroup: (flatGroup &&
+                                flatGroup !==
+                                    FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
+                        })}
+                </div>
             </>
         );
     }

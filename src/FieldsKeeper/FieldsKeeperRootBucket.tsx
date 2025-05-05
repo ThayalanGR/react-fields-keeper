@@ -564,8 +564,8 @@ function FolderScopeItemRenderer(
                                 {getPrefixNodeIcon(prefixNode)}
                                 {hasActiveSelection && (
                                     <Icons.checkMark
-                                        className="folder-scope-label-table-icon check-mark-overlay"
-                                        style={iconColorStyle}
+                                        className="check-mark-overlay"
+                                        style={accentColorStyle}
                                     />
                                 )}
                             </div>

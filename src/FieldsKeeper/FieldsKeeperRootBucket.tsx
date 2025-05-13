@@ -86,7 +86,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     >(() => {
         const searcher = new FuzzySearch(
             allItems,
-            ['label', 'id', 'folders'] satisfies (keyof IFieldsKeeperItem)[],
+            ['label', 'groupLabel',  'flatGroupLabel'] satisfies (keyof IFieldsKeeperItem)[],
             {
                 sort: true,
             },

@@ -554,7 +554,9 @@ function FolderScopeItemRenderer(
                 (type === 'folder' || type === 'table' ? (
                     <div>
                         <div
-                            className="folder-scope-label"
+                            className={classNames(
+                'folder-scope-label', customClassNames?.customLabelClassName
+            )}
                             role="button"
                             onClick={() => toggleFolderCollapse(id)}
                             title={itemLabel ?? ''}

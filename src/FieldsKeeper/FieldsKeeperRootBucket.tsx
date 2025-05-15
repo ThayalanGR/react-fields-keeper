@@ -86,7 +86,11 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     >(() => {
         const searcher = new FuzzySearch(
             allItems,
-            ['label', 'groupLabel',  'flatGroupLabel'] satisfies (keyof IFieldsKeeperItem)[],
+            [
+                'label',
+                'groupLabel',
+                'flatGroupLabel',
+            ] satisfies (keyof IFieldsKeeperItem)[],
             {
                 sort: true,
             },
@@ -544,9 +548,7 @@ function FolderScopeItemRenderer(
 
     return (
         <div
-            className={classNames(
-                'folder-scope-wrapper',
-            )}
+            className="folder-scope-wrapper"
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{ paddingLeft: setIndentation(folders ?? []) }}
         >
@@ -555,8 +557,9 @@ function FolderScopeItemRenderer(
                     <div>
                         <div
                             className={classNames(
-                'folder-scope-label', customClassNames?.customLabelClassName
-            )}
+                                'folder-scope-label',
+                                customClassNames?.customLabelClassName,
+                            )}
                             role="button"
                             onClick={() => toggleFolderCollapse(id)}
                             title={itemLabel ?? ''}
@@ -927,18 +930,31 @@ function GroupedItemRenderer(
             } = getNodeRendererOutput(
                 onContextMenuRenderer,
                 fieldItem,
-                !isGroupItem
+                !isGroupItem,
             );
 
-            const getCustomClassName = (): Record<string, boolean> | undefined  => {
-                if(customClassNames?.customGroupItemClassName && (isGroupItem || (hasMasterGroup && isGroupHeader))) {
-                    return {[customClassNames.customGroupItemClassName]: true};
+            const getCustomClassName = ():
+                | Record<string, boolean>
+                | undefined => {
+                if (
+                    customClassNames?.customGroupItemClassName &&
+                    (isGroupItem || (hasMasterGroup && isGroupHeader))
+                ) {
+                    return {
+                        [customClassNames.customGroupItemClassName]: true,
+                    };
                 }
 
-                if(customClassNames?.customFieldItemClassName && !isGroupItem && !isGroupHeader) {
-                    return {[customClassNames.customFieldItemClassName] :  true};
+                if (
+                    customClassNames?.customFieldItemClassName &&
+                    !isGroupItem &&
+                    !isGroupHeader
+                ) {
+                    return {
+                        [customClassNames.customFieldItemClassName]: true,
+                    };
                 }
-            }
+            };
 
             return (
                 <div

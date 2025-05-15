@@ -546,7 +546,6 @@ function FolderScopeItemRenderer(
         <div
             className={classNames(
                 'folder-scope-wrapper',
-                customClassNames?.customFieldItemClassName,
             )}
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{ paddingLeft: setIndentation(folders ?? []) }}
@@ -929,6 +928,16 @@ function GroupedItemRenderer(
                 !isGroupItem
             );
 
+            const getCustomClassName = (): Record<string, boolean> | undefined  => {
+                if(customClassNames?.customGroupItemClassName && (isGroupItem || (hasMasterGroup && isGroupHeader))) {
+                    return {[customClassNames.customGroupItemClassName]: true};
+                }
+
+                if(customClassNames?.customFieldItemClassName && !isGroupItem && !isGroupHeader) {
+                    return {[customClassNames.customFieldItemClassName] :  true};
+                }
+            }
+
             return (
                 <div
                     key={fieldItem.id}
@@ -975,10 +984,7 @@ function GroupedItemRenderer(
                                     disableAssignments,
                                 'react-fields-keeper-mapping-column-content-offset-with-master':
                                     isGroupItem && hasMasterGroup,
-                                ...(customClassNames?.customGroupItemClassName && {
-                                    [customClassNames.customGroupItemClassName]:
-                                        isGroupItem || isGroupHeader,
-                                }),
+                                ...getCustomClassName(),
                             },
                         )}
                         style={itemStyle}

@@ -947,8 +947,7 @@ function GroupedItemRenderer(
 
                 if (
                     customClassNames?.customFieldItemClassName &&
-                    !isGroupItem &&
-                    !isGroupHeader
+                    !isGroupItem
                 ) {
                     return {
                         [customClassNames.customFieldItemClassName]: true,

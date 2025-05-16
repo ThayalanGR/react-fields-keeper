@@ -24,7 +24,7 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
-import { getGroupedItems } from './utils';
+import { findGroupItemOrder, getGroupedItems } from './utils';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -73,7 +73,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
         return {
             currentBucket: bucket,
-            groupedItems: getGroupedItems(bucket.items),
+            groupedItems: getGroupedItems(bucket.items, allItems),
         };
     }, [buckets, id]);
 
@@ -97,6 +97,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                     fieldItems.length === 1
                         ? fieldItems[0]._fieldItemIndex
                         : undefined,
+                allItems: allItems,
             });
 
     // event handlers
@@ -117,7 +118,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const onDragOverHandler = (
         e: React.DragEvent<HTMLDivElement>,
         isParentElement = false,
-        fieldItemIndex?: number
+        fieldItemIndex?: number,
     ) => {
         e.preventDefault();
         e.stopPropagation();
@@ -222,21 +223,44 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         };
         const dropIndex = getDropIndex();
         const currentBucket = buckets.find((b) => b.id === fromBucket);
-        const currentBucketFieldItems = currentBucket?.items?.filter?.((item) =>
-            fieldItemIds.some((fieldItemId) => item.id === fieldItemId),
+        const currentBucketFieldItems = currentBucket?.items?.filter?.(
+            (item, itemIndex) => {
+                if (
+                    item.group &&
+                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) {
+                    item.groupOrder =
+                        item.groupOrder !== undefined
+                            ? item.groupOrder
+                            : itemIndex;
+                }
+                return fieldItemIds.some(
+                    (fieldItemId) => item.id === fieldItemId,
+                );
+            },
         );
 
         const fieldItemsRaw =
             currentBucketFieldItems ??
-            allItems.filter(
-                (item) =>
+            allItems.filter((item, itemIndex) => {
+                if (
+                    item.group &&
+                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) {
+                    item.groupOrder =
+                        item.groupOrder !== undefined
+                            ? item.groupOrder
+                            : itemIndex;
+                }
+                return (
                     fieldItemIds.some(
                         (fieldItemId) => item.id === fieldItemId,
                     ) ||
                     fieldSourceIds.some(
                         (fieldSourceId) => item.sourceId === fieldSourceId,
-                    ),
-            );
+                    )
+                );
+            });
 
         // const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
         // const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
@@ -268,6 +292,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 updateState,
                 dropIndex,
                 isPointerAboveCenter,
+                allItems: allItems,
             });
         onDragLeaveHandler();
     };
@@ -350,7 +375,11 @@ const GroupedItemRenderer = (
     props: {
         currentBucket: IFieldsKeeperBucket;
         groupedItem: IGroupedFieldsKeeperItem;
-        onDragOverHandler: (e: React.DragEvent<HTMLDivElement>, isParentElement?: boolean, fieldItemIndex?: number) => void;
+        onDragOverHandler: (
+            e: React.DragEvent<HTMLDivElement>,
+            isParentElement?: boolean,
+            fieldItemIndex?: number,
+        ) => void;
         onFieldItemRemove: (...fieldItem: IFieldsKeeperItem[]) => () => void;
         fieldItemIndex: number;
         activeDraggedElementRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -487,7 +516,10 @@ const GroupedItemRenderer = (
     ) => {
         const isRendererValid = typeof renderer === 'function';
         const rendererElement =
-            isRendererValid && (arg.fieldItem.group ? arg.groupFieldItems?.length : true) ? renderer(arg) : null;
+            isRendererValid &&
+            (arg.fieldItem.group ? arg.groupFieldItems?.length : true)
+                ? renderer(arg)
+                : null;
         const isValidElement =
             rendererElement !== undefined && rendererElement !== null;
         return { rendererElement, isValidElement };
@@ -545,28 +577,22 @@ const GroupedItemRenderer = (
                 const {
                     rendererElement: suffixNodeRendererOutput,
                     isValidElement: isSuffixNodeValid,
-                } = getFieldRendererOutput(
-                    suffixNodeRenderer,
-                    {
-                        bucketId: currentBucket.id,
-                        fieldItem,
-                        isGroupHeader,
-                        groupFieldItems: groupHeader?.groupItems,
-                    }
-                );
+                } = getFieldRendererOutput(suffixNodeRenderer, {
+                    bucketId: currentBucket.id,
+                    fieldItem,
+                    isGroupHeader,
+                    groupFieldItems: groupHeader?.groupItems,
+                });
 
                 const {
                     rendererElement: contextMenuRendererOutput,
                     isValidElement: isContextMenuValid,
-                } = getFieldRendererOutput(
-                    onContextMenuRenderer,
-                    {
-                        bucketId: currentBucket.id,
-                        fieldItem,
-                        isGroupHeader,
-                        groupFieldItems: groupHeader?.groupItems,
-                    }
-                );
+                } = getFieldRendererOutput(onContextMenuRenderer, {
+                    bucketId: currentBucket.id,
+                    fieldItem,
+                    isGroupHeader,
+                    groupFieldItems: groupHeader?.groupItems,
+                });
 
                 return (
                     <Fragment>
@@ -682,7 +708,7 @@ const GroupedItemRenderer = (
                             customClassNames?.customFieldItemContainerClassName,
                         )}
                         style={itemStyle}
-                        draggable
+                        draggable={isGroupHeader || isGroupItem ? false : true}
                         data-index={fieldItemIndex}
                         onDragStart={onDragStartHandler(
                             (fieldItem._fieldItemIndex ?? '') + '',
@@ -691,7 +717,13 @@ const GroupedItemRenderer = (
                                 ? groupHeader.groupItems
                                 : [fieldItem],
                         )}
-                        onDragOver={(e) => onDragOverHandler(e, false, fieldItemIndex)}
+                        onDragOver={(e) =>
+                            onDragOverHandler(
+                                e,
+                                false,
+                                fieldItem._fieldItemIndex,
+                            )
+                        }
                     >
                         {customItemRenderer !== undefined
                             ? customItemRenderer({
@@ -731,6 +763,9 @@ const GroupedItemRenderer = (
                     },
                     customClassNames?.customGroupContainerClassName,
                 )}
+                draggable
+                onDragStart={onDragStartHandler('', currentBucket.id, items)}
+                onDragOver={(e) => onDragOverHandler(e, false, fieldItemIndex)}
             >
                 {/* group header */}
                 {renderFieldItems({
@@ -796,6 +831,7 @@ export function assignFieldItems(props: {
     fromBucket: string;
     buckets: IFieldsKeeperBucket[];
     fieldItems: IFieldsKeeperItem[];
+    allItems: IFieldsKeeperItem[];
     updateState: ContextSetState;
     removeOnly?: boolean;
     sortGroupOrderWiseOnAssignment?: boolean;
@@ -803,6 +839,7 @@ export function assignFieldItems(props: {
     removeIndex?: number;
     dropIndex?: number;
     isPointerAboveCenter?: boolean;
+    isFieldItemClick?: boolean;
 }) {
     // props
     const {
@@ -818,6 +855,8 @@ export function assignFieldItems(props: {
         fromBucket: fromBucketId,
         dropIndex = -1,
         isPointerAboveCenter = false,
+        isFieldItemClick = false,
+        allItems,
     } = props;
 
     const newBuckets = [...buckets];
@@ -839,8 +878,9 @@ export function assignFieldItems(props: {
                 const shouldKeepItem =
                     requiredFieldItems.some(
                         (fieldItem) =>
-                            ((fieldItem.sourceId ?? fieldItem.id) ===
-                            (item.sourceId ?? item.id)) || (fieldItem.flatGroup === item.id) ,
+                            (fieldItem.sourceId ?? fieldItem.id) ===
+                                (item.sourceId ?? item.id) ||
+                            fieldItem.flatGroup === item.id,
                     ) === false ||
                     restrictedItems.some(
                         (fieldItem) => fieldItem.id === item.id,
@@ -860,7 +900,7 @@ export function assignFieldItems(props: {
             newBuckets.forEach((bucket) => {
                 filterItemsFromBucket(bucket);
                 if (sortGroupOrderWiseOnAssignment)
-                    sortBucketItemsBasedOnGroupOrder(bucket.items);
+                    sortBucketItemsBasedOnGroupOrder(bucket.items, allItems);
             });
         } else {
             if (fromBucket) filterItemsFromBucket(fromBucket);
@@ -885,13 +925,74 @@ export function assignFieldItems(props: {
             return;
         const targetBucketItemsPreviousLength = targetBucket.items.length;
 
-        const insertItemsToBucket = (isAssignmentFromSameBucket = false) => {
+        const insertItemsToBucket = (bucketIndex: number) => {
+            if (isFieldItemClick) {
+                const updatedItemsInBucket: IFieldsKeeperItem<any>[] = [];
+                if (
+                    requiredFieldItems.length === 1 &&
+                    requiredFieldItems.every(
+                        (item) =>
+                            item.group &&
+                            item.group != FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
+                    ) &&
+                    targetBucket.items.length
+                ) {
+                    let currentGroupItems: IFieldsKeeperItem[] = [];
+                    let isRequiredItemAdded = false;
+                    targetBucket.items.forEach((itemInBucket, itemIndex) => {
+                        if (
+                            itemInBucket.group &&
+                            itemInBucket.group !=
+                                FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                            requiredFieldItems.every(
+                                (ite) => ite.group === itemInBucket.group,
+                            )
+                        ) {
+                            if (
+                                targetBucket?.items?.length === itemIndex + 1 ||
+                                itemInBucket.group !==
+                                    targetBucket?.items?.[itemIndex + 1]?.group
+                            ) {
+                                currentGroupItems.push(itemInBucket);
+                                if (
+                                    (!allowDuplicates &&
+                                        !isRequiredItemAdded) ||
+                                    allowDuplicates
+                                ) {
+                                    currentGroupItems.push(
+                                        ...requiredFieldItems,
+                                    );
+                                    isRequiredItemAdded = true;
+                                }
+                                if (currentGroupItems.length) {
+                                    const sortedCurrentGrpItems =
+                                        sortBucketItemsBasedOnGroupOrder(
+                                            currentGroupItems,
+                                            allItems,
+                                        );
+                                    updatedItemsInBucket.push(
+                                        ...sortedCurrentGrpItems,
+                                    );
+                                    currentGroupItems = [];
+                                }
+                            } else {
+                                currentGroupItems.push(itemInBucket);
+                            }
+                        } else {
+                            updatedItemsInBucket.push(itemInBucket);
+                        }
+                    });
+
+                    targetBucket.items = [...updatedItemsInBucket];
+                    return;
+                }
+            }
+            targetBucket.items.splice(bucketIndex, 0, ...requiredFieldItems);
+        };
+
+        const updateTargetBucket = (isAssignmentFromSameBucket = false) => {
             if (dropIndex < 0) {
-                targetBucket.items.splice(
-                    targetBucket.items.length,
-                    0,
-                    ...requiredFieldItems,
-                );
+                insertItemsToBucket(targetBucket.items.length);
                 return;
             }
 
@@ -926,11 +1027,7 @@ export function assignFieldItems(props: {
                 }
             }
 
-            targetBucket.items.splice(
-                dropTargetIndex,
-                0,
-                ...requiredFieldItems,
-            );
+            insertItemsToBucket(dropTargetIndex);
         };
 
         if (fromBucketId === FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID) {
@@ -938,44 +1035,53 @@ export function assignFieldItems(props: {
             // clear previously assigned items if any in any of the buckets
             if (!allowDuplicates)
                 newBuckets.forEach((bucket) => filterItemsFromBucket(bucket));
-            insertItemsToBucket();
+            updateTargetBucket();
             checkAndMaintainMaxItems(
                 targetBucket,
                 targetBucketItemsPreviousLength,
             );
 
             if (sortGroupOrderWiseOnAssignment)
-                sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+                sortBucketItemsBasedOnGroupOrder(targetBucket.items, allItems);
         } else {
             const isAssignmentFromSameBucket = fromBucketId === targetBucket.id;
 
             if (isAssignmentFromSameBucket) {
                 filterItemsFromBucket(targetBucket);
-                insertItemsToBucket(true);
+                updateTargetBucket(true);
                 checkAndMaintainMaxItems(
                     targetBucket,
                     targetBucketItemsPreviousLength,
                 );
 
                 if (sortGroupOrderWiseOnAssignment)
-                    sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+                    sortBucketItemsBasedOnGroupOrder(
+                        targetBucket.items,
+                        allItems,
+                    );
             } else {
                 // assignment from sibling bucket
-                insertItemsToBucket();
+                updateTargetBucket();
                 const restrictedItems = checkAndMaintainMaxItems(
                     targetBucket,
                     targetBucketItemsPreviousLength,
                 );
 
                 if (sortGroupOrderWiseOnAssignment)
-                    sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+                    sortBucketItemsBasedOnGroupOrder(
+                        targetBucket.items,
+                        allItems,
+                    );
 
                 // fromBucket cleanup
                 if (fromBucket) {
                     filterItemsFromBucket(fromBucket, restrictedItems);
 
                     if (sortGroupOrderWiseOnAssignment)
-                        sortBucketItemsBasedOnGroupOrder(fromBucket.items);
+                        sortBucketItemsBasedOnGroupOrder(
+                            fromBucket.items,
+                            allItems,
+                        );
                 }
             }
         }
@@ -995,6 +1101,7 @@ export function assignFieldItems(props: {
 // eslint-disable-next-line react-refresh/only-export-components
 export function sortBucketItemsBasedOnGroupOrder(
     items: IFieldsKeeperItem[],
+    allItems: IFieldsKeeperItem[],
 ): IFieldsKeeperItem[] {
     // grouping based on the group property
     const chunkGroups = items.reduce<
@@ -1020,11 +1127,16 @@ export function sortBucketItemsBasedOnGroupOrder(
             if (current.items.length > 1) {
                 // sort the groups based on group order
                 current.items.sort((itemA, itemB) => {
-                    if (
-                        itemA.groupOrder !== undefined &&
-                        itemB.groupOrder !== undefined
-                    ) {
-                        return itemA.groupOrder - itemB.groupOrder;
+                    const itemAIndex = findGroupItemOrder(
+                        allItems,
+                        itemA,
+                    );
+                    const itemBIndex = findGroupItemOrder(
+                        allItems,
+                        itemB,
+                    );
+                    if (itemAIndex !== undefined && itemBIndex !== undefined) {
+                        return itemAIndex - itemBIndex;
                     }
                     return 0;
                 });

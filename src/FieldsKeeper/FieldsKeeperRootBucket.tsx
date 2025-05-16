@@ -192,7 +192,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 return {
                     type,
                     folderScopeItems:
-                        getGroupedItems(folderScopeItems ?? []) ?? [],
+                        getGroupedItems(folderScopeItems ?? [], allItems, true) ?? [],
                     folderScopeItem,
                 } satisfies IFolderScopedItem<IGroupedFieldsKeeperItem>;
             },
@@ -681,6 +681,7 @@ function GroupedItemRenderer(
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const {
+        allItems,
         buckets,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
         allowDuplicates,
@@ -694,6 +695,7 @@ function GroupedItemRenderer(
 
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [contextMenuId, setContextMenuId] = useState('');
 
     useEffect(() => {
         if (isContextMenuOpen) {
@@ -811,6 +813,8 @@ function GroupedItemRenderer(
                 sortGroupOrderWiseOnAssignment,
                 allowDuplicates,
                 updateState,
+                isFieldItemClick: true,
+                allItems: allItems
             });
         };
 
@@ -930,7 +934,6 @@ function GroupedItemRenderer(
             } = getNodeRendererOutput(
                 onContextMenuRenderer,
                 fieldItem,
-                !isGroupItem,
             );
 
             const getCustomClassName = ():
@@ -979,6 +982,7 @@ function GroupedItemRenderer(
                     onContextMenu={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        setContextMenuId(fieldItem.sourceId ?? fieldItem.id)
                         setIsContextMenuOpen(true);
                     }}
                 >
@@ -1148,7 +1152,7 @@ function GroupedItemRenderer(
                                 <div />
                             )}
                         </div>
-                        {isContextMenuOpen && isContextMenuValid && (
+                        {contextMenuId === ( fieldItem.sourceId ?? fieldItem.id ) && isContextMenuOpen && isContextMenuValid && (
                             <div className="react-fields-keeper-root-mapping-content-action-context-menu">
                                 {contextMenuRendererOutput}
                             </div>

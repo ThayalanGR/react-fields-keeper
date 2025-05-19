@@ -1097,7 +1097,9 @@ function GroupedItemRenderer(
                                 />
                             </div>
                         )}
-                        <div className="react-fields-keeper-mapping-column-content-wrapper">
+                        <div className="react-fields-keeper-mapping-column-content-wrapper" 
+                            style={ groupHeight > 0 ? { zIndex: 1 } : {} }
+                        >
                             {allowPrefixNode ? (
                                 ((prefixNodeIcon !== undefined &&
                                     prefixNodeIcon != '') ||

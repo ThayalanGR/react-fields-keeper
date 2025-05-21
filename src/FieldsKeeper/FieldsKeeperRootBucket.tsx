@@ -88,6 +88,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
             allItems,
             [
                 'label',
+                'folders',
                 'groupLabel',
                 'flatGroupLabel',
             ] satisfies (keyof IFieldsKeeperItem)[],

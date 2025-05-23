@@ -925,6 +925,17 @@ export function assignFieldItems(props: {
             return;
         const targetBucketItemsPreviousLength = targetBucket.items.length;
 
+        const getGroupDetails = (
+            items: IFieldsKeeperItem<any>[],
+            index: number,
+        ): { group: string; groupOrder: number } => {
+            const item = items[index];
+            return {
+                group: item?.group ?? '',
+                groupOrder: item?.groupOrder ?? -1,
+            };
+        };
+
         const insertItemsToBucket = (bucketIndex: number) => {
             if (isFieldItemClick) {
                 const updatedItemsInBucket: IFieldsKeeperItem<any>[] = [];
@@ -933,7 +944,7 @@ export function assignFieldItems(props: {
                     requiredFieldItems.every(
                         (item) =>
                             item.group &&
-                            item.group != FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
+                            item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
                     ) &&
                     targetBucket.items.length
                 ) {
@@ -942,7 +953,7 @@ export function assignFieldItems(props: {
                     targetBucket.items.forEach((itemInBucket, itemIndex) => {
                         if (
                             itemInBucket.group &&
-                            itemInBucket.group !=
+                            itemInBucket.group !==
                                 FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
                             requiredFieldItems.every(
                                 (ite) => ite.group === itemInBucket.group,
@@ -987,7 +998,45 @@ export function assignFieldItems(props: {
                     return;
                 }
             }
-            targetBucket.items.splice(bucketIndex, 0, ...requiredFieldItems);
+
+            const targetBucketItems = targetBucket.items;
+
+            const { group: groupAbove, groupOrder: orderAbove } =
+                getGroupDetails(targetBucketItems, bucketIndex - 1);
+            const { group: groupBelow, groupOrder: orderBelow } =
+                getGroupDetails(targetBucketItems, bucketIndex);
+
+            const isBetweenSameGroup =
+                bucketIndex > 0 &&
+                groupAbove === groupBelow &&
+                orderAbove < orderBelow;
+
+            if (isBetweenSameGroup) {
+                let insertIndex: number;
+
+                if (isPointerAboveCenter) {
+                    insertIndex =
+                        targetBucketItems.findIndex(
+                            (item, index) =>
+                                index < bucketIndex &&
+                                targetBucketItems[index + 1]?.group === groupAbove &&
+                                item.group !== groupAbove,
+                        ) + 1;
+
+                    if (insertIndex <= 0) insertIndex = bucketIndex;
+                } else {
+                    insertIndex = targetBucketItems.findIndex(
+                        (item, index) =>
+                            index > bucketIndex && item.group !== groupBelow,
+                    );
+
+                    if (insertIndex === -1) insertIndex = targetBucketItems.length;
+                }
+
+                targetBucketItems.splice(insertIndex, 0, ...requiredFieldItems);
+            } else {
+                targetBucketItems.splice(bucketIndex, 0, ...requiredFieldItems);
+            }
         };
 
         const updateTargetBucket = (isAssignmentFromSameBucket = false) => {
@@ -1127,14 +1176,8 @@ export function sortBucketItemsBasedOnGroupOrder(
             if (current.items.length > 1) {
                 // sort the groups based on group order
                 current.items.sort((itemA, itemB) => {
-                    const itemAIndex = findGroupItemOrder(
-                        allItems,
-                        itemA,
-                    );
-                    const itemBIndex = findGroupItemOrder(
-                        allItems,
-                        itemB,
-                    );
+                    const itemAIndex = findGroupItemOrder(allItems, itemA);
+                    const itemBIndex = findGroupItemOrder(allItems, itemB);
                     if (itemAIndex !== undefined && itemBIndex !== undefined) {
                         return itemAIndex - itemBIndex;
                     }

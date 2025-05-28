@@ -305,6 +305,11 @@ export interface IFieldsKeeperRootBucketProps {
          * Class name applied to a group.
          */
         customGroupItemClassName?: string;
+
+        /**
+         * Class name applied to checkbox.
+         */
+        customCheckBoxClassName?: string;
     };
 
     /**
@@ -479,6 +484,8 @@ export interface IFieldsKeeperBucketProps {
          * Class name applied to a group.
          */
         customGroupContainerClassName?: string;
+
+        customCheckBoxClassName?: string;
     };
 }
 

@@ -1100,7 +1100,10 @@ function GroupedItemRenderer(
                             <div className="react-fields-keeper-mapping-column-content-checkbox">
                                 <input
                                     type="checkbox"
-                                    className="react-fields-keeper-checkbox"
+                                    className={classNames(
+                                "react-fields-keeper-checkbox",
+                                customClassNames?.customCheckBoxClassName,
+                            )} 
                                     checked={isFieldItemAssigned}
                                     style={accentColorStyle}
                                     onChange={

@@ -74,3 +74,7 @@
     cursor: grabbing;
     transform: scale(0.98);
 }
+
+.custom-checkbox-classname {
+    accent-color: red !important;
+}

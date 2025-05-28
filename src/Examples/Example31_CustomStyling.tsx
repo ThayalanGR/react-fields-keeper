@@ -168,6 +168,8 @@ export default function Example31() {
                                     'custom-field-item-class-name',
                                 customGroupItemClassName:
                                     'custom-group-item-class-name',
+                                customCheckBoxClassName:
+                                    'custom-checkbox-classname',
                             }}
                         />
                     </div>

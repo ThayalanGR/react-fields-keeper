@@ -565,6 +565,16 @@ function FolderScopeItemRenderer(
                             onClick={() => toggleFolderCollapse(id)}
                             title={itemLabel ?? ''}
                         >
+                            <div
+                                className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
+                                style={iconColorStyle}
+                            >
+                                {isFolderCollapsed ? (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                                ) : (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                                )}
+                            </div>
                             <div className="folder-scope-label-icon">
                                 {getPrefixNodeIcon(prefixNode)}
                                 {hasActiveSelection && (
@@ -584,16 +594,7 @@ function FolderScopeItemRenderer(
                             >
                                 {itemLabel}
                             </div>
-                            <div
-                                className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
-                                style={iconColorStyle}
-                            >
-                                {isFolderCollapsed ? (
-                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                                ) : (
-                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                                )}
-                            </div>
+                            
                         </div>
                         {!isFolderCollapsed &&
                         sortBasedOnFolder &&
@@ -1077,11 +1078,32 @@ function GroupedItemRenderer(
                             }
                         }}
                     >
+                        {isGroupHeader ? (
+                                <div
+                                    className={classNames(
+                                        'react-fields-keeper-mapping-column-content-action',
+                                    )}
+                                    role="button"
+                                    onClick={groupHeader.onGroupHeaderToggle}
+                                    style={ groupHeight > 0 ? {zIndex: 1, ...accentColorStyle } : {...accentColorStyle} }
+                                >
+                                    {groupHeader.isGroupCollapsed ? (
+                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                                    ) : (
+                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                                    )}
+                                </div>
+                            ) : (
+                                <div />
+                            )}
                         {!ignoreCheckBox && (
                             <div className="react-fields-keeper-mapping-column-content-checkbox">
                                 <input
                                     type="checkbox"
-                                    className="react-fields-keeper-checkbox"
+                                    className={classNames(
+                                "react-fields-keeper-checkbox",
+                                customClassNames?.customCheckBoxClassName,
+                            )} 
                                     checked={isFieldItemAssigned}
                                     style={accentColorStyle}
                                     onChange={
@@ -1132,24 +1154,6 @@ function GroupedItemRenderer(
                             {isSuffixNodeValid ? (
                                 <div className="react-fields-keeper-mapping-column-content-suffix">
                                     {suffixNodeRendererOutput}
-                                </div>
-                            ) : (
-                                <div />
-                            )}
-                            {isGroupHeader ? (
-                                <div
-                                    className={classNames(
-                                        'react-fields-keeper-mapping-column-content-action',
-                                    )}
-                                    role="button"
-                                    onClick={groupHeader.onGroupHeaderToggle}
-                                    style={accentColorStyle}
-                                >
-                                    {groupHeader.isGroupCollapsed ? (
-                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                                    ) : (
-                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                                    )}
                                 </div>
                             ) : (
                                 <div />

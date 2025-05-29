@@ -996,6 +996,7 @@ export function assignFieldItems(props: {
                     });
 
                     targetBucket.items = [...updatedItemsInBucket];
+                    if(!isRequiredItemAdded) targetBucket.items.push(...requiredFieldItems)
                     return;
                 }
             }

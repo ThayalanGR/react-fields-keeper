@@ -930,9 +930,10 @@ export function assignFieldItems(props: {
             index: number,
         ): { group: string; groupOrder: number } => {
             const item = items[index];
+            const itemOrder = findGroupItemOrder(allItems, item);
             return {
                 group: item?.group ?? '',
-                groupOrder: item?.groupOrder ?? -1,
+                groupOrder: itemOrder ?? -1,
             };
         };
 

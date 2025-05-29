@@ -27,6 +27,17 @@ interface ContextState {
     deleteState: (instanceId: string) => void;
 }
 
+export const getStoreState = (instanceId: string) => {
+    const state = useStore.getState().state[instanceId];
+ 
+    if (!state)
+        throw new Error(
+            'Instance not found, all the buckets should be wrapped under provider / unique instanceIds should be passed',
+        );
+ 
+    return state as Required<IFieldsKeeperState>;
+};
+
 export const useStore = create<ContextState>()((set, get) => ({
     state: {},
     setState: (instanceId, newState, updateInfo) => {

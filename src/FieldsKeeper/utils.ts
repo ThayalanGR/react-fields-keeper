@@ -77,3 +77,24 @@ export function getGroupedItems(
 
     return groupedItems;
 }
+
+export const getNodeRendererOutput = (
+        renderer: unknown,
+        item: IFieldsKeeperItem,
+        fieldItems: IFieldsKeeperItem[],
+        onFieldItemClick: (fieldItems: IFieldsKeeperItem[], remove: boolean, assignedField?: { bucketId: string; currentInstanceId: string }) => () => void
+    ) => {
+        const assignField = (bucketId: string, instanceId: string) => {
+            onFieldItemClick(fieldItems, false, {
+                bucketId,
+                currentInstanceId: instanceId,
+            })();
+        };
+        const isRendererValid = typeof renderer === 'function';
+        const rendererOutput = isRendererValid
+            ? renderer(item, assignField)
+            : null;
+        const isValidElement =
+            rendererOutput !== undefined && rendererOutput !== null;
+        return { rendererOutput, isValidElement };
+    };

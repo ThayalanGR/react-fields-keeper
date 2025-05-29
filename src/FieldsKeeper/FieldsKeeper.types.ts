@@ -273,10 +273,10 @@ export interface IFieldsKeeperRootBucketProps {
     };
 
     /**  Function to customize suffix node rendering **/
-    suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+    suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>, assignFieldBucketItem: (bucketId: string, instanceId: string) => void) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+    onContextMenuRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>, assignFieldBucketItem: (bucketId: string, instanceId: string) => void) => JSX.Element;
 
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;

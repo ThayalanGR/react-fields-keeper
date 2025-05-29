@@ -24,11 +24,12 @@ import { assignFieldItems } from '..';
 import {
     FIELDS_KEEPER_CONSTANTS,
     FieldsKeeperContext,
+    getStoreState,
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
-import { getGroupedItems } from './utils';
+import { getGroupedItems, getNodeRendererOutput } from './utils';
 import { Icons } from '../Components/svgElements/Icons';
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
@@ -795,43 +796,50 @@ function GroupedItemRenderer(
     };
 
     const onFieldItemClick =
-        (fieldItems: IFieldsKeeperItem[], remove = false) =>
+        (
+            fieldItems: IFieldsKeeperItem[],
+            remove = false,
+            assignedField?: { bucketId: string; currentInstanceId: string },
+        ) =>
         () => {
             if (disableAssignments) {
                 return false;
             }
+
+            let currentBuckets = buckets;
+            const isValidAndDifferentInstanceId =
+                assignedField?.currentInstanceId &&
+                assignedField?.currentInstanceId !== instanceId;
+            if (isValidAndDifferentInstanceId) {
+                const { buckets } = getStoreState(
+                    assignedField?.currentInstanceId as string,
+                );
+                currentBuckets = buckets;
+            }
+
             const bucketToFill = getPriorityTargetBucketToFill({
                 buckets,
                 priorityGroup: fieldItems[0].group,
                 currentFillingItem: filteredItems,
             });
             assignFieldItems({
-                instanceId,
-                bucketId: bucketToFill.id,
+                instanceId: isValidAndDifferentInstanceId
+                    ? assignedField?.currentInstanceId
+                    : instanceId,
+                bucketId: isValidAndDifferentInstanceId
+                    ? assignedField?.bucketId
+                    : bucketToFill.id,
                 fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
                 fieldItems,
-                buckets,
+                buckets: currentBuckets,
                 removeOnly: remove,
                 sortGroupOrderWiseOnAssignment,
                 allowDuplicates,
                 updateState,
                 isFieldItemClick: true,
-                allItems: allItems
+                allItems: allItems,
             });
         };
-
-    const getNodeRendererOutput = (
-        renderer: unknown,
-        item: IFieldsKeeperItem,
-        isNotGroupItem = true,
-    ) => {
-        const isRendererValid = typeof renderer === 'function';
-        const rendererOutput =
-            isRendererValid && isNotGroupItem ? renderer(item) : null;
-        const isValidElement =
-            rendererOutput !== undefined && rendererOutput !== null;
-        return { rendererOutput, isValidElement };
-    };
 
     // paint
     const renderFieldItems = ({
@@ -928,7 +936,12 @@ function GroupedItemRenderer(
             const {
                 rendererOutput: suffixNodeRendererOutput,
                 isValidElement: isSuffixNodeValid,
-            } = getNodeRendererOutput(suffixNodeRenderer, fieldItem);
+            } = getNodeRendererOutput(
+                suffixNodeRenderer,
+                fieldItem,
+                isGroupHeader ? groupHeader.groupItems : [fieldItem],
+                onFieldItemClick,
+            );
 
             const {
                 rendererOutput: contextMenuRendererOutput,
@@ -936,6 +949,8 @@ function GroupedItemRenderer(
             } = getNodeRendererOutput(
                 onContextMenuRenderer,
                 fieldItem,
+                isGroupHeader ? groupHeader.groupItems : [fieldItem],
+                onFieldItemClick,
             );
 
             const getCustomClassName = ():
@@ -984,7 +999,7 @@ function GroupedItemRenderer(
                     onContextMenu={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setContextMenuId(fieldItem.sourceId ?? fieldItem.id)
+                        setContextMenuId(fieldItem.sourceId ?? fieldItem.id);
                         setIsContextMenuOpen(true);
                     }}
                 >
@@ -1079,31 +1094,35 @@ function GroupedItemRenderer(
                         }}
                     >
                         {isGroupHeader ? (
-                                <div
-                                    className={classNames(
-                                        'react-fields-keeper-mapping-column-content-action',
-                                    )}
-                                    role="button"
-                                    onClick={groupHeader.onGroupHeaderToggle}
-                                    style={ groupHeight > 0 ? {zIndex: 1, ...accentColorStyle } : {...accentColorStyle} }
-                                >
-                                    {groupHeader.isGroupCollapsed ? (
-                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                                    ) : (
-                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                                    )}
-                                </div>
-                            ) : (
-                                <div />
-                            )}
+                            <div
+                                className={classNames(
+                                    'react-fields-keeper-mapping-column-content-action',
+                                )}
+                                role="button"
+                                onClick={groupHeader.onGroupHeaderToggle}
+                                style={
+                                    groupHeight > 0
+                                        ? { zIndex: 1, ...accentColorStyle }
+                                        : { ...accentColorStyle }
+                                }
+                            >
+                                {groupHeader.isGroupCollapsed ? (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                                ) : (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                                )}
+                            </div>
+                        ) : (
+                            <div />
+                        )}
                         {!ignoreCheckBox && (
                             <div className="react-fields-keeper-mapping-column-content-checkbox">
                                 <input
                                     type="checkbox"
                                     className={classNames(
-                                "react-fields-keeper-checkbox",
-                                customClassNames?.customCheckBoxClassName,
-                            )} 
+                                        'react-fields-keeper-checkbox',
+                                        customClassNames?.customCheckBoxClassName,
+                                    )}
                                     checked={isFieldItemAssigned}
                                     style={accentColorStyle}
                                     onChange={
@@ -1120,8 +1139,9 @@ function GroupedItemRenderer(
                                 />
                             </div>
                         )}
-                        <div className="react-fields-keeper-mapping-column-content-wrapper" 
-                            style={ groupHeight > 0 ? { zIndex: 1 } : {} }
+                        <div
+                            className="react-fields-keeper-mapping-column-content-wrapper"
+                            style={groupHeight > 0 ? { zIndex: 1 } : {}}
                         >
                             {allowPrefixNode ? (
                                 ((prefixNodeIcon !== undefined &&
@@ -1159,11 +1179,14 @@ function GroupedItemRenderer(
                                 <div />
                             )}
                         </div>
-                        {contextMenuId === ( fieldItem.sourceId ?? fieldItem.id ) && isContextMenuOpen && isContextMenuValid && (
-                            <div className="react-fields-keeper-root-mapping-content-action-context-menu">
-                                {contextMenuRendererOutput}
-                            </div>
-                        )}
+                        {contextMenuId ===
+                            (fieldItem.sourceId ?? fieldItem.id) &&
+                            isContextMenuOpen &&
+                            isContextMenuValid && (
+                                <div className="react-fields-keeper-root-mapping-content-action-context-menu">
+                                    {contextMenuRendererOutput}
+                                </div>
+                            )}
                     </div>
                 </div>
             );

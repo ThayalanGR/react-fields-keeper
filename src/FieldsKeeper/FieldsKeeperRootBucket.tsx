@@ -194,7 +194,11 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 return {
                     type,
                     folderScopeItems:
-                        getGroupedItems(folderScopeItems ?? [], allItems, true) ?? [],
+                        getGroupedItems(
+                            folderScopeItems ?? [],
+                            allItems,
+                            true,
+                        ) ?? [],
                     folderScopeItem,
                 } satisfies IFolderScopedItem<IGroupedFieldsKeeperItem>;
             },
@@ -595,7 +599,6 @@ function FolderScopeItemRenderer(
                             >
                                 {itemLabel}
                             </div>
-                            
                         </div>
                         {!isFolderCollapsed &&
                         sortBasedOnFolder &&
@@ -795,26 +798,49 @@ function GroupedItemRenderer(
         return leastFilledOrderedBuckets[0];
     };
 
+    const assignFieldItemToBucket = (
+        fieldItems: IFieldsKeeperItem[],
+        assignedField: { bucketId: string; currentInstanceId: string },
+    ) => {
+        let currentBuckets = buckets;
+        const isValidAndDifferentInstanceId =
+            assignedField?.currentInstanceId &&
+            assignedField?.currentInstanceId !== instanceId;
+
+        if (isValidAndDifferentInstanceId) {
+            try {
+                const { buckets: selectedBuckets } = getStoreState(
+                    assignedField?.currentInstanceId as string,
+                );
+                currentBuckets = selectedBuckets;
+            }
+            catch {
+                currentBuckets = buckets;
+            }
+        }
+        
+        assignFieldItems({
+            instanceId: isValidAndDifferentInstanceId
+                ? assignedField?.currentInstanceId
+                : instanceId,
+            bucketId: assignedField?.bucketId as string,
+            fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
+            fieldItems,
+            buckets: currentBuckets,
+            removeOnly: false,
+            sortGroupOrderWiseOnAssignment,
+            allowDuplicates,
+            updateState,
+            isFieldItemClick: true,
+            allItems: allItems,
+        });
+    };
+
     const onFieldItemClick =
-        (
-            fieldItems: IFieldsKeeperItem[],
-            remove = false,
-            assignedField?: { bucketId: string; currentInstanceId: string },
-        ) =>
+        (fieldItems: IFieldsKeeperItem[], remove = false) =>
         () => {
             if (disableAssignments) {
                 return false;
-            }
-
-            let currentBuckets = buckets;
-            const isValidAndDifferentInstanceId =
-                assignedField?.currentInstanceId &&
-                assignedField?.currentInstanceId !== instanceId;
-            if (isValidAndDifferentInstanceId) {
-                const { buckets } = getStoreState(
-                    assignedField?.currentInstanceId as string,
-                );
-                currentBuckets = buckets;
             }
 
             const bucketToFill = getPriorityTargetBucketToFill({
@@ -822,16 +848,13 @@ function GroupedItemRenderer(
                 priorityGroup: fieldItems[0].group,
                 currentFillingItem: filteredItems,
             });
+
             assignFieldItems({
-                instanceId: isValidAndDifferentInstanceId
-                    ? assignedField?.currentInstanceId
-                    : instanceId,
-                bucketId: isValidAndDifferentInstanceId
-                    ? assignedField?.bucketId
-                    : bucketToFill.id,
+                instanceId: instanceId,
+                bucketId: bucketToFill.id,
                 fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
                 fieldItems,
-                buckets: currentBuckets,
+                buckets,
                 removeOnly: remove,
                 sortGroupOrderWiseOnAssignment,
                 allowDuplicates,
@@ -940,7 +963,7 @@ function GroupedItemRenderer(
                 suffixNodeRenderer,
                 fieldItem,
                 isGroupHeader ? groupHeader.groupItems : [fieldItem],
-                onFieldItemClick,
+                assignFieldItemToBucket,
             );
 
             const {
@@ -950,7 +973,7 @@ function GroupedItemRenderer(
                 onContextMenuRenderer,
                 fieldItem,
                 isGroupHeader ? groupHeader.groupItems : [fieldItem],
-                onFieldItemClick,
+                assignFieldItemToBucket,
             );
 
             const getCustomClassName = ():

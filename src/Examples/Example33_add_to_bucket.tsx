@@ -183,6 +183,7 @@ export default function Example33_add_to_bucket() {
                     <div className="root-bucket-container">
                         <FieldsKeeperRootBucket
                             label="Root Bucket"
+                            collapseFoldersOnMount={false}
                             suffixNodeRenderer={(
                                 { id: fieldId },
                                 assignFieldBucketItem,

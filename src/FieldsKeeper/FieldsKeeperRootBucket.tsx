@@ -649,7 +649,7 @@ function FolderScopeItemRenderer(
                                 onContextMenuRenderer != undefined &&
                                 typeof onContextMenuRenderer === 'function'
                                     ? onContextMenuRenderer({
-                                          type: 'folder',
+                                          type,
                                           fieldItem: folderScopeItem,
                                           onExpandCollapseAll:
                                               onExpandCollapseAll,
@@ -660,7 +660,7 @@ function FolderScopeItemRenderer(
                                 {suffixNodeRenderer != undefined &&
                                 typeof suffixNodeRenderer === 'function'
                                     ? suffixNodeRenderer({
-                                          type: 'folder',
+                                          type,
                                           fieldItem: folderScopeItem,
                                           onExpandCollapseAll:
                                               onExpandCollapseAll,

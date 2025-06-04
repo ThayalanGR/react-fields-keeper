@@ -255,6 +255,20 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         iconColor ? { '--bucket-icon-color': iconColor } : {}
     ) as CSSProperties;
 
+    const onExpandCollapseAll = (isCollapse: boolean) => {
+        const collapsedFolders: Record<string, boolean> = {};
+        folderScopedItems.map((folderItem) => {
+            if (folderItem.folderScopeItem) {
+                const folderId = folderItem.folderScopeItem.id as string;
+                collapsedFolders[folderId] = isCollapse;
+            }
+        });
+        setCollapsedNodes((prevState) => ({
+            ...prevState,
+            ...collapsedFolders,
+        }));
+    };
+
     // paint
     return (
         <div
@@ -308,6 +322,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             folderScopedItemsArray={folderScopedItems}
                             collapsedNodes={collapsedNodes}
                             setCollapsedNodes={setCollapsedNodes}
+                            onExpandCollapseAll={onExpandCollapseAll}
                         />
                     ))
                 ) : !hasData ? (
@@ -356,6 +371,7 @@ function FolderScopeItemRenderer(
         setCollapsedNodes: React.Dispatch<
             React.SetStateAction<Record<string, boolean>>
         >;
+        onExpandCollapseAll: (isCollapse: boolean) => void;
     },
 ) {
     // props
@@ -368,6 +384,9 @@ function FolderScopeItemRenderer(
         setCollapsedNodes,
         customClassNames,
         sortBasedOnFolder = true,
+        suffixNodeRenderer,
+        onContextMenuRenderer,
+        onExpandCollapseAll,
         ...rootBucketProps
     } = props;
 
@@ -387,15 +406,27 @@ function FolderScopeItemRenderer(
     // effects
     useEffect(() => {
         if (rootBucketProps.collapseFoldersOnMount !== undefined) {
-            setIsFolderCollapsed(rootBucketProps.collapseFoldersOnMount);
+            
+            setIsFolderCollapsed(
+                collapsedNodes[id] ?? rootBucketProps.collapseFoldersOnMount,
+            );
             if (rootBucketProps.collapseFoldersOnMount) {
                 setCollapsedNodes((prevState) => ({
                     ...prevState,
                     [id]: true,
                 }));
             }
+        } else {
+            if(Object.keys(collapsedNodes).includes(id)){
+                setIsFolderCollapsed(collapsedNodes[id]);
+            }
         }
-    }, [rootBucketProps.collapseFoldersOnMount, id, setCollapsedNodes]);
+    }, [
+        rootBucketProps.collapseFoldersOnMount,
+        id,
+        collapsedNodes,
+        setCollapsedNodes,
+    ]);
 
     // handlers
     const toggleFolderCollapse = (id: string) => {
@@ -405,6 +436,17 @@ function FolderScopeItemRenderer(
         }));
 
         setIsFolderCollapsed(!isFolderCollapsed);
+    };
+
+    const checkIsFolderCollapsed = () => {
+        let isCollapsed = false;
+        folders?.forEach((folder) => {
+            if (collapsedNodes[folder] && !hasSearchQuery) {
+                isCollapsed = true;
+            }
+        });
+
+        return isCollapsed;
     };
 
     const { instanceId: instanceIdFromContext } =
@@ -456,6 +498,10 @@ function FolderScopeItemRenderer(
         );
     }, [buckets, updatedFolderScopeItems]);
 
+    const [isContextMenuFolderOpen, setIsContextMenuFolderOpen] =
+        useState(false);
+    const [contextMenuFolderId, setContextMenuFolderId] = useState('');
+
     // style
     const accentColorStyle = (
         accentColor ? { '--bucket-accent-color': accentColor } : {}
@@ -474,6 +520,8 @@ function FolderScopeItemRenderer(
                         {...rootBucketProps}
                         key={index}
                         groupedItems={groupedItems}
+                        suffixNodeRenderer={suffixNodeRenderer}
+                        onContextMenuRenderer={onContextMenuRenderer}
                     />
                 ))}
             </>
@@ -491,16 +539,6 @@ function FolderScopeItemRenderer(
             groupLabel: resolvedGroupLabel,
         };
     })();
-
-    const checkIsFolderCollapsed = () => {
-        let isCollapsed = false;
-        folders?.forEach((folder) => {
-            if (collapsedNodes[folder] && !hasSearchQuery) {
-                isCollapsed = true;
-            }
-        });
-        return isCollapsed;
-    };
 
     const getPrefixNodeIcon = (prefixNodeIcon: ReactNode) => {
         if (React.isValidElement(prefixNode)) {
@@ -569,6 +607,12 @@ function FolderScopeItemRenderer(
                             role="button"
                             onClick={() => toggleFolderCollapse(id)}
                             title={itemLabel ?? ''}
+                            onContextMenu={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setContextMenuFolderId(id);
+                                setIsContextMenuFolderOpen(true);
+                            }}
                         >
                             <div
                                 className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
@@ -599,6 +643,30 @@ function FolderScopeItemRenderer(
                             >
                                 {itemLabel}
                             </div>
+                            <div className="folder-label-context-menu">
+                                {contextMenuFolderId === id &&
+                                isContextMenuFolderOpen &&
+                                onContextMenuRenderer != undefined &&
+                                typeof onContextMenuRenderer === 'function'
+                                    ? onContextMenuRenderer({
+                                          type: 'folder',
+                                          fieldItem: folderScopeItem,
+                                          onExpandCollapseAll:
+                                              onExpandCollapseAll,
+                                      })
+                                    : null}
+                            </div>
+                            <div className="folder-label-suffix-content">
+                                {suffixNodeRenderer != undefined &&
+                                typeof suffixNodeRenderer === 'function'
+                                    ? suffixNodeRenderer({
+                                          type: 'folder',
+                                          fieldItem: folderScopeItem,
+                                          onExpandCollapseAll:
+                                              onExpandCollapseAll,
+                                      })
+                                    : null}
+                            </div>
                         </div>
                         {!isFolderCollapsed &&
                         sortBasedOnFolder &&
@@ -610,6 +678,10 @@ function FolderScopeItemRenderer(
                                         key={index}
                                         groupedItems={groupedItems}
                                         customClassNames={customClassNames}
+                                        suffixNodeRenderer={suffixNodeRenderer}
+                                        onContextMenuRenderer={
+                                            onContextMenuRenderer
+                                        }
                                     />
                                 ))}
                             </div>
@@ -623,6 +695,8 @@ function FolderScopeItemRenderer(
                                 key={index}
                                 groupedItems={groupedItems}
                                 customClassNames={customClassNames}
+                                suffixNodeRenderer={suffixNodeRenderer}
+                                onContextMenuRenderer={onContextMenuRenderer}
                             />
                         ))}
                     </div>
@@ -642,6 +716,8 @@ function FolderScopeItemRenderer(
                             ],
                         }}
                         customClassNames={customClassNames}
+                        suffixNodeRenderer={suffixNodeRenderer}
+                        onContextMenuRenderer={onContextMenuRenderer}
                     />
                 ))}
         </div>
@@ -813,12 +889,10 @@ function GroupedItemRenderer(
                     assignedField?.currentInstanceId as string,
                 );
                 currentBuckets = selectedBuckets;
-            }
-            catch {
+            } catch {
                 currentBuckets = buckets;
             }
         }
-        
         assignFieldItems({
             instanceId: isValidAndDifferentInstanceId
                 ? assignedField?.currentInstanceId

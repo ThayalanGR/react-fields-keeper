@@ -181,6 +181,13 @@ export interface IGetPriorityTargetBucketToFillProps {
     priorityGroup?: string;
 }
 
+export interface ISuffixRootNodeRendererProps <T = any> {
+  type: 'folder' | 'group' | 'leaf' | 'table' | 'hierarchy';
+  fieldItem?: IFieldsKeeperItem<T>;
+  onExpandCollapseAll?: (isCollapse: boolean) => void;
+  assignFieldBucketItem?: (bucketId: string, instanceId: string) => void;
+}
+
 /**
  * Root properties for configuring a FieldsKeeper bucket.
  */
@@ -273,10 +280,10 @@ export interface IFieldsKeeperRootBucketProps {
     };
 
     /**  Function to customize suffix node rendering **/
-    suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>, assignFieldBucketItem: (bucketId: string, instanceId: string) => void) => JSX.Element;
+    suffixNodeRenderer?: (props: ISuffixRootNodeRendererProps) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>, assignFieldBucketItem: (bucketId: string, instanceId: string) => void) => JSX.Element;
+    onContextMenuRenderer?: (props: ISuffixRootNodeRendererProps) => JSX.Element;
 
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;

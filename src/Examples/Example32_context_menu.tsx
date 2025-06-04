@@ -294,7 +294,7 @@ export default function Example32() {
                     <div className="root-bucket-container">
                         <FieldsKeeperRootBucket
                             label="Root Bucket"
-                            suffixNodeRenderer={({ id: fieldId }) => {
+                            suffixNodeRenderer={({ fieldItem }) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Option 1', id: 'option1' },
@@ -306,7 +306,7 @@ export default function Example32() {
                                     console.log(
                                         'onContextMenuClick',
                                         id,
-                                        fieldId,
+                                        fieldItem?.id,
                                     );
                                 };
 
@@ -319,7 +319,7 @@ export default function Example32() {
                                     />
                                 );
                             }}
-                            onContextMenuRenderer={({ id: fieldId }) => {
+                            onContextMenuRenderer={({ fieldItem }) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Option 1', id: 'option1' },
@@ -331,7 +331,7 @@ export default function Example32() {
                                     console.log(
                                         'onContextMenuClick',
                                         id,
-                                        fieldId,
+                                        fieldItem?.id,
                                     );
                                 };
 

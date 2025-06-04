@@ -120,14 +120,14 @@ export default function Example24() {
                         <FieldsKeeperRootBucket
                             label="All Items"
                             collapseFoldersOnMount={false}
-                            suffixNodeRenderer={({ id }) => {
+                            suffixNodeRenderer={({fieldItem}) => {
                                 return (
                                     <div>
                                         <span
                                             onClick={() =>
                                                 setPinnedIds((prevState) => [
                                                     ...prevState,
-                                                    id,
+                                                    fieldItem?.id ?? '',
                                                 ])
                                             }
                                         >

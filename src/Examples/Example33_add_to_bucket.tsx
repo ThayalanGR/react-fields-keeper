@@ -184,11 +184,10 @@ export default function Example33_add_to_bucket() {
                         <FieldsKeeperRootBucket
                             label="Root Bucket"
                             collapseFoldersOnMount={false}
-                            suffixNodeRenderer={(
-                                { id: fieldId },
+                            suffixNodeRenderer={({
                                 assignFieldBucketItem,
+                            }
                             ) => {
-                                console.log("🚀 ~ Example33_add_to_bucket ~ fieldId:", fieldId)
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         {
@@ -227,7 +226,7 @@ export default function Example33_add_to_bucket() {
                                     ].includes(assignedBucketId)
                                         ? 'filter-bucket'
                                         : 'root-bucket';
-                                    assignFieldBucketItem(
+                                    assignFieldBucketItem?.(
                                         assignedBucketId,
                                         currentInstanceId,
                                     );

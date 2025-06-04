@@ -51,36 +51,81 @@ export default function Example18() {
 
     // compute
     const allItems: IFieldsKeeperItem[] = [
-        { id: 'a', label: 'a' },
-        { id: 'b', label: 'b' },
-        { id: 'c', label: 'c' },
+        { id: 'a', label: 'a', folders: ['folder_1'] },
+        { id: 'b', label: 'b', folders: ['folder_1'] },
+        { id: 'c', label: 'c', folders: ['folder_2'] },
+        { id: 'd', label: 'd', folders: ['folder_2'] },
         {
             id: 'date.quarter',
             label: 'Quarter',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            folders: ['folder_2'],
+            group: 'dateHierarchy',
+            groupLabel: 'Date Hierarchy',
+            groupIcon: 'hierarchy-icon',
             groupOrder: 1,
+            flatGroup: 'date',
+            flatGroupLabel: 'Date',
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.year',
             label: 'Year',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            folders: ['folder_2'],
+            group: 'dateHierarchy',
+            groupLabel: 'Date Hierarchy',
+            groupIcon: 'hierarchy-icon',
             groupOrder: 0,
+            flatGroup: 'date',
+            flatGroupLabel: 'Date',
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.month',
             label: 'Month',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            folders: ['folder_2'],
+            group: 'dateHierarchy',
+            groupLabel: 'Date Hierarchy',
+            groupIcon: 'hierarchy-icon',
             groupOrder: 2,
+            flatGroup: 'date',
+            flatGroupLabel: 'Date',
+            flatGroupIcon: 'contact-card',
         },
         {
             id: 'date.day',
             label: 'Day',
-            group: 'date',
-            groupLabel: 'Date long group header sample pass',
+            folders: ['folder_2'],
+            group: 'dateHierarchy',
+            groupLabel: 'Date Hierarchy',
+            groupIcon: 'hierarchy-icon',
             groupOrder: 3,
+            flatGroup: 'date',
+            flatGroupLabel: 'Date',
+            flatGroupIcon: 'contact-card',
+        },
+        {
+            id: 'date.time',
+            label: 'time',
+            folders: ['folder_2'],
+            group: 'dateHierarchy',
+            groupLabel: 'Date Hierarchy',
+            groupIcon: 'hierarchy-icon',
+            groupOrder: 4,
+            flatGroup: 'date',
+            flatGroupLabel: 'Date',
+            flatGroupIcon: 'contact-card',
+        },
+        {
+            id: 'date.seconds',
+            label: 'seconds',
+            folders: ['folder_2'],
+            group: 'dateHierarchy',
+            groupLabel: 'Date Hierarchy',
+            groupIcon: 'hierarchy-icon',
+            groupOrder: 5,
+            flatGroup: 'date',
+            flatGroupLabel: 'Date',
+            flatGroupIcon: 'contact-card',
         },
     ];
 
@@ -102,6 +147,18 @@ export default function Example18() {
                 allItems={allItems}
                 buckets={buckets}
                 onUpdate={(state) => console.log(state)}
+                foldersMeta={{
+                    folder_1: {
+                        id: 'folder_1',
+                        label: 'Folder 1',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                    folder_2: {
+                        id: 'folder_2',
+                        label: 'Folder 2',
+                        prefixNodeIcon: 'folder-icon',
+                    },
+                }}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">
@@ -184,7 +241,6 @@ export default function Example18() {
                                         ),
                                     );
                                 };
-
                                 return (
                                     <SuffixNode
                                         contextMenuOptions={contextMenuOptions}
@@ -207,7 +263,7 @@ export default function Example18() {
                     <div className="root-bucket-container">
                         <FieldsKeeperRootBucket
                             label="Root Bucket"
-                            suffixNodeRenderer={({ id: fieldId }) => {
+                            suffixNodeRenderer={({type, onExpandCollapseAll}) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Option 1', id: 'option1' },
@@ -215,18 +271,21 @@ export default function Example18() {
                                         { label: 'Option 3', id: 'option3' },
                                     ];
 
+                                    const contextMenuRootLabelOptions: IContextMenuOption[] =
+                                    [
+                                        { label: 'Expand', id: 'expand' },
+                                        { label: 'Collapse', id: 'collapse' },
+                                    ];
                                 const onOptionClick = (id: string) => {
-                                    console.log(
-                                        'onContextMenuClick',
-                                        id,
-                                        fieldId,
-                                    );
+                                    if((id === 'collapse' || id === 'expand') && onExpandCollapseAll !== undefined){
+                                        onExpandCollapseAll((id === 'collapse'));
+                                    } 
                                 };
 
                                 return (
                                     <SuffixNode
                                         contextMenuOptions={
-                                            contextMenuRootOptions
+                                            type === 'folder' ? contextMenuRootLabelOptions : contextMenuRootOptions
                                         }
                                         onOptionClick={onOptionClick}
                                     />

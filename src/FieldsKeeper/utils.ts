@@ -81,19 +81,22 @@ export function getGroupedItems(
 
     export const getNodeRendererOutput = (
         renderer: unknown,
-        item: IFieldsKeeperItem,
-        fieldItems: IFieldsKeeperItem[],
-        assignFieldItemToBucket: (fieldItems: IFieldsKeeperItem[], assignedField: { bucketId: string; currentInstanceId: string }) => void
+        item?: IFieldsKeeperItem,
+        fieldItems?: IFieldsKeeperItem[],
+        assignFieldItemToBucket?: (fieldItems: IFieldsKeeperItem[], assignedField: { bucketId: string; currentInstanceId: string }) => void,
+        onExpandCollapseAll?: (isCollapse: boolean) => void
     ) => {
         const assignField = (bucketId: string, instanceId: string) => {
-            assignFieldItemToBucket(fieldItems, {
+            if(fieldItems) {
+            assignFieldItemToBucket?.(fieldItems, {
                 bucketId,
                 currentInstanceId: instanceId,
             });
+            }
         };
         const isRendererValid = typeof renderer === 'function';
         const rendererOutput = isRendererValid
-            ? renderer(item, assignField)
+            ? renderer({type: item?.type, fieldItem: item,onExpandCollapseAll: onExpandCollapseAll, assignFieldBucketItem: assignField})
             : null;
         const isValidElement =
             rendererOutput !== undefined && rendererOutput !== null;

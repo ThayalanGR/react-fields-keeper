@@ -88,15 +88,15 @@ export function getGroupedItems(
     ) => {
         const assignField = (bucketId: string, instanceId: string) => {
             if(fieldItems) {
-            assignFieldItemToBucket?.(fieldItems, {
-                bucketId,
-                currentInstanceId: instanceId,
-            });
+                assignFieldItemToBucket?.(fieldItems, {
+                    bucketId,
+                    currentInstanceId: instanceId,
+                });
             }
         };
         const isRendererValid = typeof renderer === 'function';
         const rendererOutput = isRendererValid
-            ? renderer({type: item?.type, fieldItem: item,onExpandCollapseAll: onExpandCollapseAll, assignFieldBucketItem: assignField})
+            ? renderer({type: item?.type, fieldItem: item, onExpandCollapseAll, assignFieldBucketItem: assignField})
             : null;
         const isValidElement =
             rendererOutput !== undefined && rendererOutput !== null;

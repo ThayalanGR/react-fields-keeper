@@ -371,7 +371,9 @@ function FolderScopeItemRenderer(
         setCollapsedNodes: React.Dispatch<
             React.SetStateAction<Record<string, boolean>>
         >;
-        onExpandCollapseAll: (isCollapse: boolean) => void;
+        onExpandCollapseAll: (
+            isCollapse: boolean,
+        ) => void;
     },
 ) {
     // props
@@ -406,27 +408,21 @@ function FolderScopeItemRenderer(
     // effects
     useEffect(() => {
         if (rootBucketProps.collapseFoldersOnMount !== undefined) {
-            
-            setIsFolderCollapsed(
-                collapsedNodes[id] ?? rootBucketProps.collapseFoldersOnMount,
-            );
+            setIsFolderCollapsed(rootBucketProps.collapseFoldersOnMount);
             if (rootBucketProps.collapseFoldersOnMount) {
                 setCollapsedNodes((prevState) => ({
                     ...prevState,
                     [id]: true,
                 }));
             }
-        } else {
-            if(Object.keys(collapsedNodes).includes(id)){
-                setIsFolderCollapsed(collapsedNodes[id]);
-            }
         }
-    }, [
-        rootBucketProps.collapseFoldersOnMount,
-        id,
-        collapsedNodes,
-        setCollapsedNodes,
-    ]);
+    }, [rootBucketProps.collapseFoldersOnMount, id]);
+
+    useEffect(() => {
+        if (Object.keys(collapsedNodes).includes(id)) {
+            setIsFolderCollapsed(collapsedNodes[id]);
+        }
+    }, [collapsedNodes]);
 
     // handlers
     const toggleFolderCollapse = (id: string) => {
@@ -656,7 +652,9 @@ function FolderScopeItemRenderer(
                                       })
                                     : null}
                             </div>
-                            <div className="folder-label-suffix-content">
+                            <div className="folder-label-suffix-content" onClick={(e) => {
+                                e.stopPropagation();
+                            }}>
                                 {suffixNodeRenderer != undefined &&
                                 typeof suffixNodeRenderer === 'function'
                                     ? suffixNodeRenderer({
@@ -682,6 +680,7 @@ function FolderScopeItemRenderer(
                                         onContextMenuRenderer={
                                             onContextMenuRenderer
                                         }
+                                        onExpandCollapseAll={onExpandCollapseAll}
                                     />
                                 ))}
                             </div>
@@ -697,6 +696,7 @@ function FolderScopeItemRenderer(
                                 customClassNames={customClassNames}
                                 suffixNodeRenderer={suffixNodeRenderer}
                                 onContextMenuRenderer={onContextMenuRenderer}
+                                onExpandCollapseAll={onExpandCollapseAll}
                             />
                         ))}
                     </div>
@@ -727,6 +727,7 @@ function FolderScopeItemRenderer(
 function GroupedItemRenderer(
     props: {
         groupedItems: IGroupedFieldsKeeperItem;
+        onExpandCollapseAll?: (isCollapsed: boolean) => void;
     } & IFieldsKeeperRootBucketProps,
 ) {
     // props
@@ -879,34 +880,49 @@ function GroupedItemRenderer(
         assignedField: { bucketId: string; currentInstanceId: string },
     ) => {
         let currentBuckets = buckets;
-        const isValidAndDifferentInstanceId =
+        let currentAllItems = allItems;
+        let currentFieldItems = fieldItems;
+
+        const isDifferentInstance =
             assignedField?.currentInstanceId &&
             assignedField?.currentInstanceId !== instanceId;
 
-        if (isValidAndDifferentInstanceId) {
+        if (isDifferentInstance) {
             try {
-                const { buckets: selectedBuckets } = getStoreState(
-                    assignedField?.currentInstanceId as string,
-                );
+                const { buckets: selectedBuckets, allItems: selectedAllItems } =
+                    getStoreState(assignedField?.currentInstanceId as string);
                 currentBuckets = selectedBuckets;
+                currentAllItems = selectedAllItems;
+                const fieldItemIds = new Set(fieldItems.map((item) => item.id));
+                const fieldItemSourceIds = new Set(
+                    fieldItems.map((item) => item.sourceId).filter(Boolean),
+                );
+
+                currentFieldItems = selectedAllItems.filter(
+                    (item) =>
+                        fieldItemIds.has(item.id) ||
+                        (item.sourceId &&
+                            fieldItemSourceIds.has(item.sourceId)),
+                );
             } catch {
                 currentBuckets = buckets;
             }
         }
+
         assignFieldItems({
-            instanceId: isValidAndDifferentInstanceId
+            instanceId: isDifferentInstance
                 ? assignedField?.currentInstanceId
                 : instanceId,
             bucketId: assignedField?.bucketId as string,
             fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
-            fieldItems,
+            fieldItems: currentFieldItems,
             buckets: currentBuckets,
             removeOnly: false,
             sortGroupOrderWiseOnAssignment,
             allowDuplicates,
             updateState,
             isFieldItemClick: true,
-            allItems: allItems,
+            allItems: currentAllItems,
         });
     };
 
@@ -945,7 +961,11 @@ function GroupedItemRenderer(
         groupHeader,
         hasMasterGroup,
     }: IGroupedItemRenderer) => {
-        const { suffixNodeRenderer, onContextMenuRenderer } = props;
+        const {
+            suffixNodeRenderer,
+            onContextMenuRenderer,
+            onExpandCollapseAll,
+        } = props;
         // compute
         const isGroupHeader = groupHeader !== undefined;
 
@@ -1038,6 +1058,7 @@ function GroupedItemRenderer(
                 fieldItem,
                 isGroupHeader ? groupHeader.groupItems : [fieldItem],
                 assignFieldItemToBucket,
+                onExpandCollapseAll,
             );
 
             const {
@@ -1048,6 +1069,7 @@ function GroupedItemRenderer(
                 fieldItem,
                 isGroupHeader ? groupHeader.groupItems : [fieldItem],
                 assignFieldItemToBucket,
+                onExpandCollapseAll,
             );
 
             const getCustomClassName = ():

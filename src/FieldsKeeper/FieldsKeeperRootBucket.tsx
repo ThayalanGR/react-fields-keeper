@@ -652,9 +652,12 @@ function FolderScopeItemRenderer(
                                       })
                                     : null}
                             </div>
-                            <div className="folder-label-suffix-content" onClick={(e) => {
-                                e.stopPropagation();
-                            }}>
+                            <div
+                                className="folder-label-suffix-content"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                }}
+                            >
                                 {suffixNodeRenderer != undefined &&
                                 typeof suffixNodeRenderer === 'function'
                                     ? suffixNodeRenderer({
@@ -875,56 +878,64 @@ function GroupedItemRenderer(
         return leastFilledOrderedBuckets[0];
     };
 
-    const assignFieldItemToBucket = (
-        fieldItems: IFieldsKeeperItem[],
-        assignedField: { bucketId: string; currentInstanceId: string },
-    ) => {
-        let currentBuckets = buckets;
-        let currentAllItems = allItems;
-        let currentFieldItems = fieldItems;
+   const assignFieldItemToBucket = (
+    fieldItems: IFieldsKeeperItem[],
+    assignedField: { bucketId: string; currentInstanceId: string },
+) => {
+    const { bucketId, currentInstanceId } = assignedField || {};
+    const isDifferentInstance = currentInstanceId && currentInstanceId !== instanceId;
 
-        const isDifferentInstance =
-            assignedField?.currentInstanceId &&
-            assignedField?.currentInstanceId !== instanceId;
+    let currentBuckets = buckets;
+    let currentAllItems = allItems;
+    let currentFieldItems = fieldItems;
+    let targetBucketId = bucketId;
 
-        if (isDifferentInstance) {
-            try {
-                const { buckets: selectedBuckets, allItems: selectedAllItems } =
-                    getStoreState(assignedField?.currentInstanceId as string);
-                currentBuckets = selectedBuckets;
-                currentAllItems = selectedAllItems;
-                const fieldItemIds = new Set(fieldItems.map((item) => item.id));
-                const fieldItemSourceIds = new Set(
-                    fieldItems.map((item) => item.sourceId).filter(Boolean),
-                );
+    if (isDifferentInstance) {
+        try {
+            const storeState = getStoreState(currentInstanceId);
+            currentBuckets = storeState.buckets;
+            currentAllItems = storeState.allItems;
 
-                currentFieldItems = selectedAllItems.filter(
-                    (item) =>
-                        fieldItemIds.has(item.id) ||
-                        (item.sourceId &&
-                            fieldItemSourceIds.has(item.sourceId)),
-                );
-            } catch {
-                currentBuckets = buckets;
-            }
+            const fieldItemIds = new Set(fieldItems.map(item => item.id));
+            const fieldItemSourceIds = new Set(
+                fieldItems.map(item => item.sourceId).filter(Boolean),
+            );
+
+            currentFieldItems = currentAllItems.filter(
+                item =>
+                    fieldItemIds.has(item.id) ||
+                    (item.sourceId && fieldItemSourceIds.has(item.sourceId)),
+            );
+        } catch {
+            // Keep using local `buckets` and `allItems` if store fetch fails
         }
+    } else {
+        if (disableAssignments) return false;
 
-        assignFieldItems({
-            instanceId: isDifferentInstance
-                ? assignedField?.currentInstanceId
-                : instanceId,
-            bucketId: assignedField?.bucketId as string,
-            fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
-            fieldItems: currentFieldItems,
-            buckets: currentBuckets,
-            removeOnly: false,
-            sortGroupOrderWiseOnAssignment,
-            allowDuplicates,
-            updateState,
-            isFieldItemClick: true,
-            allItems: currentAllItems,
+        const bucketToFill = getPriorityTargetBucketToFill({
+            buckets,
+            priorityGroup: fieldItems[0]?.group,
+            currentFillingItem: filteredItems,
         });
-    };
+
+        targetBucketId = bucketToFill.id;
+    }
+
+    assignFieldItems({
+        instanceId: currentInstanceId || instanceId,
+        bucketId: targetBucketId!,
+        fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
+        fieldItems: currentFieldItems,
+        buckets: currentBuckets,
+        removeOnly: false,
+        sortGroupOrderWiseOnAssignment,
+        allowDuplicates,
+        updateState,
+        isFieldItemClick: true,
+        allItems: currentAllItems,
+    });
+};
+
 
     const onFieldItemClick =
         (fieldItems: IFieldsKeeperItem[], remove = false) =>

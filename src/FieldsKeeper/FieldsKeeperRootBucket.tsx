@@ -754,6 +754,7 @@ function GroupedItemRenderer(
         prefixNode: prefixNodeConfig,
         disableAssignments = false,
         customClassNames,
+        isHighlightGroup = false
     } = props;
 
     const {
@@ -1189,7 +1190,7 @@ function GroupedItemRenderer(
                                 e.clientY <=
                                     currentTargetRect[0].y +
                                         currentTargetRect[0].height;
-                            if (isGroupHeader && isCursorWithinGroupHeader) {
+                            if (isHighlightGroup && isGroupHeader && isCursorWithinGroupHeader) {
                                 const groupWrapper = e.currentTarget.closest(
                                     '.react-fields-keeper-grouped-item-wrapper',
                                 );

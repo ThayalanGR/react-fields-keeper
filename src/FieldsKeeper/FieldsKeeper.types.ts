@@ -324,6 +324,11 @@ export interface IFieldsKeeperRootBucketProps {
      * @default true
      */
     sortBasedOnFolder?: boolean;
+
+    /**
+     * Indicates whether the group is a highlight group.
+     */
+    isHighlightGroup?: boolean;
 }
 
 /**

@@ -24,7 +24,7 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
-import { findGroupItemOrder, getGroupedItems } from './utils';
+import { FIELD_DELIMITER, findGroupItemOrder, getGroupedItems } from './utils';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -208,8 +208,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             : '';
 
         const [idsChunk, sourceIdsChunk] = foundInstanceIdChunk.split('***');
-        const fieldItemIds = (idsChunk ?? '').split(',');
-        const fieldSourceIds = (sourceIdsChunk ?? '').split(',');
+        const fieldItemIds = (idsChunk ?? '').split(FIELD_DELIMITER);
+        const fieldSourceIds = (sourceIdsChunk ?? '').split(FIELD_DELIMITER);
 
         return { fieldItemIds, fromBucket, fieldItemIndex, fieldSourceIds };
     };
@@ -478,9 +478,9 @@ const GroupedItemRenderer = (
             );
             e.dataTransfer.setData(
                 instanceId,
-                fieldItems.map((item) => item.id).join(',') +
+                fieldItems.map((item) => item.id).join(FIELD_DELIMITER) +
                     '***' +
-                    fieldItems.map((item) => item.sourceId).join(','),
+                    fieldItems.map((item) => item.sourceId).join(FIELD_DELIMITER),
             );
             activeDraggedElementRef.current = e.target as HTMLDivElement;
         };

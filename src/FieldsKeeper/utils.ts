@@ -5,6 +5,8 @@ import {
 } from './FieldsKeeper.types';
 import { sortBucketItemsBasedOnGroupOrder } from './FieldsKeeperBucket';
 
+export const FIELD_DELIMITER = '~||~';
+
 export function getUniqueId() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
         const r = (Math.random() * 16) | 0;

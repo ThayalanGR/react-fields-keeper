@@ -560,6 +560,24 @@ function FolderScopeItemRenderer(
                     style={iconColorStyle}
                 />
             );
+        } else if (prefixNodeIcon === 'calculation-group-icon') {
+            return (
+                <Icons.calculationGroup
+                    className="folder-scope-label-calculation-group"
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            );
+        } else if (prefixNodeIcon === 'calculation-group-item-icon') {
+            return (
+                <Icons.calculationGroupItem
+                    className="folder-scope-label-calculation-group"
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            );
         } else if (prefixNodeIcon === 'calendar-icon') {
             return (
                 <i
@@ -1012,10 +1030,39 @@ function GroupedItemRenderer(
                         }}
                     />
                 );
+            } else if (prefixNodeIcon === 'calculation-group-icon') {
+                return (
+                    <Icons.calculationGroup
+                        className="folder-scope-label-calculation-group"
+                        style={{
+                            transform: 'translateX(-3px)',
+                            ...accentColorStyle,
+                        }}
+                    />
+                );
+            } else if (prefixNodeIcon === 'calculation-group-item-icon') {
+                return (
+                    <Icons.calculationGroupItem
+                        className="folder-scope-label-calculation-group"
+                        style={{
+                            transform: 'translateX(-3px)',
+                            ...accentColorStyle,
+                        }}
+                    />
+                );
             } else if (prefixNodeIcon === 'calculator-icon') {
                 return (
                     <i
                         className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--Calculator"
+                        style={{
+                            ...accentColorStyle,
+                        }}
+                    />
+                );
+            } else if (prefixNodeIcon === 'globe-icon') {
+                return (
+                    <i
+                        className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--Globe"
                         style={{
                             ...accentColorStyle,
                         }}

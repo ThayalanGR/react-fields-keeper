@@ -29,7 +29,7 @@ import {
     useStoreState,
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
-import { getGroupedItems, getNodeRendererOutput } from './utils';
+import { FIELD_DELIMITER, getGroupedItems, getNodeRendererOutput } from './utils';
 import { Icons } from '../Components/svgElements/Icons';
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
@@ -835,9 +835,9 @@ function GroupedItemRenderer(
             );
             e.dataTransfer.setData(
                 instanceId,
-                fieldItems.map((item) => item.id).join(',') +
+                fieldItems.map((item) => item.id).join(FIELD_DELIMITER) +
                     '***' +
-                    fieldItems.map((item) => item.sourceId).join(','),
+                    fieldItems.map((item) => item.sourceId).join(FIELD_DELIMITER),
             );
         };
 

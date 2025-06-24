@@ -124,7 +124,7 @@ export interface IFieldsKeeperItem<T = any> {
      * pass 'measure-icon' to show default measure icon
      *
      */
-    prefixNode?: 'measure-icon' | 'calculator-icon' | 'date-icon' | 'calculation-group-icon' | 'calculation-group-item-icon' | 'globe-icon' | ReactNode;
+    prefixNode?: 'measure-icon' | 'calculator-icon' | 'date-icon' | 'calculation-group-icon' | 'calculation-group-item-icon' | 'globe-icon' | 'planning-icon' | ReactNode;
 
     /**
      * useful for matching the field item type with corresponding bucket type

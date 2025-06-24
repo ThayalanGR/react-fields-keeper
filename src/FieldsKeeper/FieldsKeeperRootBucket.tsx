@@ -578,6 +578,15 @@ function FolderScopeItemRenderer(
                     }}
                 />
             );
+        } else if (prefixNodeIcon === 'planning-icon') {
+            return (
+                <Icons.planningIcon
+                    className="folder-scope-label-planning-icon"
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            );
         } else if (prefixNodeIcon === 'calendar-icon') {
             return (
                 <i
@@ -1043,7 +1052,7 @@ function GroupedItemRenderer(
             } else if (prefixNodeIcon === 'calculation-group-item-icon') {
                 return (
                     <Icons.calculationGroupItem
-                        className="folder-scope-label-calculation-group"
+                        className="folder-scope-label-calculation-group-item"
                         style={{
                             transform: 'translateX(-3px)',
                             ...accentColorStyle,

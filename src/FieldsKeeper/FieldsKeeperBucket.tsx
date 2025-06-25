@@ -337,7 +337,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                         'react-fields-keeper-mapping-content-multi-input':
                             hasRoomForFieldAssignment &&
                             !showExtendedAssignmentPlaceholder &&
-                            orientation === 'vertical',
+                            orientation === 'vertical' && groupedItems?.length,
                         'react-fields-keeper-mapping-content-input-active':
                             isCurrentFieldActive,
                         'react-fields-keeper-mapping-content-disabled':

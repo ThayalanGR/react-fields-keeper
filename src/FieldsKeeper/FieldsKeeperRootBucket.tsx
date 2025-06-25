@@ -403,6 +403,7 @@ function FolderScopeItemRenderer(
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
+    const [isElementHovered, setIsElementHovered] = useState(!rootBucketProps.showSuffixOnHover);
     const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
 
     // effects
@@ -636,6 +637,16 @@ function FolderScopeItemRenderer(
                                 setContextMenuFolderId(id);
                                 setIsContextMenuFolderOpen(true);
                             }}
+                            onMouseLeave={() => {
+                                if(rootBucketProps.showSuffixOnHover) {
+                                    setIsElementHovered(false);
+                                }
+                            }}
+                            onMouseOver={() => {
+                                if(rootBucketProps.showSuffixOnHover) {
+                                    setIsElementHovered(true);
+                                }
+                            }}
                         >
                             <div
                                 className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
@@ -684,6 +695,7 @@ function FolderScopeItemRenderer(
                                 onClick={(e) => {
                                     e.stopPropagation();
                                 }}
+                                style={{display: isElementHovered ? 'block' : 'none'}}
                             >
                                 {suffixNodeRenderer != undefined &&
                                 typeof suffixNodeRenderer === 'function'
@@ -781,7 +793,8 @@ function GroupedItemRenderer(
         prefixNode: prefixNodeConfig,
         disableAssignments = false,
         customClassNames,
-        isHighlightGroup = false
+        isHighlightGroup = false,
+        showSuffixOnHover = false
     } = props;
 
     const {
@@ -810,6 +823,7 @@ function GroupedItemRenderer(
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
+    const [isElementHovered, setIsElementHovered] = useState(!showSuffixOnHover);
 
     useEffect(() => {
         if (isContextMenuOpen) {
@@ -1195,6 +1209,8 @@ function GroupedItemRenderer(
                             'react-fields-keeper-mapping-column-content',
                             fieldItem.rootBucketActiveNodeClassName,
                             {
+                                'react-fields-keeper-master-group-header-offset':
+                                    groupHeader?.isFlatGroupHeader || (isGroupHeader && !hasMasterGroup),
                                 'react-fields-keeper-mapping-column-content-offset':
                                     isGroupItem ||
                                     (isGroupHeader && hasMasterGroup),
@@ -1235,6 +1251,9 @@ function GroupedItemRenderer(
                                   )
                                 : undefined
                         }
+                        onMouseOut={() => {
+                            if(showSuffixOnHover) setIsElementHovered(false);
+                        }}
                         onMouseOver={(
                             e: React.MouseEvent<HTMLDivElement, MouseEvent>,
                         ) => {
@@ -1277,6 +1296,9 @@ function GroupedItemRenderer(
                                 }
                             } else {
                                 setGroupHeight(0);
+                            }
+                            if(showSuffixOnHover){
+                                setIsElementHovered(true);
                             }
                         }}
                     >
@@ -1358,12 +1380,11 @@ function GroupedItemRenderer(
                             >
                                 <span>{fieldItem.label}</span>
                             </div>
-                            {isSuffixNodeValid ? (
-                                <div className="react-fields-keeper-mapping-column-content-suffix">
+                            {isSuffixNodeValid && (
+                                <div className="react-fields-keeper-mapping-column-content-suffix"
+                                    style={{ display: isElementHovered ? 'block' : 'none' }}>
                                     {suffixNodeRendererOutput}
                                 </div>
-                            ) : (
-                                <div />
                             )}
                         </div>
                         {contextMenuId ===

@@ -823,7 +823,6 @@ function GroupedItemRenderer(
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
-    const [isElementHovered, setIsElementHovered] = useState(!showSuffixOnHover);
 
     useEffect(() => {
         if (isContextMenuOpen) {
@@ -1142,7 +1141,7 @@ function GroupedItemRenderer(
                 assignFieldItemToBucket,
                 onExpandCollapseAll,
             );
-
+            const [isElementHovered, setIsElementHovered] = useState(!showSuffixOnHover);
             const {
                 rendererOutput: contextMenuRendererOutput,
                 isValidElement: isContextMenuValid,

@@ -660,7 +660,7 @@ function FolderScopeItemRenderer(
                             </div>
                             <div className="folder-scope-label-icon">
                                 {getPrefixNodeIcon(prefixNode)}
-                                {hasActiveSelection && (
+                                {!React.isValidElement(prefixNode) && hasActiveSelection && (
                                     <Icons.checkMark
                                         className="check-mark-overlay"
                                         style={accentColorStyle}

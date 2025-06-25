@@ -329,6 +329,11 @@ export interface IFieldsKeeperRootBucketProps {
      * Indicates whether the group is a highlight group.
      */
     isHighlightGroup?: boolean;
+
+    /**
+     * Indicates whether to display suffix node at the time of hover only.
+     */
+    showSuffixOnHover?: boolean;
 }
 
 /**

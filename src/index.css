@@ -97,10 +97,6 @@ h1 {
     gap: 15px;
 }
 
-.folder-label-suffix-content {
-    margin-right: 4px;
-}
-
 .keeper-container-large {
     width: 500px;
     display: grid;

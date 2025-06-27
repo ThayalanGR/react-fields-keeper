@@ -819,7 +819,7 @@ function GroupedItemRenderer(
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
-
+    const [isElementHovered, setIsElementHovered] = useState(!showSuffixOnHover);
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
@@ -1141,7 +1141,6 @@ function GroupedItemRenderer(
                 assignFieldItemToBucket,
                 onExpandCollapseAll,
             );
-            const [isElementHovered, setIsElementHovered] = useState(!showSuffixOnHover);
             const {
                 rendererOutput: contextMenuRendererOutput,
                 isValidElement: isContextMenuValid,

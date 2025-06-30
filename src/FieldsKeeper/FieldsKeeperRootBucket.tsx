@@ -824,7 +824,6 @@ function GroupedItemRenderer(
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
 
-    console.log("🚀 ~ highlightedItemId:", highlightedItemId)
 
     useEffect(() => {
         if (isContextMenuOpen) {

@@ -819,10 +819,12 @@ function GroupedItemRenderer(
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
-    const [isElementHovered, setIsElementHovered] = useState(!showSuffixOnHover);
+    const [hoveredItems, setHoveredItems] = useState<Record<string, boolean>>({});
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
+
+    console.log("🚀 ~ highlightedItemId:", highlightedItemId)
 
     useEffect(() => {
         if (isContextMenuOpen) {
@@ -1174,6 +1176,9 @@ function GroupedItemRenderer(
                 }
             };
 
+            const itemId = fieldItem.sourceId ?? fieldItem.id;
+            const isItemHovered = showSuffixOnHover && hoveredItems[itemId];
+
             return (
                 <div
                     key={fieldItem.id}
@@ -1198,7 +1203,7 @@ function GroupedItemRenderer(
                     onContextMenu={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setContextMenuId(fieldItem.sourceId ?? fieldItem.id);
+                        setContextMenuId(itemId);
                         setIsContextMenuOpen(true);
                     }}
                 >
@@ -1250,7 +1255,13 @@ function GroupedItemRenderer(
                                 : undefined
                         }
                         onMouseOut={() => {
-                            if(showSuffixOnHover) setIsElementHovered(false);
+                            if (showSuffixOnHover) {
+                                setHoveredItems((prev) => {
+                                    const newHoveredItems = { ...prev };
+                                    delete newHoveredItems[itemId];
+                                    return Object.keys(newHoveredItems).length === 0 ? {} : newHoveredItems;
+                                });
+                            }
                         }}
                         onMouseOver={(
                             e: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -1295,8 +1306,11 @@ function GroupedItemRenderer(
                             } else {
                                 setGroupHeight(0);
                             }
-                            if(showSuffixOnHover){
-                                setIsElementHovered(true);
+                            if (showSuffixOnHover) {
+                                setHoveredItems((prev) => ({
+                                    ...prev,
+                                    [itemId]: true,
+                                }));
                             }
                         }}
                     >
@@ -1379,8 +1393,10 @@ function GroupedItemRenderer(
                                 <span>{fieldItem.label}</span>
                             </div>
                             {isSuffixNodeValid && (
-                                <div className="react-fields-keeper-mapping-column-content-suffix"
-                                    style={{ display: isElementHovered ? 'block' : 'none' }}>
+                                <div
+                                    className="react-fields-keeper-mapping-column-content-suffix"
+                                    style={{ display: isItemHovered ? 'block' : 'none' }}
+                                >
                                     {suffixNodeRendererOutput}
                                 </div>
                             )}

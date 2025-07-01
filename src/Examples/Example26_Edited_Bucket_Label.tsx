@@ -5,7 +5,7 @@ import {
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
-    IFieldItemLabelClickProps,
+    IFieldItemLabelChangeProps,
 } from '..';
 
 export default function Example26() {
@@ -75,7 +75,7 @@ export default function Example26() {
     ]);
 
     const updateFieldLabel = (
-        fieldItemLabelClickProps: IFieldItemLabelClickProps,
+        fieldItemLabelClickProps: IFieldItemLabelChangeProps,
     ) => {
         const {
             bucketId,
@@ -133,8 +133,8 @@ export default function Example26() {
                             id="bucket1"
                             label="Bucket 1"
                             allowRemoveFields
-                            onFieldItemLabelClick={(
-                                fieldItemLabelClickProps: IFieldItemLabelClickProps,
+                            onFieldItemLabelChange={(
+                                fieldItemLabelClickProps: IFieldItemLabelChangeProps,
                             ) => {
                                 updateFieldLabel(fieldItemLabelClickProps);
                             }}
@@ -143,8 +143,8 @@ export default function Example26() {
                             id="bucket2"
                             label="Bucket 2"
                             allowRemoveFields
-                            onFieldItemLabelClick={(
-                                fieldItemLabelClickProps: IFieldItemLabelClickProps,
+                            onFieldItemLabelChange={(
+                                fieldItemLabelClickProps: IFieldItemLabelChangeProps,
                             ) => {
                                 updateFieldLabel(fieldItemLabelClickProps);
                             }}
@@ -153,8 +153,8 @@ export default function Example26() {
                             id="bucket3"
                             label="Bucket 3"
                             allowRemoveFields
-                            onFieldItemLabelClick={(
-                                fieldItemLabelClickProps: IFieldItemLabelClickProps,
+                            onFieldItemLabelChange={(
+                                fieldItemLabelClickProps: IFieldItemLabelChangeProps,
                             ) => {
                                 updateFieldLabel(fieldItemLabelClickProps);
                             }}

@@ -13,7 +13,7 @@ import {
     IFieldsKeeperBucket,
     IFieldsKeeperBucketProps,
     IFieldsKeeperItem,
-    ISuffixNodeRendererProps,
+    ISuffixBucketNodeRendererProps,
 } from './FieldsKeeper.types';
 import { IGroupedFieldsKeeperItem, IGroupedItemRenderer } from '..';
 import {
@@ -400,7 +400,7 @@ const GroupedItemRenderer = (
         onFieldItemRemove,
         fieldItemIndex,
         activeDraggedElementRef,
-        onFieldItemLabelClick,
+        onFieldItemLabelChange,
         customClassNames,
     } = props;
 
@@ -409,6 +409,7 @@ const GroupedItemRenderer = (
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const { iconColor } = useStoreState(instanceId);
+    const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -439,6 +440,14 @@ const GroupedItemRenderer = (
             };
         }
     }, [isContextMenuOpen]);
+
+    useEffect(() => {
+        if (editableItemId && inputRefs.current[editableItemId]) {
+            const input = inputRefs.current[editableItemId];
+            input?.focus();
+            input?.setSelectionRange(input.value.length, input.value.length);
+        }
+    }, [editableItemId]);
 
     useEffect(() => {
         setEditedLabels((prev) => {
@@ -494,13 +503,14 @@ const GroupedItemRenderer = (
         isOnBlur = false,
         e?: React.KeyboardEvent<HTMLInputElement>,
     ) => {
-        if (onFieldItemLabelClick && (e?.key === 'Enter' || isOnBlur)) {
+        const isEnter = e?.key === 'Enter';
+        if (onFieldItemLabelChange && (isEnter || isOnBlur)) {
             const oldValue = fieldItem.label;
             const updatedFieldItem = {
                 ...fieldItem,
                 label: editedLabels[fieldItem.id],
             };
-            onFieldItemLabelClick({
+            onFieldItemLabelChange({
                 bucketId: currentBucket.id,
                 fieldItem: updatedFieldItem,
                 oldValue,
@@ -512,7 +522,7 @@ const GroupedItemRenderer = (
 
     const getFieldRendererOutput = (
         renderer: unknown,
-        arg: ISuffixNodeRendererProps,
+        arg: ISuffixBucketNodeRendererProps,
     ) => {
         const isRendererValid = typeof renderer === 'function';
         const rendererElement =
@@ -556,6 +566,33 @@ const GroupedItemRenderer = (
             const remove = onFieldItemRemove(
                 ...(isGroupHeader ? groupHeader.groupItems : [fieldItem]),
             );
+
+            const onFieldRename = () => {
+                setEditableItemId(fieldItem.id);
+            }
+
+            const {
+                rendererElement: suffixNodeRendererOutput,
+                isValidElement: isSuffixNodeValid,
+            } = getFieldRendererOutput(suffixNodeRenderer, {
+                bucketId: currentBucket.id,
+                fieldItem,
+                isGroupHeader,
+                groupFieldItems: groupHeader?.groupItems,
+                onRenameField: onFieldRename
+            });
+
+            const {
+                rendererElement: contextMenuRendererOutput,
+                isValidElement: isContextMenuValid,
+            } = getFieldRendererOutput(onContextMenuRenderer, {
+                bucketId: currentBucket.id,
+                fieldItem,
+                isGroupHeader,
+                groupFieldItems: groupHeader?.groupItems,
+                onRenameField: onFieldRename
+            });
+            
             const getDefaultItemRenderer = () => {
                 const groupCollapseButton = isGroupHeader && (
                     <div
@@ -574,31 +611,14 @@ const GroupedItemRenderer = (
                     </div>
                 );
 
-                const {
-                    rendererElement: suffixNodeRendererOutput,
-                    isValidElement: isSuffixNodeValid,
-                } = getFieldRendererOutput(suffixNodeRenderer, {
-                    bucketId: currentBucket.id,
-                    fieldItem,
-                    isGroupHeader,
-                    groupFieldItems: groupHeader?.groupItems,
-                });
-
-                const {
-                    rendererElement: contextMenuRendererOutput,
-                    isValidElement: isContextMenuValid,
-                } = getFieldRendererOutput(onContextMenuRenderer, {
-                    bucketId: currentBucket.id,
-                    fieldItem,
-                    isGroupHeader,
-                    groupFieldItems: groupHeader?.groupItems,
-                });
-
                 return (
                     <Fragment>
                         {editableItemId ===
                         (isGroupHeader ? group : fieldItem.id) ? (
                             <input
+                                ref={(el) => {
+                                    inputRefs.current[fieldItem.id] = el;
+                                }}
                                 className="react-fields-keeper-mapping-content-input-edit"
                                 value={editedLabels[fieldItem.id]}
                                 onChange={(e) =>
@@ -682,13 +702,15 @@ const GroupedItemRenderer = (
                             : fieldItem.tooltip) ?? fieldItem.tooltip
                     }
                     onDoubleClick={() => {
-                        if (onFieldItemLabelClick) {
+                        if (onFieldItemLabelChange) {
                             setEditableItemId(fieldItem.id);
                         }
                     }}
                     onContextMenu={(e) => {
                         e.preventDefault();
-                        setIsContextMenuOpen(true);
+                        if(isContextMenuValid && contextMenuRendererOutput) {
+                            setIsContextMenuOpen(true);
+                        }
                     }}
                 >
                     <div
@@ -704,6 +726,7 @@ const GroupedItemRenderer = (
                                     fieldItem.disabled?.active,
                                 'react-fields-keeper-mapping-content-input-filled-custom-renderer':
                                     customItemRenderer !== undefined,
+                                'react-fields-keeper-context-menu-active': isContextMenuOpen
                             },
                             customClassNames?.customFieldItemContainerClassName,
                         )}

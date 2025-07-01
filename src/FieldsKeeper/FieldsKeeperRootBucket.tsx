@@ -403,7 +403,7 @@ function FolderScopeItemRenderer(
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
-    const [isElementHovered, setIsElementHovered] = useState(!rootBucketProps.showSuffixOnHover);
+    const [hoveredFolderItems, setHoveredFolderItems] = useState<Record<string, boolean>>({});
     const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
 
     // effects
@@ -637,14 +637,31 @@ function FolderScopeItemRenderer(
                                 setContextMenuFolderId(id);
                                 setIsContextMenuFolderOpen(true);
                             }}
-                            onMouseLeave={() => {
-                                if(rootBucketProps.showSuffixOnHover) {
-                                    setIsElementHovered(false);
+                            onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                const validClassNames = [
+                                    'folder-scope-wrapper',
+                                    'react-fields-keeper-mapping-content-scrollable-container'
+                                ];
+                                
+                                if (
+                                    rootBucketProps.showSuffixOnHover &&
+                                    e.relatedTarget instanceof Element &&
+                                    e.relatedTarget.classList &&
+                                    Array.from(e.relatedTarget.classList).some(className => validClassNames.includes(className))
+                                ) {
+                                    setHoveredFolderItems((prev) => {
+                                        const newHoveredFolderItems = { ...prev };
+                                        delete newHoveredFolderItems[id];
+                                        return Object.keys(newHoveredFolderItems).length === 0 ? {} : newHoveredFolderItems;
+                                    });
                                 }
                             }}
                             onMouseOver={() => {
-                                if(rootBucketProps.showSuffixOnHover) {
-                                    setIsElementHovered(true);
+                                if (rootBucketProps.showSuffixOnHover) {
+                                    setHoveredFolderItems((prev) => ({
+                                        ...prev,
+                                        [id]: true,
+                                    }));
                                 }
                             }}
                         >
@@ -695,7 +712,7 @@ function FolderScopeItemRenderer(
                                 onClick={(e) => {
                                     e.stopPropagation();
                                 }}
-                                style={{display: isElementHovered ? 'block' : 'none'}}
+                                style={{display: hoveredFolderItems[id] ? 'block' : 'none'}}
                             >
                                 {suffixNodeRenderer != undefined &&
                                 typeof suffixNodeRenderer === 'function'
@@ -1253,8 +1270,17 @@ function GroupedItemRenderer(
                                   )
                                 : undefined
                         }
-                        onMouseOut={() => {
-                            if (showSuffixOnHover) {
+                        onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                            const validClassNames = [
+                                'react-fields-keeper-mapping-column-content',
+                                'react-fields-keeper-mapping-content-scrollable-container'
+                            ];
+                            if (
+                                showSuffixOnHover &&
+                                e.relatedTarget instanceof Element &&
+                                e.relatedTarget.classList &&
+                                Array.from(e.relatedTarget.classList).some(className => validClassNames.includes(className))
+                            ) {
                                 setHoveredItems((prev) => {
                                     const newHoveredItems = { ...prev };
                                     delete newHoveredItems[itemId];

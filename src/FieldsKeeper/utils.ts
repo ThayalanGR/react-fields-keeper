@@ -1,5 +1,6 @@
 import { FIELDS_KEEPER_CONSTANTS } from './FieldsKeeper.context';
 import {
+    IFieldItemLabelChangeProps,
     IFieldsKeeperItem,
     IGroupedFieldsKeeperItem,
 } from './FieldsKeeper.types';
@@ -86,7 +87,10 @@ export function getGroupedItems(
         item?: IFieldsKeeperItem,
         fieldItems?: IFieldsKeeperItem[],
         assignFieldItemToBucket?: (fieldItems: IFieldsKeeperItem[], assignedField: { bucketId: string; currentInstanceId: string }) => void,
-        onExpandCollapseAll?: (isCollapse: boolean) => void
+        onExpandCollapseAll?: (isCollapse: boolean) => void,
+        onRenameField?:(
+                fieldItemClickProps: IFieldItemLabelChangeProps,
+            ) => void
     ) => {
         const assignField = (bucketId: string, instanceId: string) => {
             if(fieldItems) {
@@ -98,7 +102,7 @@ export function getGroupedItems(
         };
         const isRendererValid = typeof renderer === 'function';
         const rendererOutput = isRendererValid
-            ? renderer({type: item?.type, fieldItem: item, onExpandCollapseAll, assignFieldBucketItem: assignField})
+            ? renderer({type: item?.type, fieldItem: item, onExpandCollapseAll, assignFieldBucketItem: assignField, onRenameField})
             : null;
         const isValidElement =
             rendererOutput !== undefined && rendererOutput !== null;

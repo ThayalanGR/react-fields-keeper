@@ -464,10 +464,10 @@ export interface IFieldsKeeperBucketProps {
     /**
      * Custom function for rendering suffix items specific to this bucket
      */
-    suffixNodeRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
+    suffixNodeRenderer?: (props: ISuffixBucketNodeRendererProps) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
+    onContextMenuRenderer?: (props: ISuffixBucketNodeRendererProps) => JSX.Element;
 
     /** Layout orientation for items within the bucket */
     orientation?: 'vertical' | 'horizontal';
@@ -478,9 +478,9 @@ export interface IFieldsKeeperBucketProps {
     /** If true, groups are displayed flat */
     showAllGroupsFlat?: boolean;
 
-    /** Callback triggered when a field item label is clicked */
-    onFieldItemLabelClick?: (
-        fieldItemClickProps: IFieldItemLabelClickProps,
+    /** Callback triggered when a field item label is changed */
+    onFieldItemLabelChange?: (
+        fieldItemClickProps: IFieldItemLabelChangeProps,
     ) => void;
 
     /**
@@ -504,9 +504,14 @@ export interface IFieldsKeeperBucketProps {
 
         customCheckBoxClassName?: string;
     };
+
+    /**
+     * Callback triggered to highlight the element.
+     */
+    onHighlightElement?: () => void; // TO - DO
 }
 
-export interface IFieldItemLabelClickProps {
+export interface IFieldItemLabelChangeProps {
     /** ID of the bucket containing the field item */
     bucketId: string;
 
@@ -523,7 +528,7 @@ export interface IFieldItemLabelClickProps {
 /**
  * Custom renderer properties for suffix items within a bucket.
  */
-export interface ISuffixNodeRendererProps {
+export interface ISuffixBucketNodeRendererProps {
     /** The field item being rendered */
     fieldItem: IFieldsKeeperItem;
 
@@ -535,11 +540,16 @@ export interface ISuffixNodeRendererProps {
 
     // when isGroupHeader is up all its children will be passed
     groupFieldItems?: IFieldsKeeperItem[];
+
+    /**
+     * Callback triggered when renaming a field.
+     */
+    onRenameField?: () => void;
 }
 
 /**
  * Interface representing the properties for a Suffix Node component.
- * Extends the ISuffixNodeRendererProps interface.
+ * Extends the ISuffixBucketNodeRendererProps interface.
  */
 export interface ISuffixNodeProps extends Omit<IContextMenuProps, 'children'> {
     _dummy?: boolean;

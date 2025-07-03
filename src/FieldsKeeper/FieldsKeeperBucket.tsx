@@ -401,6 +401,7 @@ const GroupedItemRenderer = (
         fieldItemIndex,
         activeDraggedElementRef,
         onFieldItemLabelChange,
+        onFieldItemClick,
         customClassNames,
     } = props;
 
@@ -711,6 +712,9 @@ const GroupedItemRenderer = (
                         if(isContextMenuValid && contextMenuRendererOutput) {
                             setIsContextMenuOpen(true);
                         }
+                    }}
+                    onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+                        onFieldItemClick?.(fieldItem, e);
                     }}
                 >
                     <div

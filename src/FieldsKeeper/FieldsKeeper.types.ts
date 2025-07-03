@@ -484,6 +484,17 @@ export interface IFieldsKeeperBucketProps {
     ) => void;
 
     /**
+     * Callback fired when a field item is clicked.
+     *
+     * @param fieldItem - The clicked field item.
+     * @param event - The mouse event triggered by the click.
+     */
+    onFieldItemClick?: (
+        fieldItem: IFieldsKeeperItem,
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => void;
+
+    /**
      * Optional object to specify custom class names for different UI components.
      */
     customClassNames?: {

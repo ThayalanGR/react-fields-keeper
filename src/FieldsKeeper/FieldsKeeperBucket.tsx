@@ -467,6 +467,32 @@ const GroupedItemRenderer = (
         });
     }, [items]);
 
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const clickCountRef = useRef<number>(0);
+
+    const handleFieldItemClick = (fieldItem: IFieldsKeeperItem, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        clickCountRef.current += 1;
+
+        if (clickCountRef.current === 1) {
+            clickTimeoutRef.current = setTimeout(() => {
+                if (clickCountRef.current === 1 && onFieldItemClick) {
+                    onFieldItemClick(fieldItem, e);
+                }
+                clickCountRef.current = 0; 
+                clickTimeoutRef.current = null;
+            }, 300); 
+        } else if (clickCountRef.current === 2) {
+            if (clickTimeoutRef.current) {
+                clearTimeout(clickTimeoutRef.current);
+                clickTimeoutRef.current = null;
+            }
+            if (onFieldItemLabelChange) {
+                setEditableItemId(fieldItem.id);
+            }
+            clickCountRef.current = 0; 
+        }
+    };
+
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
     // handlers
@@ -702,20 +728,13 @@ const GroupedItemRenderer = (
                             ? fieldItem.disabled?.message
                             : fieldItem.tooltip) ?? fieldItem.tooltip
                     }
-                    onDoubleClick={() => {
-                        if (onFieldItemLabelChange) {
-                            setEditableItemId(fieldItem.id);
-                        }
-                    }}
                     onContextMenu={(e) => {
                         e.preventDefault();
                         if(isContextMenuValid && contextMenuRendererOutput) {
                             setIsContextMenuOpen(true);
                         }
                     }}
-                    onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-                        onFieldItemClick?.(fieldItem, e);
-                    }}
+                    onClick={(e) => handleFieldItemClick(fieldItem, e)}
                 >
                     <div
                         className={classNames(

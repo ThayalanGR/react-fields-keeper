@@ -24,7 +24,7 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
-import { FIELD_DELIMITER, findGroupItemOrder, getGroupedItems } from './utils';
+import { DOUBLE_CLICK_THRESHOLD, FIELD_DELIMITER, findGroupItemOrder, getGroupedItems } from './utils';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -480,7 +480,7 @@ const GroupedItemRenderer = (
                 }
                 clickCountRef.current = 0; 
                 clickTimeoutRef.current = null;
-            }, 300); 
+            }, DOUBLE_CLICK_THRESHOLD); 
         } else if (clickCountRef.current === 2) {
             if (clickTimeoutRef.current) {
                 clearTimeout(clickTimeoutRef.current);

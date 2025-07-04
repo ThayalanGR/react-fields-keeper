@@ -6,7 +6,7 @@ import {
 } from './FieldsKeeper.types';
 import { sortBucketItemsBasedOnGroupOrder } from './FieldsKeeperBucket';
 
-export const FIELD_DELIMITER = '~||~';
+export const FIELD_DELIMITER = '~!!!~';
 
 export const DOUBLE_CLICK_THRESHOLD = 300;
 

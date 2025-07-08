@@ -404,7 +404,25 @@ function FolderScopeItemRenderer(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
     const [hoveredFolderItems, setHoveredFolderItems] = useState<Record<string, boolean>>({});
-    const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
+
+    const { instanceId: instanceIdFromContext } =
+        useContext(FieldsKeeperContext);
+    const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
+    const { buckets, accentColor, iconColor, highlightAcrossBuckets, highlightedItemId, setHighlightedItem } = useStoreState(instanceId);
+    const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)?.[0];
+    const getIsItemHighlighted = (): boolean => {
+        if (!folderScopeItems) return false;
+
+        return folderScopeItems.some(scopeItem =>
+            scopeItem.items.some(item => item.id === highlightedItem)
+        );
+    };
+
+    const isItemHighlighted = highlightAcrossBuckets?.enabled ? getIsItemHighlighted() : false;
+    let isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
+    if (isFolderCollapsed && isItemHighlighted) {
+        isFolderCollapsed = false;
+    }
 
     // effects
     useEffect(() => {
@@ -427,6 +445,7 @@ function FolderScopeItemRenderer(
 
     // handlers
     const toggleFolderCollapse = (id: string) => {
+        setHighlightedItem(instanceId, null);
         setCollapsedNodes((prevState) => ({
             ...prevState,
             [id]: !prevState[id],
@@ -446,10 +465,6 @@ function FolderScopeItemRenderer(
         return isCollapsed;
     };
 
-    const { instanceId: instanceIdFromContext } =
-        useContext(FieldsKeeperContext);
-    const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
-    const { buckets, accentColor, iconColor } = useStoreState(instanceId);
     const updatedFolderScopeItems =
         folders?.length === 0
             ? folderScopedItemsArray.filter(
@@ -614,8 +629,35 @@ function FolderScopeItemRenderer(
         return `${indentSize}px`;
     };
 
+    const folderRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (highlightAcrossBuckets?.enabled && highlightedItem && isItemHighlighted) {
+            if (folderRef.current) {
+                const highlightedElement = folderRef.current.querySelector(
+                    `[data-item-id="${highlightedItem}"]`,
+                );
+                if (highlightedElement instanceof HTMLElement) {
+                    highlightedElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'start',
+                    });
+                }
+            }
+            if (isFolderCollapsedOriginal) {
+                setIsFolderCollapsed(false);
+                setCollapsedNodes((prevState) => ({
+                    ...prevState,
+                    [id]: false,
+                }));
+            }
+        }
+    }, [highlightedItem, isItemHighlighted, id, isFolderCollapsedOriginal]);
+
     return (
         <div
+        ref={folderRef}
             className="folder-scope-wrapper"
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{ paddingLeft: setIndentation(folders ?? []) }}
@@ -810,7 +852,7 @@ function GroupedItemRenderer(
         prefixNode: prefixNodeConfig,
         disableAssignments = false,
         customClassNames,
-        isHighlightGroup = false,
+        isHighlightGroupOnHover = false,
         showSuffixOnHover = false
     } = props;
 
@@ -832,7 +874,10 @@ function GroupedItemRenderer(
         accentColor,
         accentHighlightColor,
         iconColor,
+        highlightedItemId,
+        highlightAcrossBuckets
     } = useStoreState(instanceId);
+    const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)[0];
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
@@ -840,7 +885,21 @@ function GroupedItemRenderer(
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
+    const [activeHighlightIds, setActiveHighlightIds] = useState<Record<string, boolean>>({});
+    useEffect(() => {
+        if (highlightedItem) {
+            setActiveHighlightIds((prev) => ({
+                ...prev,
+                [highlightedItem]: true,
+            }));
 
+            const timer = setTimeout(() => {
+                setActiveHighlightIds({});
+            }, highlightAcrossBuckets?.highlightDuration);
+
+            return () => clearTimeout(timer);
+        }
+    }, [highlightedItemId, instanceId]);
 
     useEffect(() => {
         if (isContextMenuOpen) {
@@ -1026,11 +1085,14 @@ function GroupedItemRenderer(
 
     // paint
     const renderFieldItems = ({
-        fieldItems,
-        isGroupItem,
-        groupHeader,
-        hasMasterGroup,
-    }: IGroupedItemRenderer) => {
+    fieldItems,
+    isGroupItem,
+    groupHeader,
+    hasMasterGroup,
+    activeHighlightIds,
+}: IGroupedItemRenderer & {
+    activeHighlightIds: Record<string, boolean>;
+}) => {
         const {
             suffixNodeRenderer,
             onContextMenuRenderer,
@@ -1209,6 +1271,7 @@ function GroupedItemRenderer(
                                 groupHeader?.isFlatGroupHeader,
                         },
                     )}
+                    data-item-id={fieldItem.id}
                     title={
                         (fieldItem.rootDisabled?.active
                             ? fieldItem.rootDisabled?.message
@@ -1221,6 +1284,10 @@ function GroupedItemRenderer(
                         e.stopPropagation();
                         setContextMenuId(itemId);
                         setIsContextMenuOpen(true);
+                    }}
+                    style={{
+                        backgroundColor:
+                            activeHighlightIds?.[fieldItem.id] ? highlightAcrossBuckets?.highlightColor : 'transparent',
                     }}
                 >
                     <div
@@ -1299,7 +1366,7 @@ function GroupedItemRenderer(
                                 e.clientY <=
                                     currentTargetRect[0].y +
                                         currentTargetRect[0].height;
-                            if (isHighlightGroup && isGroupHeader && isCursorWithinGroupHeader) {
+                            if (isHighlightGroupOnHover && isGroupHeader && isCursorWithinGroupHeader) {
                                 const groupWrapper = e.currentTarget.closest(
                                     '.react-fields-keeper-grouped-item-wrapper',
                                 );
@@ -1505,6 +1572,7 @@ function GroupedItemRenderer(
                                 },
                                 isFlatGroupHeader: true,
                             },
+                            activeHighlightIds
                         })}
 
                     {!isMasterGroupCollapsed &&
@@ -1520,6 +1588,7 @@ function GroupedItemRenderer(
                             hasMasterGroup: (flatGroup &&
                                 flatGroup !==
                                     FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
+                            activeHighlightIds
                         })}
 
                     {!isMasterGroupCollapsed &&
@@ -1530,10 +1599,11 @@ function GroupedItemRenderer(
                             hasMasterGroup: (flatGroup &&
                                 flatGroup !==
                                     FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
+                        activeHighlightIds
                         })}
                 </div>
             </>
         );
     }
-    return <>{renderFieldItems({ fieldItems: filteredItems })}</>;
+    return <>{renderFieldItems({ fieldItems: filteredItems, activeHighlightIds })}</>;
 }

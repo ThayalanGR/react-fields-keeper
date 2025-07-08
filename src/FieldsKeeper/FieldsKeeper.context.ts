@@ -19,6 +19,7 @@ export type ContextSetState = (
     instanceId: string,
     newState: Partial<State & AdditionalContextState>,
     updateInfo: StateUpdateInfo,
+    isHighlightUpdate?: boolean
 ) => void;
 
 interface ContextState {
@@ -40,7 +41,7 @@ export const getStoreState = (instanceId: string) => {
 
 export const useStore = create<ContextState>()((set, get) => ({
     state: {},
-    setState: (instanceId, newState, updateInfo) => {
+    setState: (instanceId, newState, updateInfo, isHighlightUpdate = false) => {
         const prevState = get().state;
 
         const currentState = prevState[instanceId] ?? {};
@@ -51,7 +52,7 @@ export const useStore = create<ContextState>()((set, get) => ({
                 [instanceId]: requiredState,
             },
         });
-        currentState.onStateUpdate(requiredState, updateInfo);
+        if(!isHighlightUpdate) currentState.onStateUpdate(requiredState, updateInfo);
     },
     deleteState(instanceId) {
         const prevState = { ...get().state };

@@ -188,6 +188,12 @@ export interface ISuffixRootNodeRendererProps <T = any> {
   assignFieldBucketItem?: (bucketId: string, instanceId: string) => void;
 }
 
+export interface IHighlightAcrossBuckets {
+    enabled: boolean;
+    highlightColor: string;
+    highlightDuration: number;
+}
+
 /**
  * Root properties for configuring a FieldsKeeper bucket.
  */
@@ -326,9 +332,9 @@ export interface IFieldsKeeperRootBucketProps {
     sortBasedOnFolder?: boolean;
 
     /**
-     * Indicates whether the group is a highlight group.
+     * Indicates whether to highlight the child elements of the group when the group header is hovered.
      */
-    isHighlightGroup?: boolean;
+    isHighlightGroupOnHover?: boolean;
 
     /**
      * Indicates whether to display suffix node at the time of hover only.
@@ -382,6 +388,28 @@ export interface IFieldsKeeperState {
      * A list of folders with folder name as key and folder details as value
      */
     foldersMeta?: Record<string, IFieldsKeeperFolder>;
+
+    /**
+     
+     * Configuration for highlighting items across multiple buckets.
+     */
+    highlightAcrossBuckets?: IHighlightAcrossBuckets;
+
+    /**
+     * @internal
+     * ID of the currently highlighted item from Bucket.
+     */
+    highlightedItemId?: string;
+
+    /**
+     * @internal
+     * Function to set or clear the highlighted item.
+     * 
+     * @param instanceId - The instance or scope identifier for the operation.
+     * @param itemId - The ID of the item to highlight, or `null` to clear the highlight.
+     */
+    setHighlightedItem?: (instanceId: string, itemId: string | null) => void;
+
 }
 
 /**
@@ -534,6 +562,11 @@ export interface IFieldItemLabelChangeProps {
 
     /** Updated value of the field item */
     newValue: string;
+
+    /**
+     * Index of the field item to which the label is updated.
+     */
+    fieldIndex?: number
 }
 
 /**

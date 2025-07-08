@@ -29,6 +29,7 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
         getPriorityTargetBucketToFill,
         onUpdate,
         foldersMeta,
+        highlightAcrossBuckets
     } = props;
 
     // state
@@ -62,6 +63,17 @@ export const FieldsKeeperProvider = (props: IFieldsKeeperProviderProps) => {
                     updateInfo,
                 );
             },
+            highlightAcrossBuckets,
+            highlightedItemId: '',
+            setHighlightedItem: (obtainedInstanceId, itemId) => {
+                setState(obtainedInstanceId, {...keeperCoreState, highlightedItemId: itemId as string}, {
+                    fieldItems: [],
+                    fromBucket: '',
+                    targetBucket: '',
+                    isRemoved: false,
+                }, true);
+            }
+
         };
 
         state[instanceId] = coreState;

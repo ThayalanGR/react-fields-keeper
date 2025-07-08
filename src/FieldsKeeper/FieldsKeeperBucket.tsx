@@ -409,7 +409,7 @@ const GroupedItemRenderer = (
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { iconColor } = useStoreState(instanceId);
+    const { iconColor, highlightAcrossBuckets, setHighlightedItem } = useStoreState(instanceId);
     const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -528,6 +528,7 @@ const GroupedItemRenderer = (
     const onEnterKeyPress = (
         fieldItem: IFieldsKeeperItem,
         isOnBlur = false,
+        fieldIndex?: number,
         e?: React.KeyboardEvent<HTMLInputElement>,
     ) => {
         const isEnter = e?.key === 'Enter';
@@ -542,6 +543,7 @@ const GroupedItemRenderer = (
                 fieldItem: updatedFieldItem,
                 oldValue,
                 newValue: editedLabels[fieldItem.id],
+                fieldIndex
             });
             setEditableItemId(null);
         }
@@ -655,9 +657,9 @@ const GroupedItemRenderer = (
                                     )
                                 }
                                 onKeyDown={(e) =>
-                                    onEnterKeyPress(fieldItem, false, e)
+                                    onEnterKeyPress(fieldItem, false, fieldItem._fieldItemIndex, e)
                                 }
-                                onBlur={() => onEnterKeyPress(fieldItem, true)}
+                                onBlur={() => onEnterKeyPress(fieldItem, true, fieldItem._fieldItemIndex)}
                                 onFocus={(e) => e.target.select()}
                                 autoFocus
                             />
@@ -734,7 +736,13 @@ const GroupedItemRenderer = (
                             setIsContextMenuOpen(true);
                         }
                     }}
-                    onClick={(e) => handleFieldItemClick(fieldItem, e)}
+                    onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (highlightAcrossBuckets?.enabled && target.classList.contains('react-fields-keeper-mapping-content-input-filled')) {
+                            setHighlightedItem(instanceId, `${fieldItem.id}${FIELD_DELIMITER}${Date.now()}`);
+                        }
+                        handleFieldItemClick(fieldItem, e)
+                    }}
                 >
                     <div
                         className={classNames(

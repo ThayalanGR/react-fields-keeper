@@ -10,6 +10,11 @@ export const FIELD_DELIMITER = '~!!!~';
 
 export const DOUBLE_CLICK_THRESHOLD = 300;
 
+export interface IHighlightInfo {
+    enabled: boolean;
+    backgroundColor: string;
+};
+
 export function getUniqueId() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
         const r = (Math.random() * 16) | 0;
@@ -84,29 +89,33 @@ export function getGroupedItems(
 }
 
 
-    export const getNodeRendererOutput = (
-        renderer: unknown,
-        item?: IFieldsKeeperItem,
-        fieldItems?: IFieldsKeeperItem[],
-        assignFieldItemToBucket?: (fieldItems: IFieldsKeeperItem[], assignedField: { bucketId: string; currentInstanceId: string }) => void,
-        onExpandCollapseAll?: (isCollapse: boolean) => void,
-        onRenameField?:(
-                fieldItemClickProps: IFieldItemLabelChangeProps,
-            ) => void
-    ) => {
-        const assignField = (bucketId: string, instanceId: string) => {
-            if(fieldItems) {
-                assignFieldItemToBucket?.(fieldItems, {
-                    bucketId,
-                    currentInstanceId: instanceId,
-                });
-            }
-        };
-        const isRendererValid = typeof renderer === 'function';
-        const rendererOutput = isRendererValid
-            ? renderer({type: item?.type, fieldItem: item, onExpandCollapseAll, assignFieldBucketItem: assignField, onRenameField})
-            : null;
-        const isValidElement =
-            rendererOutput !== undefined && rendererOutput !== null;
-        return { rendererOutput, isValidElement };
+export const getNodeRendererOutput = (
+    renderer: unknown,
+    item?: IFieldsKeeperItem,
+    fieldItems?: IFieldsKeeperItem[],
+    assignFieldItemToBucket?: (fieldItems: IFieldsKeeperItem[], assignedField: { bucketId: string; currentInstanceId: string }) => void,
+    onExpandCollapseAll?: (isCollapse: boolean) => void,
+    onRenameField?:(
+            fieldItemClickProps: IFieldItemLabelChangeProps,
+        ) => void
+) => {
+    const assignField = (bucketId: string, instanceId: string) => {
+        if(fieldItems) {
+            assignFieldItemToBucket?.(fieldItems, {
+                bucketId,
+                currentInstanceId: instanceId,
+            });
+        }
     };
+    const isRendererValid = typeof renderer === 'function';
+    const rendererOutput = isRendererValid
+        ? renderer({type: item?.type, fieldItem: item, onExpandCollapseAll, assignFieldBucketItem: assignField, onRenameField})
+        : null;
+    const isValidElement =
+        rendererOutput !== undefined && rendererOutput !== null;
+    return { rendererOutput, isValidElement };
+};
+
+export const getFolderIdsFromValues = (foldersMeta: Record<string, { id: string }>): string[] => {
+    return Object.values(foldersMeta).map(folder => folder.id);
+};

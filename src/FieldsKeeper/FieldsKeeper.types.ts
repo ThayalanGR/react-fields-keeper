@@ -191,7 +191,10 @@ export interface ISuffixRootNodeRendererProps <T = any> {
 export interface IHighlightAcrossBuckets {
     enabled: boolean;
     highlightColor: string;
-    highlightDuration: number;
+    highlightDuration?: number;
+}
+export interface ICrossHighlightAcrossBuckets extends IHighlightAcrossBuckets {
+    crossHighlightIds: string[];
 }
 
 /**
@@ -340,6 +343,24 @@ export interface IFieldsKeeperRootBucketProps {
      * Indicates whether to display suffix node at the time of hover only.
      */
     showSuffixOnHover?: boolean;
+
+    /**
+     * Configuration object for managing cross-highlight functionality 
+     * across multiple buckets. When provided, it enables items in one 
+     * bucket to influence highlighting behavior in others.
+     */
+    crossHighlightAcrossBucket?: ICrossHighlightAcrossBuckets;
+
+    /**
+     * Callback fired when a field item is clicked.
+     *
+     * @param fieldItem - The clicked field item.
+     * @param event - The mouse event triggered by the click.
+     */
+    onFieldItemClick?: (
+        fieldItem: IFieldsKeeperItem,
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => void;
 }
 
 /**

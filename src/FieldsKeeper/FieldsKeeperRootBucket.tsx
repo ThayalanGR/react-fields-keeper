@@ -29,7 +29,7 @@ import {
     useStoreState,
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
-import { FIELD_DELIMITER, getGroupedItems, getNodeRendererOutput } from './utils';
+import { FIELD_DELIMITER, getFolderIdsFromValues, getGroupedItems, getNodeRendererOutput, IHighlightInfo } from './utils';
 import { Icons } from '../Components/svgElements/Icons';
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
@@ -404,21 +404,27 @@ function FolderScopeItemRenderer(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
     const [hoveredFolderItems, setHoveredFolderItems] = useState<Record<string, boolean>>({});
+    const getCrossHighlightIds = () => {
+        if(rootBucketProps.crossHighlightAcrossBucket?.enabled) {
+            return rootBucketProps?.crossHighlightAcrossBucket.crossHighlightIds
+        }
+        return [];
+    }
+    const [crossHighlightItemIds, setCrossHighlightItemIds] = useState(getCrossHighlightIds());
 
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
-    const { buckets, accentColor, iconColor, highlightAcrossBuckets, highlightedItemId, setHighlightedItem } = useStoreState(instanceId);
+    const { buckets, accentColor, iconColor, highlightAcrossBuckets, foldersMeta, highlightedItemId, setHighlightedItem } = useStoreState(instanceId);
     const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)?.[0];
     const getIsItemHighlighted = (): boolean => {
         if (!folderScopeItems) return false;
-
         return folderScopeItems.some(scopeItem =>
-            scopeItem.items.some(item => item.id === highlightedItem)
+            scopeItem.items.some(item => item.id === highlightedItem || crossHighlightItemIds.includes(item.id))
         );
     };
 
-    const isItemHighlighted = highlightAcrossBuckets?.enabled ? getIsItemHighlighted() : false;
+    const isItemHighlighted = highlightAcrossBuckets?.enabled || rootBucketProps.crossHighlightAcrossBucket?.enabled ? getIsItemHighlighted() : false;
     let isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
     if (isFolderCollapsed && isItemHighlighted) {
         isFolderCollapsed = false;
@@ -443,14 +449,50 @@ function FolderScopeItemRenderer(
         }
     }, [collapsedNodes]);
 
-    // handlers
-    const toggleFolderCollapse = (id: string) => {
-        setHighlightedItem(instanceId, null);
-        setCollapsedNodes((prevState) => ({
-            ...prevState,
-            [id]: !prevState[id],
-        }));
+    useEffect(() => {
+        setCrossHighlightItemIds(rootBucketProps?.crossHighlightAcrossBucket?.crossHighlightIds ?? []);
+    }, [rootBucketProps?.crossHighlightAcrossBucket?.crossHighlightIds]);
 
+    // handlers
+    const toggleFolderCollapse = (id: string, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        const target = event?.target as HTMLElement;
+
+        const iconClassList = [
+            'fk-ms-Icon',
+            'fk-ms-Icon--ChevronRight',
+            'folder-scope-label-collapse-icon',
+            'react-fields-keeper-mapping-column-content-action',
+        ];
+
+        const isExpansionNeeded = iconClassList.some((className) =>
+            target?.classList?.contains(className)
+        );
+
+        if (!isExpansionNeeded && rootBucketProps.onFieldItemClick && folderScopeItem) {
+            rootBucketProps.onFieldItemClick(folderScopeItem, event);
+            return; // Restricting the expand collapse functionality if onFieldItemClick is called
+        }
+
+        setHighlightedItem(instanceId, null);
+        const toggleCollapse = (id: string) => {
+            setCollapsedNodes((prevState) => {
+                const newCollapsed = !prevState[id];
+                return {
+                    ...prevState,
+                    [id]: newCollapsed,
+                };
+            });
+
+            // Move highlight update logic outside of render phase
+            const highlightedIds = getCrossHighlightIds();
+            const folderIds = getFolderIdsFromValues(foldersMeta);
+            const updatedHighlightIds = !collapsedNodes[id]
+                ? [...highlightedIds.filter((id) => folderIds.includes(id))]
+                : highlightedIds;
+            setCrossHighlightItemIds(updatedHighlightIds);
+        };
+
+        toggleCollapse(id);
         setIsFolderCollapsed(!isFolderCollapsed);
     };
 
@@ -654,7 +696,7 @@ function FolderScopeItemRenderer(
             }
         }
     }, [highlightedItem, isItemHighlighted, id, isFolderCollapsedOriginal]);
-
+    
     return (
         <div
         ref={folderRef}
@@ -671,7 +713,7 @@ function FolderScopeItemRenderer(
                                 customClassNames?.customLabelClassName,
                             )}
                             role="button"
-                            onClick={() => toggleFolderCollapse(id)}
+                            onClick={(e) => toggleFolderCollapse(id, e)}
                             title={itemLabel ?? ''}
                             onContextMenu={(e) => {
                                 e.preventDefault();
@@ -705,6 +747,10 @@ function FolderScopeItemRenderer(
                                         [id]: true,
                                     }));
                                 }
+                            }}
+                            style={{
+                                backgroundColor:
+                                    crossHighlightItemIds.includes(id) ? rootBucketProps?.crossHighlightAcrossBucket?.highlightColor : 'transparent',
                             }}
                         >
                             <div
@@ -853,7 +899,9 @@ function GroupedItemRenderer(
         disableAssignments = false,
         customClassNames,
         isHighlightGroupOnHover = false,
-        showSuffixOnHover = false
+        showSuffixOnHover = false,
+        crossHighlightAcrossBucket,
+        onFieldItemClick
     } = props;
 
     const {
@@ -885,21 +933,51 @@ function GroupedItemRenderer(
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
-    const [activeHighlightIds, setActiveHighlightIds] = useState<Record<string, boolean>>({});
+
+    const getInitialActiveHighlightIds = () => {
+        const activeIds: Record<string, IHighlightInfo> = {}
+        if(crossHighlightAcrossBucket?.enabled && crossHighlightAcrossBucket?.crossHighlightIds?.length) {
+            crossHighlightAcrossBucket?.crossHighlightIds.forEach((highlightedId) => {
+                activeIds[highlightedId] = {enabled: crossHighlightAcrossBucket.enabled, backgroundColor: crossHighlightAcrossBucket.highlightColor};
+            })
+        } 
+        return activeIds;
+    }
+    const [activeHighlightIds, setActiveHighlightIds] = useState<Record<string, IHighlightInfo>>(getInitialActiveHighlightIds());
     useEffect(() => {
         if (highlightedItem) {
             setActiveHighlightIds((prev) => ({
                 ...prev,
-                [highlightedItem]: true,
+                [highlightedItem]: {enabled: true, backgroundColor: highlightAcrossBuckets?.highlightColor},
             }));
 
             const timer = setTimeout(() => {
                 setActiveHighlightIds({});
-            }, highlightAcrossBuckets?.highlightDuration);
+            }, highlightAcrossBuckets?.highlightDuration ?? 3000);
 
             return () => clearTimeout(timer);
         }
     }, [highlightedItemId, instanceId]);
+
+    useEffect(() => {
+        if(crossHighlightAcrossBucket) {
+            const updatedActiveIds: Record<string, IHighlightInfo> = {}
+            crossHighlightAcrossBucket.crossHighlightIds.forEach((highlightId) => {
+                updatedActiveIds[highlightId] =  {enabled: true, backgroundColor: crossHighlightAcrossBucket?.highlightColor as string}
+            })
+            setActiveHighlightIds(() => ({
+                ...updatedActiveIds
+            }));
+            if (crossHighlightAcrossBucket?.enabled && crossHighlightAcrossBucket?.crossHighlightIds && crossHighlightAcrossBucket?.highlightDuration) {
+                const timer = setTimeout(() => {
+                    setActiveHighlightIds({});
+                }, crossHighlightAcrossBucket?.highlightDuration);
+
+                return () => clearTimeout(timer);
+            }
+        }
+        
+    }, [crossHighlightAcrossBucket]);
 
     useEffect(() => {
         if (isContextMenuOpen) {
@@ -1055,7 +1133,7 @@ function GroupedItemRenderer(
 };
 
 
-    const onFieldItemClick =
+    const onFieldItemClickHandler =
         (fieldItems: IFieldsKeeperItem[], remove = false) =>
         () => {
             if (disableAssignments) {
@@ -1091,7 +1169,7 @@ function GroupedItemRenderer(
     hasMasterGroup,
     activeHighlightIds,
 }: IGroupedItemRenderer & {
-    activeHighlightIds: Record<string, boolean>;
+    activeHighlightIds: Record<string, IHighlightInfo>;
 }) => {
         const {
             suffixNodeRenderer,
@@ -1287,7 +1365,7 @@ function GroupedItemRenderer(
                     }}
                     style={{
                         backgroundColor:
-                            activeHighlightIds?.[fieldItem.id] ? highlightAcrossBuckets?.highlightColor : 'transparent',
+                            activeHighlightIds?.[fieldItem.id] ? activeHighlightIds?.[fieldItem.id]?.backgroundColor : 'transparent',
                     }}
                 >
                     <div
@@ -1327,16 +1405,19 @@ function GroupedItemRenderer(
                                 ? groupHeader.groupItems
                                 : [fieldItem]),
                         )}
-                        onClick={
-                            toggleCheckboxOnLabelClick
-                                ? onFieldItemClick(
-                                      isGroupHeader
-                                          ? groupHeader.groupItems
-                                          : [fieldItem],
-                                      isFieldItemAssigned,
-                                  )
-                                : undefined
-                        }
+                        onClick={(e) => {
+                            if(toggleCheckboxOnLabelClick) {
+                                onFieldItemClickHandler(
+                                    isGroupHeader
+                                        ? groupHeader.groupItems
+                                        : [fieldItem],
+                                    isFieldItemAssigned,
+                                )
+                            }
+                            if (typeof onFieldItemClick === 'function') {
+                                onFieldItemClick(fieldItem, e);
+                            }
+                        }}
                         onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
                             const validClassNames = [
                                 'react-fields-keeper-mapping-column-content',
@@ -1441,7 +1522,7 @@ function GroupedItemRenderer(
                                     onChange={
                                         toggleCheckboxOnLabelClick
                                             ? undefined
-                                            : onFieldItemClick(
+                                            : onFieldItemClickHandler(
                                                   isGroupHeader
                                                       ? groupHeader.groupItems
                                                       : [fieldItem],

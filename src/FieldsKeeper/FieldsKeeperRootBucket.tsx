@@ -1412,7 +1412,7 @@ function GroupedItemRenderer(
                                         ? groupHeader.groupItems
                                         : [fieldItem],
                                     isFieldItemAssigned,
-                                )
+                                )();
                             }
                             if (typeof onFieldItemClick === 'function') {
                                 onFieldItemClick(fieldItem, e);

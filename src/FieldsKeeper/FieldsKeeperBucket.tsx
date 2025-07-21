@@ -13,7 +13,7 @@ import {
     IFieldsKeeperBucket,
     IFieldsKeeperBucketProps,
     IFieldsKeeperItem,
-    ISuffixNodeRendererProps,
+    ISuffixBucketNodeRendererProps,
 } from './FieldsKeeper.types';
 import { IGroupedFieldsKeeperItem, IGroupedItemRenderer } from '..';
 import {
@@ -24,7 +24,7 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
-import { getGroupedItems } from './utils';
+import { DOUBLE_CLICK_THRESHOLD, FIELD_DELIMITER, findGroupItemOrder, getGroupedItems } from './utils';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -53,6 +53,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const preHoveredElementRef = useRef<HTMLDivElement | null>(null);
     const activeDraggedElementRef = useRef<HTMLDivElement | null>(null);
     let isPointerAboveCenter = false;
+    let hoveredFieldItemIndex = -1;
 
     const {
         allItems,
@@ -72,7 +73,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
         return {
             currentBucket: bucket,
-            groupedItems: getGroupedItems(bucket.items),
+            groupedItems: getGroupedItems(bucket.items, allItems),
         };
     }, [buckets, id]);
 
@@ -96,6 +97,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                     fieldItems.length === 1
                         ? fieldItems[0]._fieldItemIndex
                         : undefined,
+                allItems: allItems,
             });
 
     // event handlers
@@ -116,6 +118,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const onDragOverHandler = (
         e: React.DragEvent<HTMLDivElement>,
         isParentElement = false,
+        fieldItemIndex?: number,
     ) => {
         e.preventDefault();
         e.stopPropagation();
@@ -178,7 +181,9 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
             preHoveredElementRef.current = hoveredTargetElement;
         }
-
+        if (fieldItemIndex != null && fieldItemIndex >= 0) {
+            hoveredFieldItemIndex = fieldItemIndex;
+        }
         onDragEnterHandler();
     };
 
@@ -203,8 +208,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             : '';
 
         const [idsChunk, sourceIdsChunk] = foundInstanceIdChunk.split('***');
-        const fieldItemIds = (idsChunk ?? '').split(',');
-        const fieldSourceIds = (sourceIdsChunk ?? '').split(',');
+        const fieldItemIds = (idsChunk ?? '').split(FIELD_DELIMITER);
+        const fieldSourceIds = (sourceIdsChunk ?? '').split(FIELD_DELIMITER);
 
         return { fieldItemIds, fromBucket, fieldItemIndex, fieldSourceIds };
     };
@@ -213,37 +218,49 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } =
             getFieldItemIds(e);
 
-        const destinationBucket = buckets.find((b) => b.id === id);
         const getDropIndex = () => {
-            if (
-                (e.target as HTMLDivElement).classList.contains(
-                    'react-fields-keeper-mapping-content-input',
-                )
-            ) {
-                return destinationBucket?.items.length ?? 0;
-            } else {
-                return Number(
-                    (e.target as HTMLDivElement).getAttribute('data-index'),
-                );
-            }
+            return hoveredFieldItemIndex;
         };
         const dropIndex = getDropIndex();
         const currentBucket = buckets.find((b) => b.id === fromBucket);
-        const currentBucketFieldItems = currentBucket?.items?.filter?.((item) =>
-            fieldItemIds.some((fieldItemId) => item.id === fieldItemId),
+        const currentBucketFieldItems = currentBucket?.items?.filter?.(
+            (item, itemIndex) => {
+                if (
+                    item.group &&
+                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) {
+                    item.groupOrder =
+                        item.groupOrder !== undefined
+                            ? item.groupOrder
+                            : itemIndex;
+                }
+                return fieldItemIds.some(
+                    (fieldItemId) => item.id === fieldItemId,
+                );
+            },
         );
 
         const fieldItemsRaw =
             currentBucketFieldItems ??
-            allItems.filter(
-                (item) =>
+            allItems.filter((item, itemIndex) => {
+                if (
+                    item.group &&
+                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) {
+                    item.groupOrder =
+                        item.groupOrder !== undefined
+                            ? item.groupOrder
+                            : itemIndex;
+                }
+                return (
                     fieldItemIds.some(
                         (fieldItemId) => item.id === fieldItemId,
                     ) ||
                     fieldSourceIds.some(
                         (fieldSourceId) => item.sourceId === fieldSourceId,
-                    ),
-            );
+                    )
+                );
+            });
 
         // const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
         // const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
@@ -275,6 +292,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 updateState,
                 dropIndex,
                 isPointerAboveCenter,
+                allItems: allItems,
             });
         onDragLeaveHandler();
     };
@@ -319,7 +337,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                         'react-fields-keeper-mapping-content-multi-input':
                             hasRoomForFieldAssignment &&
                             !showExtendedAssignmentPlaceholder &&
-                            orientation === 'vertical',
+                            orientation === 'vertical' && groupedItems?.length,
                         'react-fields-keeper-mapping-content-input-active':
                             isCurrentFieldActive,
                         'react-fields-keeper-mapping-content-disabled':
@@ -357,7 +375,11 @@ const GroupedItemRenderer = (
     props: {
         currentBucket: IFieldsKeeperBucket;
         groupedItem: IGroupedFieldsKeeperItem;
-        onDragOverHandler: (e: React.DragEvent<HTMLDivElement>) => void;
+        onDragOverHandler: (
+            e: React.DragEvent<HTMLDivElement>,
+            isParentElement?: boolean,
+            fieldItemIndex?: number,
+        ) => void;
         onFieldItemRemove: (...fieldItem: IFieldsKeeperItem[]) => () => void;
         fieldItemIndex: number;
         activeDraggedElementRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -378,7 +400,8 @@ const GroupedItemRenderer = (
         onFieldItemRemove,
         fieldItemIndex,
         activeDraggedElementRef,
-        onFieldItemLabelClick,
+        onFieldItemLabelChange,
+        onFieldItemClick,
         customClassNames,
     } = props;
 
@@ -386,7 +409,8 @@ const GroupedItemRenderer = (
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { iconColor } = useStoreState(instanceId);
+    const { iconColor, highlightAcrossBuckets, setHighlightedItem } = useStoreState(instanceId);
+    const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -419,6 +443,14 @@ const GroupedItemRenderer = (
     }, [isContextMenuOpen]);
 
     useEffect(() => {
+        if (editableItemId && inputRefs.current[editableItemId]) {
+            const input = inputRefs.current[editableItemId];
+            input?.focus();
+            input?.setSelectionRange(input.value.length, input.value.length);
+        }
+    }, [editableItemId]);
+
+    useEffect(() => {
         setEditedLabels((prev) => {
             const newLabels = { ...prev };
             items.forEach((item) => {
@@ -434,6 +466,32 @@ const GroupedItemRenderer = (
             return newLabels;
         });
     }, [items]);
+
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const clickCountRef = useRef<number>(0);
+
+    const handleFieldItemClick = (fieldItem: IFieldsKeeperItem, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        clickCountRef.current += 1;
+
+        if (clickCountRef.current === 1) {
+            clickTimeoutRef.current = setTimeout(() => {
+                if (clickCountRef.current === 1 && onFieldItemClick) {
+                    onFieldItemClick(fieldItem, e);
+                }
+                clickCountRef.current = 0; 
+                clickTimeoutRef.current = null;
+            }, DOUBLE_CLICK_THRESHOLD); 
+        } else if (clickCountRef.current === 2) {
+            if (clickTimeoutRef.current) {
+                clearTimeout(clickTimeoutRef.current);
+                clickTimeoutRef.current = null;
+            }
+            if (onFieldItemLabelChange) {
+                setEditableItemId(fieldItem.id);
+            }
+            clickCountRef.current = 0; 
+        }
+    };
 
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
 
@@ -456,9 +514,9 @@ const GroupedItemRenderer = (
             );
             e.dataTransfer.setData(
                 instanceId,
-                fieldItems.map((item) => item.id).join(',') +
+                fieldItems.map((item) => item.id).join(FIELD_DELIMITER) +
                     '***' +
-                    fieldItems.map((item) => item.sourceId).join(','),
+                    fieldItems.map((item) => item.sourceId).join(FIELD_DELIMITER),
             );
             activeDraggedElementRef.current = e.target as HTMLDivElement;
         };
@@ -470,19 +528,22 @@ const GroupedItemRenderer = (
     const onEnterKeyPress = (
         fieldItem: IFieldsKeeperItem,
         isOnBlur = false,
+        fieldIndex?: number,
         e?: React.KeyboardEvent<HTMLInputElement>,
     ) => {
-        if (onFieldItemLabelClick && (e?.key === 'Enter' || isOnBlur)) {
+        const isEnter = e?.key === 'Enter';
+        if (onFieldItemLabelChange && (isEnter || isOnBlur)) {
             const oldValue = fieldItem.label;
             const updatedFieldItem = {
                 ...fieldItem,
                 label: editedLabels[fieldItem.id],
             };
-            onFieldItemLabelClick({
+            onFieldItemLabelChange({
                 bucketId: currentBucket.id,
                 fieldItem: updatedFieldItem,
                 oldValue,
                 newValue: editedLabels[fieldItem.id],
+                fieldIndex
             });
             setEditableItemId(null);
         }
@@ -490,12 +551,14 @@ const GroupedItemRenderer = (
 
     const getFieldRendererOutput = (
         renderer: unknown,
-        arg: ISuffixNodeRendererProps,
-        additionalCondition = true,
+        arg: ISuffixBucketNodeRendererProps,
     ) => {
         const isRendererValid = typeof renderer === 'function';
         const rendererElement =
-            isRendererValid && additionalCondition ? renderer(arg) : null;
+            isRendererValid &&
+            (arg.fieldItem.group ? arg.groupFieldItems?.length : true)
+                ? renderer(arg)
+                : null;
         const isValidElement =
             rendererElement !== undefined && rendererElement !== null;
         return { rendererElement, isValidElement };
@@ -532,6 +595,33 @@ const GroupedItemRenderer = (
             const remove = onFieldItemRemove(
                 ...(isGroupHeader ? groupHeader.groupItems : [fieldItem]),
             );
+
+            const onFieldRename = () => {
+                setEditableItemId(fieldItem.id);
+            }
+
+            const {
+                rendererElement: suffixNodeRendererOutput,
+                isValidElement: isSuffixNodeValid,
+            } = getFieldRendererOutput(suffixNodeRenderer, {
+                bucketId: currentBucket.id,
+                fieldItem,
+                isGroupHeader,
+                groupFieldItems: groupHeader?.groupItems,
+                onRenameField: onFieldRename
+            });
+
+            const {
+                rendererElement: contextMenuRendererOutput,
+                isValidElement: isContextMenuValid,
+            } = getFieldRendererOutput(onContextMenuRenderer, {
+                bucketId: currentBucket.id,
+                fieldItem,
+                isGroupHeader,
+                groupFieldItems: groupHeader?.groupItems,
+                onRenameField: onFieldRename
+            });
+            
             const getDefaultItemRenderer = () => {
                 const groupCollapseButton = isGroupHeader && (
                     <div
@@ -550,39 +640,14 @@ const GroupedItemRenderer = (
                     </div>
                 );
 
-                const {
-                    rendererElement: suffixNodeRendererOutput,
-                    isValidElement: isSuffixNodeValid,
-                } = getFieldRendererOutput(
-                    suffixNodeRenderer,
-                    {
-                        bucketId: currentBucket.id,
-                        fieldItem,
-                        isGroupHeader,
-                        groupFieldItems: groupHeader?.groupItems,
-                    },
-                    !fieldItem.flatGroup,
-                );
-
-                const {
-                    rendererElement: contextMenuRendererOutput,
-                    isValidElement: isContextMenuValid,
-                } = getFieldRendererOutput(
-                    onContextMenuRenderer,
-                    {
-                        bucketId: currentBucket.id,
-                        fieldItem,
-                        isGroupHeader,
-                        groupFieldItems: groupHeader?.groupItems,
-                    },
-                    !fieldItem.flatGroup,
-                );
-
                 return (
                     <Fragment>
                         {editableItemId ===
                         (isGroupHeader ? group : fieldItem.id) ? (
                             <input
+                                ref={(el) => {
+                                    inputRefs.current[fieldItem.id] = el;
+                                }}
                                 className="react-fields-keeper-mapping-content-input-edit"
                                 value={editedLabels[fieldItem.id]}
                                 onChange={(e) =>
@@ -592,9 +657,9 @@ const GroupedItemRenderer = (
                                     )
                                 }
                                 onKeyDown={(e) =>
-                                    onEnterKeyPress(fieldItem, false, e)
+                                    onEnterKeyPress(fieldItem, false, fieldItem._fieldItemIndex, e)
                                 }
-                                onBlur={() => onEnterKeyPress(fieldItem, true)}
+                                onBlur={() => onEnterKeyPress(fieldItem, true, fieldItem._fieldItemIndex)}
                                 onFocus={(e) => e.target.select()}
                                 autoFocus
                             />
@@ -665,14 +730,18 @@ const GroupedItemRenderer = (
                             ? fieldItem.disabled?.message
                             : fieldItem.tooltip) ?? fieldItem.tooltip
                     }
-                    onDoubleClick={() => {
-                        if (onFieldItemLabelClick) {
-                            setEditableItemId(fieldItem.id);
-                        }
-                    }}
                     onContextMenu={(e) => {
                         e.preventDefault();
-                        setIsContextMenuOpen(true);
+                        if(isContextMenuValid && contextMenuRendererOutput) {
+                            setIsContextMenuOpen(true);
+                        }
+                    }}
+                    onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (highlightAcrossBuckets?.enabled && target.classList.contains('react-fields-keeper-mapping-content-input-filled')) {
+                            setHighlightedItem(instanceId, `${fieldItem.id}${FIELD_DELIMITER}${Date.now()}`);
+                        }
+                        handleFieldItemClick(fieldItem, e)
                     }}
                 >
                     <div
@@ -688,11 +757,12 @@ const GroupedItemRenderer = (
                                     fieldItem.disabled?.active,
                                 'react-fields-keeper-mapping-content-input-filled-custom-renderer':
                                     customItemRenderer !== undefined,
+                                'react-fields-keeper-context-menu-active': isContextMenuOpen
                             },
                             customClassNames?.customFieldItemContainerClassName,
                         )}
                         style={itemStyle}
-                        draggable
+                        draggable={isGroupHeader || isGroupItem ? false : true}
                         data-index={fieldItemIndex}
                         onDragStart={onDragStartHandler(
                             (fieldItem._fieldItemIndex ?? '') + '',
@@ -701,7 +771,13 @@ const GroupedItemRenderer = (
                                 ? groupHeader.groupItems
                                 : [fieldItem],
                         )}
-                        onDragOver={onDragOverHandler}
+                        onDragOver={(e) =>
+                            onDragOverHandler(
+                                e,
+                                false,
+                                fieldItem._fieldItemIndex,
+                            )
+                        }
                     >
                         {customItemRenderer !== undefined
                             ? customItemRenderer({
@@ -741,6 +817,9 @@ const GroupedItemRenderer = (
                     },
                     customClassNames?.customGroupContainerClassName,
                 )}
+                draggable
+                onDragStart={onDragStartHandler('', currentBucket.id, items)}
+                onDragOver={(e) => onDragOverHandler(e, false, fieldItemIndex)}
             >
                 {/* group header */}
                 {renderFieldItems({
@@ -806,6 +885,7 @@ export function assignFieldItems(props: {
     fromBucket: string;
     buckets: IFieldsKeeperBucket[];
     fieldItems: IFieldsKeeperItem[];
+    allItems: IFieldsKeeperItem[];
     updateState: ContextSetState;
     removeOnly?: boolean;
     sortGroupOrderWiseOnAssignment?: boolean;
@@ -813,6 +893,7 @@ export function assignFieldItems(props: {
     removeIndex?: number;
     dropIndex?: number;
     isPointerAboveCenter?: boolean;
+    isFieldItemClick?: boolean;
 }) {
     // props
     const {
@@ -828,6 +909,8 @@ export function assignFieldItems(props: {
         fromBucket: fromBucketId,
         dropIndex = -1,
         isPointerAboveCenter = false,
+        isFieldItemClick = false,
+        allItems,
     } = props;
 
     const newBuckets = [...buckets];
@@ -850,7 +933,8 @@ export function assignFieldItems(props: {
                     requiredFieldItems.some(
                         (fieldItem) =>
                             (fieldItem.sourceId ?? fieldItem.id) ===
-                            (item.sourceId ?? item.id),
+                                (item.sourceId ?? item.id) ||
+                            fieldItem.flatGroup === item.id,
                     ) === false ||
                     restrictedItems.some(
                         (fieldItem) => fieldItem.id === item.id,
@@ -870,7 +954,7 @@ export function assignFieldItems(props: {
             newBuckets.forEach((bucket) => {
                 filterItemsFromBucket(bucket);
                 if (sortGroupOrderWiseOnAssignment)
-                    sortBucketItemsBasedOnGroupOrder(bucket.items);
+                    sortBucketItemsBasedOnGroupOrder(bucket.items, allItems);
             });
         } else {
             if (fromBucket) filterItemsFromBucket(fromBucket);
@@ -895,13 +979,125 @@ export function assignFieldItems(props: {
             return;
         const targetBucketItemsPreviousLength = targetBucket.items.length;
 
-        const insertItemsToBucket = (isAssignmentFromSameBucket = false) => {
+        const getGroupDetails = (
+            items: IFieldsKeeperItem<any>[],
+            index: number,
+        ): { group: string; groupOrder: number } => {
+            const item = items[index];
+            const itemOrder = findGroupItemOrder(allItems, item);
+            return {
+                group: item?.group ?? '',
+                groupOrder: itemOrder ?? -1,
+            };
+        };
+
+        const insertItemsToBucket = (bucketIndex: number) => {
+            if (isFieldItemClick) {
+                const updatedItemsInBucket: IFieldsKeeperItem<any>[] = [];
+                if (
+                    requiredFieldItems.length === 1 &&
+                    requiredFieldItems.every(
+                        (item) =>
+                            item.group &&
+                            item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
+                    ) &&
+                    targetBucket.items.length
+                ) {
+                    let currentGroupItems: IFieldsKeeperItem[] = [];
+                    let isRequiredItemAdded = false;
+                    targetBucket.items.forEach((itemInBucket, itemIndex) => {
+                        if (
+                            itemInBucket.group &&
+                            itemInBucket.group !==
+                                FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                            requiredFieldItems.every(
+                                (ite) => ite.group === itemInBucket.group,
+                            )
+                        ) {
+                            if (
+                                targetBucket?.items?.length === itemIndex + 1 ||
+                                itemInBucket.group !==
+                                    targetBucket?.items?.[itemIndex + 1]?.group
+                            ) {
+                                currentGroupItems.push(itemInBucket);
+                                if (
+                                    (!allowDuplicates &&
+                                        !isRequiredItemAdded) ||
+                                    allowDuplicates
+                                ) {
+                                    currentGroupItems.push(
+                                        ...requiredFieldItems,
+                                    );
+                                    isRequiredItemAdded = true;
+                                }
+                                if (currentGroupItems.length) {
+                                    const sortedCurrentGrpItems =
+                                        sortBucketItemsBasedOnGroupOrder(
+                                            currentGroupItems,
+                                            allItems,
+                                        );
+                                    updatedItemsInBucket.push(
+                                        ...sortedCurrentGrpItems,
+                                    );
+                                    currentGroupItems = [];
+                                }
+                            } else {
+                                currentGroupItems.push(itemInBucket);
+                            }
+                        } else {
+                            updatedItemsInBucket.push(itemInBucket);
+                        }
+                    });
+
+                    targetBucket.items = [...updatedItemsInBucket];
+                    if(!isRequiredItemAdded) targetBucket.items.push(...requiredFieldItems)
+                    return;
+                }
+            }
+
+            const targetBucketItems = targetBucket.items;
+
+            const { group: groupAbove, groupOrder: orderAbove } =
+                getGroupDetails(targetBucketItems, bucketIndex - 1);
+            const { group: groupBelow, groupOrder: orderBelow } =
+                getGroupDetails(targetBucketItems, bucketIndex);
+
+            const isBetweenSameGroup =
+                bucketIndex > 0 &&
+                groupAbove === groupBelow &&
+                orderAbove < orderBelow;
+
+            if (isBetweenSameGroup) {
+                let insertIndex: number;
+
+                if (isPointerAboveCenter) {
+                    insertIndex =
+                        targetBucketItems.findIndex(
+                            (item, index) =>
+                                index < bucketIndex &&
+                                targetBucketItems[index + 1]?.group === groupAbove &&
+                                item.group !== groupAbove,
+                        ) + 1;
+
+                    if (insertIndex <= 0) insertIndex = bucketIndex;
+                } else {
+                    insertIndex = targetBucketItems.findIndex(
+                        (item, index) =>
+                            index > bucketIndex && item.group !== groupBelow,
+                    );
+
+                    if (insertIndex === -1) insertIndex = targetBucketItems.length;
+                }
+
+                targetBucketItems.splice(insertIndex, 0, ...requiredFieldItems);
+            } else {
+                targetBucketItems.splice(bucketIndex, 0, ...requiredFieldItems);
+            }
+        };
+
+        const updateTargetBucket = (isAssignmentFromSameBucket = false) => {
             if (dropIndex < 0) {
-                targetBucket.items.splice(
-                    targetBucket.items.length,
-                    0,
-                    ...requiredFieldItems,
-                );
+                insertItemsToBucket(targetBucket.items.length);
                 return;
             }
 
@@ -936,11 +1132,7 @@ export function assignFieldItems(props: {
                 }
             }
 
-            targetBucket.items.splice(
-                dropTargetIndex,
-                0,
-                ...requiredFieldItems,
-            );
+            insertItemsToBucket(dropTargetIndex);
         };
 
         if (fromBucketId === FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID) {
@@ -948,44 +1140,53 @@ export function assignFieldItems(props: {
             // clear previously assigned items if any in any of the buckets
             if (!allowDuplicates)
                 newBuckets.forEach((bucket) => filterItemsFromBucket(bucket));
-            insertItemsToBucket();
+            updateTargetBucket();
             checkAndMaintainMaxItems(
                 targetBucket,
                 targetBucketItemsPreviousLength,
             );
 
             if (sortGroupOrderWiseOnAssignment)
-                sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+                sortBucketItemsBasedOnGroupOrder(targetBucket.items, allItems);
         } else {
             const isAssignmentFromSameBucket = fromBucketId === targetBucket.id;
 
             if (isAssignmentFromSameBucket) {
                 filterItemsFromBucket(targetBucket);
-                insertItemsToBucket(true);
+                updateTargetBucket(true);
                 checkAndMaintainMaxItems(
                     targetBucket,
                     targetBucketItemsPreviousLength,
                 );
 
                 if (sortGroupOrderWiseOnAssignment)
-                    sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+                    sortBucketItemsBasedOnGroupOrder(
+                        targetBucket.items,
+                        allItems,
+                    );
             } else {
                 // assignment from sibling bucket
-                insertItemsToBucket();
+                updateTargetBucket();
                 const restrictedItems = checkAndMaintainMaxItems(
                     targetBucket,
                     targetBucketItemsPreviousLength,
                 );
 
                 if (sortGroupOrderWiseOnAssignment)
-                    sortBucketItemsBasedOnGroupOrder(targetBucket.items);
+                    sortBucketItemsBasedOnGroupOrder(
+                        targetBucket.items,
+                        allItems,
+                    );
 
                 // fromBucket cleanup
                 if (fromBucket) {
                     filterItemsFromBucket(fromBucket, restrictedItems);
 
                     if (sortGroupOrderWiseOnAssignment)
-                        sortBucketItemsBasedOnGroupOrder(fromBucket.items);
+                        sortBucketItemsBasedOnGroupOrder(
+                            fromBucket.items,
+                            allItems,
+                        );
                 }
             }
         }
@@ -1005,6 +1206,7 @@ export function assignFieldItems(props: {
 // eslint-disable-next-line react-refresh/only-export-components
 export function sortBucketItemsBasedOnGroupOrder(
     items: IFieldsKeeperItem[],
+    allItems: IFieldsKeeperItem[],
 ): IFieldsKeeperItem[] {
     // grouping based on the group property
     const chunkGroups = items.reduce<
@@ -1030,11 +1232,10 @@ export function sortBucketItemsBasedOnGroupOrder(
             if (current.items.length > 1) {
                 // sort the groups based on group order
                 current.items.sort((itemA, itemB) => {
-                    if (
-                        itemA.groupOrder !== undefined &&
-                        itemB.groupOrder !== undefined
-                    ) {
-                        return itemA.groupOrder - itemB.groupOrder;
+                    const itemAIndex = findGroupItemOrder(allItems, itemA);
+                    const itemBIndex = findGroupItemOrder(allItems, itemB);
+                    if (itemAIndex !== undefined && itemBIndex !== undefined) {
+                        return itemAIndex - itemBIndex;
                     }
                     return 0;
                 });

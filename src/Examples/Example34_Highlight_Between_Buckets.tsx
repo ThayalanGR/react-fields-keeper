@@ -3,10 +3,11 @@ import {
     FieldsKeeperBucket,
     FieldsKeeperRootBucket,
     IFieldsKeeperItem,
+    IFieldsKeeperBucket,
 } from '..';
-import './Styling/Example31_CustomStyling.css';
 
-export default function Example31() {
+export default function Example34() {
+    // compute
     const allItems: IFieldsKeeperItem[] = [
         { id: 'a', label: 'a', folders: ['folder_1'] },
         { id: 'b', label: 'b', folders: ['folder_1'] },
@@ -86,31 +87,20 @@ export default function Example31() {
         },
     ];
 
-    const buckets = [
+    const buckets: IFieldsKeeperBucket[] = [
+        { id: 'bucket1', items: [allItems[0]] },
         {
-            id: 'bucket1',
-            items: [],
+            id: 'bucket2',
+            items: [allItems[1], allItems[2]],
         },
-        { id: 'bucket2', items: [] },
-        {
-            id: 'bucket3',
-            items: [
-                allItems[0],
-                allItems[1],
-                allItems[4],
-                allItems[5],
-                allItems[6],
-                allItems[7],
-                allItems[8],
-                allItems[9],
-            ],
-        },
+        { id: 'bucket3', items: [] },
     ];
 
+    // paint
     return (
         <div className="example-container">
             <div className="example-container-title">
-                31. Custom Styling using custom classname{' '}
+                34. Highlight Between Buckets
             </div>
             <FieldsKeeperProvider
                 allItems={allItems}
@@ -130,6 +120,7 @@ export default function Example31() {
                         prefixNodeIcon: 'folder-icon',
                     },
                 }}
+                highlightAcrossBuckets={{enabled: true, highlightColor: 'red', highlightDuration: 1000}}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">
@@ -147,31 +138,10 @@ export default function Example31() {
                             id="bucket3"
                             label="Bucket 3"
                             allowRemoveFields
-                            customClassNames={{
-                                customLabelClassName:
-                                    'custom-bucket-label-class-name',
-                                customFieldItemContainerClassName:
-                                    'custom-bucket-field-item-class-name',
-                                customGroupContainerClassName:
-                                    'custom-bucket-group-item-class-name',
-                            }}
                         />
                     </div>
                     <div className="root-bucket-container">
-                        <FieldsKeeperRootBucket
-                            label="Root Bucket"
-                            collapseFoldersOnMount={false}
-                            prefixNode={{ allow: true, reserveSpace: true }}
-                            customClassNames={{
-                                customLabelClassName: 'custom-label-class-name',
-                                customFieldItemClassName:
-                                    'custom-field-item-class-name',
-                                customGroupItemClassName:
-                                    'custom-group-item-class-name',
-                                customCheckBoxClassName:
-                                    'custom-checkbox-classname',
-                            }}
-                        />
+                        <FieldsKeeperRootBucket label="Root Bucket" />
                     </div>
                 </div>
             </FieldsKeeperProvider>

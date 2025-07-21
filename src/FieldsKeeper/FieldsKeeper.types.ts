@@ -124,7 +124,7 @@ export interface IFieldsKeeperItem<T = any> {
      * pass 'measure-icon' to show default measure icon
      *
      */
-    prefixNode?: 'measure-icon' | 'calculator-icon' | 'date-icon' | ReactNode;
+    prefixNode?: 'measure-icon' | 'calculator-icon' | 'date-icon' | 'calculation-group-icon' | 'calculation-group-item-icon' | 'globe-icon' | 'planning-icon' | ReactNode;
 
     /**
      * useful for matching the field item type with corresponding bucket type
@@ -179,6 +179,22 @@ export interface IGetPriorityTargetBucketToFillProps {
 
     /** Optional group to prioritize */
     priorityGroup?: string;
+}
+
+export interface ISuffixRootNodeRendererProps <T = any> {
+  type: 'folder' | 'group' | 'leaf' | 'table' | 'hierarchy';
+  fieldItem?: IFieldsKeeperItem<T>;
+  onExpandCollapseAll?: (isCollapse: boolean) => void;
+  assignFieldBucketItem?: (bucketId: string, instanceId: string) => void;
+}
+
+export interface IHighlightAcrossBuckets {
+    enabled: boolean;
+    highlightColor: string;
+    highlightDuration?: number;
+}
+export interface ICrossHighlightAcrossBuckets extends IHighlightAcrossBuckets {
+    crossHighlightIds: string[];
 }
 
 /**
@@ -273,10 +289,10 @@ export interface IFieldsKeeperRootBucketProps {
     };
 
     /**  Function to customize suffix node rendering **/
-    suffixNodeRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+    suffixNodeRenderer?: (props: ISuffixRootNodeRendererProps) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?: <T>(fieldItem: IFieldsKeeperItem<T>) => JSX.Element;
+    onContextMenuRenderer?: (props: ISuffixRootNodeRendererProps) => JSX.Element;
 
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;
@@ -305,7 +321,46 @@ export interface IFieldsKeeperRootBucketProps {
          * Class name applied to a group.
          */
         customGroupItemClassName?: string;
+
+        /**
+         * Class name applied to checkbox.
+         */
+        customCheckBoxClassName?: string;
     };
+
+    /**
+     * Determines whether items are sorted based on their folder structure.
+     * @default true
+     */
+    sortBasedOnFolder?: boolean;
+
+    /**
+     * Indicates whether to highlight the child elements of the group when the group header is hovered.
+     */
+    isHighlightGroupOnHover?: boolean;
+
+    /**
+     * Indicates whether to display suffix node at the time of hover only.
+     */
+    showSuffixOnHover?: boolean;
+
+    /**
+     * Configuration object for managing cross-highlight functionality 
+     * across multiple buckets. When provided, it enables items in one 
+     * bucket to influence highlighting behavior in others.
+     */
+    crossHighlightAcrossBucket?: ICrossHighlightAcrossBuckets;
+
+    /**
+     * Callback fired when a field item is clicked.
+     *
+     * @param fieldItem - The clicked field item.
+     * @param event - The mouse event triggered by the click.
+     */
+    onFieldItemClick?: (
+        fieldItem: IFieldsKeeperItem,
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => void;
 }
 
 /**
@@ -354,6 +409,28 @@ export interface IFieldsKeeperState {
      * A list of folders with folder name as key and folder details as value
      */
     foldersMeta?: Record<string, IFieldsKeeperFolder>;
+
+    /**
+     
+     * Configuration for highlighting items across multiple buckets.
+     */
+    highlightAcrossBuckets?: IHighlightAcrossBuckets;
+
+    /**
+     * @internal
+     * ID of the currently highlighted item from Bucket.
+     */
+    highlightedItemId?: string;
+
+    /**
+     * @internal
+     * Function to set or clear the highlighted item.
+     * 
+     * @param instanceId - The instance or scope identifier for the operation.
+     * @param itemId - The ID of the item to highlight, or `null` to clear the highlight.
+     */
+    setHighlightedItem?: (instanceId: string, itemId: string | null) => void;
+
 }
 
 /**
@@ -436,10 +513,10 @@ export interface IFieldsKeeperBucketProps {
     /**
      * Custom function for rendering suffix items specific to this bucket
      */
-    suffixNodeRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
+    suffixNodeRenderer?: (props: ISuffixBucketNodeRendererProps) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?: (props: ISuffixNodeRendererProps) => JSX.Element;
+    onContextMenuRenderer?: (props: ISuffixBucketNodeRendererProps) => JSX.Element;
 
     /** Layout orientation for items within the bucket */
     orientation?: 'vertical' | 'horizontal';
@@ -450,9 +527,20 @@ export interface IFieldsKeeperBucketProps {
     /** If true, groups are displayed flat */
     showAllGroupsFlat?: boolean;
 
-    /** Callback triggered when a field item label is clicked */
-    onFieldItemLabelClick?: (
-        fieldItemClickProps: IFieldItemLabelClickProps,
+    /** Callback triggered when a field item label is changed */
+    onFieldItemLabelChange?: (
+        fieldItemClickProps: IFieldItemLabelChangeProps,
+    ) => void;
+
+    /**
+     * Callback fired when a field item is clicked.
+     *
+     * @param fieldItem - The clicked field item.
+     * @param event - The mouse event triggered by the click.
+     */
+    onFieldItemClick?: (
+        fieldItem: IFieldsKeeperItem,
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => void;
 
     /**
@@ -473,10 +561,17 @@ export interface IFieldsKeeperBucketProps {
          * Class name applied to a group.
          */
         customGroupContainerClassName?: string;
+
+        customCheckBoxClassName?: string;
     };
+
+    /**
+     * Callback triggered to highlight the element.
+     */
+    onHighlightElement?: () => void; // TO - DO
 }
 
-export interface IFieldItemLabelClickProps {
+export interface IFieldItemLabelChangeProps {
     /** ID of the bucket containing the field item */
     bucketId: string;
 
@@ -488,12 +583,17 @@ export interface IFieldItemLabelClickProps {
 
     /** Updated value of the field item */
     newValue: string;
+
+    /**
+     * Index of the field item to which the label is updated.
+     */
+    fieldIndex?: number
 }
 
 /**
  * Custom renderer properties for suffix items within a bucket.
  */
-export interface ISuffixNodeRendererProps {
+export interface ISuffixBucketNodeRendererProps {
     /** The field item being rendered */
     fieldItem: IFieldsKeeperItem;
 
@@ -505,11 +605,16 @@ export interface ISuffixNodeRendererProps {
 
     // when isGroupHeader is up all its children will be passed
     groupFieldItems?: IFieldsKeeperItem[];
+
+    /**
+     * Callback triggered when renaming a field.
+     */
+    onRenameField?: () => void;
 }
 
 /**
  * Interface representing the properties for a Suffix Node component.
- * Extends the ISuffixNodeRendererProps interface.
+ * Extends the ISuffixBucketNodeRendererProps interface.
  */
 export interface ISuffixNodeProps extends Omit<IContextMenuProps, 'children'> {
     _dummy?: boolean;

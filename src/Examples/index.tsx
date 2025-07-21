@@ -30,6 +30,9 @@ import Example29_SourceId from './Example29_SourceId';
 import Example30_flat_group from './Example30_flat_group';
 import Example31_Custom_Styling_ClassName from './Example31_CustomStyling';
 import Example32_context_menu from './Example32_context_menu';
+import Example33_add_to_bucket from './Example33_add_to_bucket';
+import Example34_Highlight_Between_Buckets from './Example34_Highlight_Between_Buckets';
+import Example35_Cross_Highlight_Across_Buckets from './Example35_Cross_Highlight_Across_Buckets';
 
 export const examples = {
     Example1_sample_use_case,
@@ -64,4 +67,7 @@ export const examples = {
     Example30_flat_group,
     Example31_Custom_Styling_ClassName,
     Example32_context_menu,
+    Example33_add_to_bucket,
+    Example34_Highlight_Between_Buckets,
+    Example35_Cross_Highlight_Across_Buckets
 };

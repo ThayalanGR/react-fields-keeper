@@ -24,11 +24,12 @@ import { assignFieldItems } from '..';
 import {
     FIELDS_KEEPER_CONSTANTS,
     FieldsKeeperContext,
+    getStoreState,
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
-import { getGroupedItems } from './utils';
+import { FIELD_DELIMITER, getFolderIdsFromValues, getGroupedItems, getNodeRendererOutput, IHighlightInfo } from './utils';
 import { Icons } from '../Components/svgElements/Icons';
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
@@ -48,6 +49,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         shouldRender = () => true,
         filteredItems,
         emptyDataMessage = 'No data found',
+        sortBasedOnFolder = true,
     } = props;
 
     const [collapsedNodes, setCollapsedNodes] = useState<
@@ -85,7 +87,12 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     >(() => {
         const searcher = new FuzzySearch(
             allItems,
-            ['label', 'id', 'folders'] satisfies (keyof IFieldsKeeperItem)[],
+            [
+                'label',
+                'folders',
+                'groupLabel',
+                'flatGroupLabel',
+            ] satisfies (keyof IFieldsKeeperItem)[],
             {
                 sort: true,
             },
@@ -136,17 +143,38 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             },
                         });
                     }
+                    if (
+                        folderIndex === itemFolders.length - 1 &&
+                        sortBasedOnFolder
+                    ) {
+                        const currentFolder = acc.get(folderName);
+                        currentFolder?.folderScopeItems?.push(curr);
+                    }
                 });
             }
-            if (
-                curr.group &&
-                curr.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
-            ) {
-                if (!acc.has(curr.group)) {
-                    acc.set(curr.group, {
-                        folderScopeLabel: curr.groupLabel as string,
-                        folderScopeItems: [],
-                        type: 'group',
+            if (sortBasedOnFolder === false || itemFolders.length === 0) {
+                if (
+                    curr.group &&
+                    curr.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) {
+                    if (!acc.has(curr.group)) {
+                        acc.set(curr.group, {
+                            folderScopeLabel: curr.groupLabel as string,
+                            folderScopeItems: [],
+                            type: 'group',
+                            folderScopeItem: {
+                                ...curr,
+                                folders: curr.folderScope
+                                    ? [curr.folderScope]
+                                    : [...itemFolders],
+                            },
+                        });
+                    }
+                    const currentGroup = acc.get(curr.group);
+                    currentGroup?.folderScopeItems?.push(curr);
+                } else if (!acc.has(curr.id)) {
+                    acc.set(curr.id, {
+                        type: 'leaf',
                         folderScopeItem: {
                             ...curr,
                             folders: curr.folderScope
@@ -155,18 +183,6 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                         },
                     });
                 }
-                const currentGroup = acc.get(curr.group);
-                currentGroup?.folderScopeItems?.push(curr);
-            } else if (!acc.has(curr.id)) {
-                acc.set(curr.id, {
-                    type: 'leaf',
-                    folderScopeItem: {
-                        ...curr,
-                        folders: curr.folderScope
-                            ? [curr.folderScope]
-                            : [...itemFolders],
-                    },
-                });
             }
 
             return acc;
@@ -178,14 +194,24 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 return {
                     type,
                     folderScopeItems:
-                        getGroupedItems(folderScopeItems ?? []) ?? [],
+                        getGroupedItems(
+                            folderScopeItems ?? [],
+                            allItems,
+                            true,
+                        ) ?? [],
                     folderScopeItem,
                 } satisfies IFolderScopedItem<IGroupedFieldsKeeperItem>;
             },
         );
 
         return newRefactorFolderScopedItems;
-    }, [customSearchQuery, searchQuery, allItems, foldersMeta]);
+    }, [
+        customSearchQuery,
+        searchQuery,
+        allItems,
+        foldersMeta,
+        sortBasedOnFolder,
+    ]);
 
     useEffect(() => {
         if (contentContainerRef.current) {
@@ -228,6 +254,20 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     const iconColorStyle = (
         iconColor ? { '--bucket-icon-color': iconColor } : {}
     ) as CSSProperties;
+
+    const onExpandCollapseAll = (isCollapse: boolean) => {
+        const collapsedFolders: Record<string, boolean> = {};
+        folderScopedItems.map((folderItem) => {
+            if (folderItem.folderScopeItem) {
+                const folderId = folderItem.folderScopeItem.id as string;
+                collapsedFolders[folderId] = isCollapse;
+            }
+        });
+        setCollapsedNodes((prevState) => ({
+            ...prevState,
+            ...collapsedFolders,
+        }));
+    };
 
     // paint
     return (
@@ -282,6 +322,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             folderScopedItemsArray={folderScopedItems}
                             collapsedNodes={collapsedNodes}
                             setCollapsedNodes={setCollapsedNodes}
+                            onExpandCollapseAll={onExpandCollapseAll}
                         />
                     ))
                 ) : !hasData ? (
@@ -330,6 +371,9 @@ function FolderScopeItemRenderer(
         setCollapsedNodes: React.Dispatch<
             React.SetStateAction<Record<string, boolean>>
         >;
+        onExpandCollapseAll: (
+            isCollapse: boolean,
+        ) => void;
     },
 ) {
     // props
@@ -341,6 +385,10 @@ function FolderScopeItemRenderer(
         collapsedNodes,
         setCollapsedNodes,
         customClassNames,
+        sortBasedOnFolder = true,
+        suffixNodeRenderer,
+        onContextMenuRenderer,
+        onExpandCollapseAll,
         ...rootBucketProps
     } = props;
 
@@ -355,7 +403,32 @@ function FolderScopeItemRenderer(
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
-    const isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
+    const [hoveredFolderItems, setHoveredFolderItems] = useState<Record<string, boolean>>({});
+    const getCrossHighlightIds = () => {
+        if(rootBucketProps.crossHighlightAcrossBucket?.enabled) {
+            return rootBucketProps?.crossHighlightAcrossBucket.crossHighlightIds
+        }
+        return [];
+    }
+    const [crossHighlightItemIds, setCrossHighlightItemIds] = useState(getCrossHighlightIds());
+
+    const { instanceId: instanceIdFromContext } =
+        useContext(FieldsKeeperContext);
+    const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
+    const { buckets, accentColor, iconColor, highlightAcrossBuckets, foldersMeta, highlightedItemId, setHighlightedItem } = useStoreState(instanceId);
+    const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)?.[0];
+    const getIsItemHighlighted = (): boolean => {
+        if (!folderScopeItems) return false;
+        return folderScopeItems.some(scopeItem =>
+            scopeItem.items.some(item => item.id === highlightedItem || crossHighlightItemIds.includes(item.id))
+        );
+    };
+
+    const isItemHighlighted = highlightAcrossBuckets?.enabled || rootBucketProps.crossHighlightAcrossBucket?.enabled ? getIsItemHighlighted() : false;
+    let isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
+    if (isFolderCollapsed && isItemHighlighted) {
+        isFolderCollapsed = false;
+    }
 
     // effects
     useEffect(() => {
@@ -368,22 +441,72 @@ function FolderScopeItemRenderer(
                 }));
             }
         }
-    }, [rootBucketProps.collapseFoldersOnMount, id, setCollapsedNodes]);
+    }, [rootBucketProps.collapseFoldersOnMount, id]);
+
+    useEffect(() => {
+        if (Object.keys(collapsedNodes).includes(id)) {
+            setIsFolderCollapsed(collapsedNodes[id]);
+        }
+    }, [collapsedNodes]);
+
+    useEffect(() => {
+        setCrossHighlightItemIds(rootBucketProps?.crossHighlightAcrossBucket?.crossHighlightIds ?? []);
+    }, [rootBucketProps?.crossHighlightAcrossBucket?.crossHighlightIds]);
 
     // handlers
-    const toggleFolderCollapse = (id: string) => {
-        setCollapsedNodes((prevState) => ({
-            ...prevState,
-            [id]: !prevState[id],
-        }));
+    const toggleFolderCollapse = (id: string, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        const target = event?.target as HTMLElement;
 
+        const iconClassList = [
+            'fk-ms-Icon',
+            'fk-ms-Icon--ChevronRight',
+            'folder-scope-label-collapse-icon',
+            'react-fields-keeper-mapping-column-content-action',
+        ];
+
+        const isExpansionNeeded = iconClassList.some((className) =>
+            target?.classList?.contains(className)
+        );
+
+        if (!isExpansionNeeded && rootBucketProps.onFieldItemClick && folderScopeItem) {
+            rootBucketProps.onFieldItemClick(folderScopeItem, event);
+            return; // Restricting the expand collapse functionality if onFieldItemClick is called
+        }
+
+        setHighlightedItem(instanceId, null);
+        const toggleCollapse = (id: string) => {
+            setCollapsedNodes((prevState) => {
+                const newCollapsed = !prevState[id];
+                return {
+                    ...prevState,
+                    [id]: newCollapsed,
+                };
+            });
+
+            // Move highlight update logic outside of render phase
+            const highlightedIds = getCrossHighlightIds();
+            const folderIds = getFolderIdsFromValues(foldersMeta);
+            const updatedHighlightIds = !collapsedNodes[id]
+                ? [...highlightedIds.filter((id) => folderIds.includes(id))]
+                : highlightedIds;
+            setCrossHighlightItemIds(updatedHighlightIds);
+        };
+
+        toggleCollapse(id);
         setIsFolderCollapsed(!isFolderCollapsed);
     };
 
-    const { instanceId: instanceIdFromContext } =
-        useContext(FieldsKeeperContext);
-    const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
-    const { buckets, accentColor, iconColor } = useStoreState(instanceId);
+    const checkIsFolderCollapsed = () => {
+        let isCollapsed = false;
+        folders?.forEach((folder) => {
+            if (collapsedNodes[folder] && !hasSearchQuery) {
+                isCollapsed = true;
+            }
+        });
+
+        return isCollapsed;
+    };
+
     const updatedFolderScopeItems =
         folders?.length === 0
             ? folderScopedItemsArray.filter(
@@ -429,6 +552,10 @@ function FolderScopeItemRenderer(
         );
     }, [buckets, updatedFolderScopeItems]);
 
+    const [isContextMenuFolderOpen, setIsContextMenuFolderOpen] =
+        useState(false);
+    const [contextMenuFolderId, setContextMenuFolderId] = useState('');
+
     // style
     const accentColorStyle = (
         accentColor ? { '--bucket-accent-color': accentColor } : {}
@@ -447,6 +574,8 @@ function FolderScopeItemRenderer(
                         {...rootBucketProps}
                         key={index}
                         groupedItems={groupedItems}
+                        suffixNodeRenderer={suffixNodeRenderer}
+                        onContextMenuRenderer={onContextMenuRenderer}
                     />
                 ))}
             </>
@@ -464,16 +593,6 @@ function FolderScopeItemRenderer(
             groupLabel: resolvedGroupLabel,
         };
     })();
-
-    const checkIsFolderCollapsed = () => {
-        let isCollapsed = false;
-        folders?.forEach((folder) => {
-            if (collapsedNodes[folder] && !hasSearchQuery) {
-                isCollapsed = true;
-            }
-        });
-        return isCollapsed;
-    };
 
     const getPrefixNodeIcon = (prefixNodeIcon: ReactNode) => {
         if (React.isValidElement(prefixNode)) {
@@ -497,6 +616,33 @@ function FolderScopeItemRenderer(
                 <i
                     className="folder-scope-label-table-icon fk-ms-Icon fk-ms-Icon--CalculatorGroup"
                     style={iconColorStyle}
+                />
+            );
+        } else if (prefixNodeIcon === 'calculation-group-icon') {
+            return (
+                <Icons.calculationGroup
+                    className="folder-scope-label-calculation-group"
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            );
+        } else if (prefixNodeIcon === 'calculation-group-item-icon') {
+            return (
+                <Icons.calculationGroupItem
+                    className="folder-scope-label-calculation-group"
+                    style={{
+                        ...accentColorStyle,
+                    }}
+                />
+            );
+        } else if (prefixNodeIcon === 'planning-icon') {
+            return (
+                <Icons.planningIcon
+                    className="folder-scope-label-planning-icon"
+                    style={{
+                        ...accentColorStyle,
+                    }}
                 />
             );
         } else if (prefixNodeIcon === 'calendar-icon') {
@@ -525,52 +671,167 @@ function FolderScopeItemRenderer(
         return `${indentSize}px`;
     };
 
+    const folderRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (highlightAcrossBuckets?.enabled && highlightedItem && isItemHighlighted) {
+            if (folderRef.current) {
+                const highlightedElement = folderRef.current.querySelector(
+                    `[data-item-id="${highlightedItem}"]`,
+                );
+                if (highlightedElement instanceof HTMLElement) {
+                    highlightedElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'start',
+                    });
+                }
+            }
+            if (isFolderCollapsedOriginal) {
+                setIsFolderCollapsed(false);
+                setCollapsedNodes((prevState) => ({
+                    ...prevState,
+                    [id]: false,
+                }));
+            }
+        }
+    }, [highlightedItem, isItemHighlighted, id, isFolderCollapsedOriginal]);
+    
     return (
         <div
-            className={classNames(
-                'folder-scope-wrapper',
-                customClassNames?.customFieldItemClassName,
-            )}
+        ref={folderRef}
+            className="folder-scope-wrapper"
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{ paddingLeft: setIndentation(folders ?? []) }}
         >
             {!checkIsFolderCollapsed() &&
                 (type === 'folder' || type === 'table' ? (
-                    <div
-                        className="folder-scope-label"
-                        role="button"
-                        onClick={() => toggleFolderCollapse(id)}
-                        title={itemLabel ?? ''}
-                    >
-                        <div className="folder-scope-label-icon">
-                            {getPrefixNodeIcon(prefixNode)}
-                            {hasActiveSelection && (
-                                <Icons.checkMark
-                                    className="folder-scope-label-table-icon check-mark-overlay"
-                                    style={iconColorStyle}
-                                />
-                            )}
-                        </div>
-
+                    <div>
                         <div
                             className={classNames(
-                                'folder-scope-label-text',
+                                'folder-scope-label',
                                 customClassNames?.customLabelClassName,
                             )}
-                            style={accentColorStyle}
+                            role="button"
+                            onClick={(e) => toggleFolderCollapse(id, e)}
+                            title={itemLabel ?? ''}
+                            onContextMenu={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setContextMenuFolderId(id);
+                                setIsContextMenuFolderOpen(true);
+                            }}
+                            onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                const validClassNames = [
+                                    'folder-scope-wrapper',
+                                    'react-fields-keeper-mapping-content-scrollable-container'
+                                ];
+                                
+                                if (
+                                    rootBucketProps.showSuffixOnHover &&
+                                    e.relatedTarget instanceof Element &&
+                                    e.relatedTarget.classList &&
+                                    Array.from(e.relatedTarget.classList).some(className => validClassNames.includes(className))
+                                ) {
+                                    setHoveredFolderItems((prev) => {
+                                        const newHoveredFolderItems = { ...prev };
+                                        delete newHoveredFolderItems[id];
+                                        return Object.keys(newHoveredFolderItems).length === 0 ? {} : newHoveredFolderItems;
+                                    });
+                                }
+                            }}
+                            onMouseOver={() => {
+                                if (rootBucketProps.showSuffixOnHover) {
+                                    setHoveredFolderItems((prev) => ({
+                                        ...prev,
+                                        [id]: true,
+                                    }));
+                                }
+                            }}
+                            style={{
+                                backgroundColor:
+                                    crossHighlightItemIds.includes(id) ? rootBucketProps?.crossHighlightAcrossBucket?.highlightColor : 'transparent',
+                            }}
                         >
-                            {itemLabel}
+                            <div
+                                className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
+                                style={iconColorStyle}
+                            >
+                                {isFolderCollapsed ? (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                                ) : (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                                )}
+                            </div>
+                            <div className="folder-scope-label-icon">
+                                {getPrefixNodeIcon(prefixNode)}
+                                {!React.isValidElement(prefixNode) && hasActiveSelection && (
+                                    <Icons.checkMark
+                                        className="check-mark-overlay"
+                                        style={accentColorStyle}
+                                    />
+                                )}
+                            </div>
+
+                            <div
+                                className={classNames(
+                                    'folder-scope-label-text',
+                                    customClassNames?.customLabelClassName,
+                                )}
+                                style={accentColorStyle}
+                            >
+                                {itemLabel}
+                            </div>
+                            <div className="folder-label-context-menu">
+                                {contextMenuFolderId === id &&
+                                isContextMenuFolderOpen &&
+                                onContextMenuRenderer != undefined &&
+                                typeof onContextMenuRenderer === 'function'
+                                    ? onContextMenuRenderer({
+                                          type,
+                                          fieldItem: folderScopeItem,
+                                          onExpandCollapseAll:
+                                              onExpandCollapseAll,
+                                      })
+                                    : null}
+                            </div>
+                            <div
+                                className="folder-label-suffix-content"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                }}
+                                style={{display: hoveredFolderItems[id] ? 'block' : 'none'}}
+                            >
+                                {suffixNodeRenderer != undefined &&
+                                typeof suffixNodeRenderer === 'function'
+                                    ? suffixNodeRenderer({
+                                          type,
+                                          fieldItem: folderScopeItem,
+                                          onExpandCollapseAll:
+                                              onExpandCollapseAll,
+                                      })
+                                    : null}
+                            </div>
                         </div>
-                        <div
-                            className="folder-scope-label-collapse-icon react-fields-keeper-mapping-column-content-action"
-                            style={iconColorStyle}
-                        >
-                            {isFolderCollapsed ? (
-                                <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                            ) : (
-                                <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                            )}
-                        </div>
+                        {!isFolderCollapsed &&
+                        sortBasedOnFolder &&
+                        folderScopeItems?.length ? (
+                            <div className="folder-scope-items">
+                                {folderScopeItems.map((groupedItems, index) => (
+                                    <GroupedItemRenderer
+                                        {...rootBucketProps}
+                                        key={index}
+                                        groupedItems={groupedItems}
+                                        customClassNames={customClassNames}
+                                        suffixNodeRenderer={suffixNodeRenderer}
+                                        onContextMenuRenderer={
+                                            onContextMenuRenderer
+                                        }
+                                        onExpandCollapseAll={onExpandCollapseAll}
+                                    />
+                                ))}
+                            </div>
+                        ) : null}
                     </div>
                 ) : folderScopeItems?.length ? (
                     <div>
@@ -580,6 +841,9 @@ function FolderScopeItemRenderer(
                                 key={index}
                                 groupedItems={groupedItems}
                                 customClassNames={customClassNames}
+                                suffixNodeRenderer={suffixNodeRenderer}
+                                onContextMenuRenderer={onContextMenuRenderer}
+                                onExpandCollapseAll={onExpandCollapseAll}
                             />
                         ))}
                     </div>
@@ -599,6 +863,8 @@ function FolderScopeItemRenderer(
                             ],
                         }}
                         customClassNames={customClassNames}
+                        suffixNodeRenderer={suffixNodeRenderer}
+                        onContextMenuRenderer={onContextMenuRenderer}
                     />
                 ))}
         </div>
@@ -608,6 +874,7 @@ function FolderScopeItemRenderer(
 function GroupedItemRenderer(
     props: {
         groupedItems: IGroupedFieldsKeeperItem;
+        onExpandCollapseAll?: (isCollapsed: boolean) => void;
     } & IFieldsKeeperRootBucketProps,
 ) {
     // props
@@ -631,6 +898,10 @@ function GroupedItemRenderer(
         prefixNode: prefixNodeConfig,
         disableAssignments = false,
         customClassNames,
+        isHighlightGroupOnHover = false,
+        showSuffixOnHover = false,
+        crossHighlightAcrossBucket,
+        onFieldItemClick
     } = props;
 
     const {
@@ -644,19 +915,69 @@ function GroupedItemRenderer(
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const {
+        allItems,
         buckets,
         getPriorityTargetBucketToFill: getPriorityTargetBucketToFillFromContext,
         allowDuplicates,
         accentColor,
         accentHighlightColor,
         iconColor,
+        highlightedItemId,
+        highlightAcrossBuckets
     } = useStoreState(instanceId);
+    const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)[0];
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
-
+    const [hoveredItems, setHoveredItems] = useState<Record<string, boolean>>({});
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [contextMenuId, setContextMenuId] = useState('');
+
+    const getInitialActiveHighlightIds = () => {
+        const activeIds: Record<string, IHighlightInfo> = {}
+        if(crossHighlightAcrossBucket?.enabled && crossHighlightAcrossBucket?.crossHighlightIds?.length) {
+            crossHighlightAcrossBucket?.crossHighlightIds.forEach((highlightedId) => {
+                activeIds[highlightedId] = {enabled: crossHighlightAcrossBucket.enabled, backgroundColor: crossHighlightAcrossBucket.highlightColor};
+            })
+        } 
+        return activeIds;
+    }
+    const [activeHighlightIds, setActiveHighlightIds] = useState<Record<string, IHighlightInfo>>(getInitialActiveHighlightIds());
+    useEffect(() => {
+        if (highlightedItem) {
+            setActiveHighlightIds((prev) => ({
+                ...prev,
+                [highlightedItem]: {enabled: true, backgroundColor: highlightAcrossBuckets?.highlightColor},
+            }));
+
+            const timer = setTimeout(() => {
+                setActiveHighlightIds({});
+            }, highlightAcrossBuckets?.highlightDuration ?? 3000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [highlightedItemId, instanceId]);
+
+    useEffect(() => {
+        if(crossHighlightAcrossBucket) {
+            const updatedActiveIds: Record<string, IHighlightInfo> = {}
+            crossHighlightAcrossBucket.crossHighlightIds.forEach((highlightId) => {
+                updatedActiveIds[highlightId] =  {enabled: true, backgroundColor: crossHighlightAcrossBucket?.highlightColor as string}
+            })
+            setActiveHighlightIds(() => ({
+                ...updatedActiveIds
+            }));
+            if (crossHighlightAcrossBucket?.enabled && crossHighlightAcrossBucket?.crossHighlightIds && crossHighlightAcrossBucket?.highlightDuration) {
+                const timer = setTimeout(() => {
+                    setActiveHighlightIds({});
+                }, crossHighlightAcrossBucket?.highlightDuration);
+
+                return () => clearTimeout(timer);
+            }
+        }
+        
+    }, [crossHighlightAcrossBucket]);
 
     useEffect(() => {
         if (isContextMenuOpen) {
@@ -691,9 +1012,9 @@ function GroupedItemRenderer(
             );
             e.dataTransfer.setData(
                 instanceId,
-                fieldItems.map((item) => item.id).join(',') +
+                fieldItems.map((item) => item.id).join(FIELD_DELIMITER) +
                     '***' +
-                    fieldItems.map((item) => item.sourceId).join(','),
+                    fieldItems.map((item) => item.sourceId).join(FIELD_DELIMITER),
             );
         };
 
@@ -753,19 +1074,80 @@ function GroupedItemRenderer(
         return leastFilledOrderedBuckets[0];
     };
 
-    const onFieldItemClick =
+   const assignFieldItemToBucket = (
+    fieldItems: IFieldsKeeperItem[],
+    assignedField: { bucketId: string; currentInstanceId: string },
+) => {
+    const { bucketId, currentInstanceId } = assignedField || {};
+    const isDifferentInstance = currentInstanceId && currentInstanceId !== instanceId;
+
+    let currentBuckets = buckets;
+    let currentAllItems = allItems;
+    let currentFieldItems = fieldItems;
+    let targetBucketId = bucketId;
+
+    if (isDifferentInstance) {
+        try {
+            const storeState = getStoreState(currentInstanceId);
+            currentBuckets = storeState.buckets;
+            currentAllItems = storeState.allItems;
+
+            const fieldItemIds = new Set(fieldItems.map(item => item.id));
+            const fieldItemSourceIds = new Set(
+                fieldItems.map(item => item.sourceId).filter(Boolean),
+            );
+
+            currentFieldItems = currentAllItems.filter(
+                item =>
+                    fieldItemIds.has(item.id) ||
+                    (item.sourceId && fieldItemSourceIds.has(item.sourceId)),
+            );
+        } catch {
+            // Keep using local `buckets` and `allItems` if store fetch fails
+        }
+    } else {
+        if (disableAssignments) return false;
+
+        const bucketToFill = getPriorityTargetBucketToFill({
+            buckets,
+            priorityGroup: fieldItems[0]?.group,
+            currentFillingItem: filteredItems,
+        });
+
+        targetBucketId = bucketToFill.id;
+    }
+
+    assignFieldItems({
+        instanceId: currentInstanceId || instanceId,
+        bucketId: targetBucketId!,
+        fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
+        fieldItems: currentFieldItems,
+        buckets: currentBuckets,
+        removeOnly: false,
+        sortGroupOrderWiseOnAssignment,
+        allowDuplicates,
+        updateState,
+        isFieldItemClick: true,
+        allItems: currentAllItems,
+    });
+};
+
+
+    const onFieldItemClickHandler =
         (fieldItems: IFieldsKeeperItem[], remove = false) =>
         () => {
             if (disableAssignments) {
                 return false;
             }
+
             const bucketToFill = getPriorityTargetBucketToFill({
                 buckets,
                 priorityGroup: fieldItems[0].group,
                 currentFillingItem: filteredItems,
             });
+
             assignFieldItems({
-                instanceId,
+                instanceId: instanceId,
                 bucketId: bucketToFill.id,
                 fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
                 fieldItems,
@@ -774,30 +1156,26 @@ function GroupedItemRenderer(
                 sortGroupOrderWiseOnAssignment,
                 allowDuplicates,
                 updateState,
+                isFieldItemClick: true,
+                allItems: allItems,
             });
         };
 
-    const getNodeRendererOutput = (
-        renderer: unknown,
-        item: IFieldsKeeperItem,
-        additionalCondition = true,
-    ) => {
-        const isRendererValid = typeof renderer === 'function';
-        const rendererOutput =
-            isRendererValid && additionalCondition ? renderer(item) : null;
-        const isValidElement =
-            rendererOutput !== undefined && rendererOutput !== null;
-        return { rendererOutput, isValidElement };
-    };
-
     // paint
     const renderFieldItems = ({
-        fieldItems,
-        isGroupItem,
-        groupHeader,
-        hasMasterGroup,
-    }: IGroupedItemRenderer) => {
-        const { suffixNodeRenderer, onContextMenuRenderer } = props;
+    fieldItems,
+    isGroupItem,
+    groupHeader,
+    hasMasterGroup,
+    activeHighlightIds,
+}: IGroupedItemRenderer & {
+    activeHighlightIds: Record<string, IHighlightInfo>;
+}) => {
+        const {
+            suffixNodeRenderer,
+            onContextMenuRenderer,
+            onExpandCollapseAll,
+        } = props;
         // compute
         const isGroupHeader = groupHeader !== undefined;
 
@@ -832,10 +1210,39 @@ function GroupedItemRenderer(
                         }}
                     />
                 );
+            } else if (prefixNodeIcon === 'calculation-group-icon') {
+                return (
+                    <Icons.calculationGroup
+                        className="folder-scope-label-calculation-group"
+                        style={{
+                            transform: 'translateX(-3px)',
+                            ...accentColorStyle,
+                        }}
+                    />
+                );
+            } else if (prefixNodeIcon === 'calculation-group-item-icon') {
+                return (
+                    <Icons.calculationGroupItem
+                        className="folder-scope-label-calculation-group-item"
+                        style={{
+                            transform: 'translateX(-3px)',
+                            ...accentColorStyle,
+                        }}
+                    />
+                );
             } else if (prefixNodeIcon === 'calculator-icon') {
                 return (
                     <i
                         className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--Calculator"
+                        style={{
+                            ...accentColorStyle,
+                        }}
+                    />
+                );
+            } else if (prefixNodeIcon === 'globe-icon') {
+                return (
+                    <i
+                        className="folder-scope-label-measure-icon fk-ms-Icon fk-ms-Icon--Globe"
                         style={{
                             ...accentColorStyle,
                         }}
@@ -885,16 +1292,48 @@ function GroupedItemRenderer(
             const {
                 rendererOutput: suffixNodeRendererOutput,
                 isValidElement: isSuffixNodeValid,
-            } = getNodeRendererOutput(suffixNodeRenderer, fieldItem);
-
+            } = getNodeRendererOutput(
+                suffixNodeRenderer,
+                fieldItem,
+                isGroupHeader ? groupHeader.groupItems : [fieldItem],
+                assignFieldItemToBucket,
+                onExpandCollapseAll,
+            );
             const {
                 rendererOutput: contextMenuRendererOutput,
                 isValidElement: isContextMenuValid,
             } = getNodeRendererOutput(
                 onContextMenuRenderer,
                 fieldItem,
-                !fieldItem.flatGroup && fieldItem._fieldItemIndex == undefined,
+                isGroupHeader ? groupHeader.groupItems : [fieldItem],
+                assignFieldItemToBucket,
+                onExpandCollapseAll,
             );
+
+            const getCustomClassName = ():
+                | Record<string, boolean>
+                | undefined => {
+                if (
+                    customClassNames?.customGroupItemClassName &&
+                    (isGroupItem || (hasMasterGroup && isGroupHeader))
+                ) {
+                    return {
+                        [customClassNames.customGroupItemClassName]: true,
+                    };
+                }
+
+                if (
+                    customClassNames?.customFieldItemClassName &&
+                    !isGroupItem
+                ) {
+                    return {
+                        [customClassNames.customFieldItemClassName]: true,
+                    };
+                }
+            };
+
+            const itemId = fieldItem.sourceId ?? fieldItem.id;
+            const isItemHovered = showSuffixOnHover && hoveredItems[itemId];
 
             return (
                 <div
@@ -910,6 +1349,7 @@ function GroupedItemRenderer(
                                 groupHeader?.isFlatGroupHeader,
                         },
                     )}
+                    data-item-id={fieldItem.id}
                     title={
                         (fieldItem.rootDisabled?.active
                             ? fieldItem.rootDisabled?.message
@@ -920,7 +1360,12 @@ function GroupedItemRenderer(
                     onContextMenu={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        setContextMenuId(itemId);
                         setIsContextMenuOpen(true);
+                    }}
+                    style={{
+                        backgroundColor:
+                            activeHighlightIds?.[fieldItem.id] ? activeHighlightIds?.[fieldItem.id]?.backgroundColor : 'transparent',
                     }}
                 >
                     <div
@@ -928,6 +1373,8 @@ function GroupedItemRenderer(
                             'react-fields-keeper-mapping-column-content',
                             fieldItem.rootBucketActiveNodeClassName,
                             {
+                                'react-fields-keeper-master-group-header-offset':
+                                    groupHeader?.isFlatGroupHeader || (isGroupHeader && !hasMasterGroup),
                                 'react-fields-keeper-mapping-column-content-offset':
                                     isGroupItem ||
                                     (isGroupHeader && hasMasterGroup),
@@ -942,10 +1389,7 @@ function GroupedItemRenderer(
                                     disableAssignments,
                                 'react-fields-keeper-mapping-column-content-offset-with-master':
                                     isGroupItem && hasMasterGroup,
-                                ...(customClassNames?.customGroupItemClassName && {
-                                    [customClassNames.customGroupItemClassName]:
-                                        isGroupItem || isGroupHeader,
-                                }),
+                                ...getCustomClassName(),
                             },
                         )}
                         style={itemStyle}
@@ -961,32 +1405,61 @@ function GroupedItemRenderer(
                                 ? groupHeader.groupItems
                                 : [fieldItem]),
                         )}
-                        onClick={
-                            toggleCheckboxOnLabelClick
-                                ? onFieldItemClick(
-                                      isGroupHeader
-                                          ? groupHeader.groupItems
-                                          : [fieldItem],
-                                      isFieldItemAssigned,
-                                  )
-                                : undefined
-                        }
+                        onClick={(e) => {
+                            if(toggleCheckboxOnLabelClick) {
+                                onFieldItemClickHandler(
+                                    isGroupHeader
+                                        ? groupHeader.groupItems
+                                        : [fieldItem],
+                                    isFieldItemAssigned,
+                                )();
+                            }
+                            if (typeof onFieldItemClick === 'function') {
+                                onFieldItemClick(fieldItem, e);
+                            }
+                        }}
+                        onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                            const validClassNames = [
+                                'react-fields-keeper-mapping-column-content',
+                                'react-fields-keeper-mapping-content-scrollable-container'
+                            ];
+                            if (
+                                showSuffixOnHover &&
+                                e.relatedTarget instanceof Element &&
+                                e.relatedTarget.classList &&
+                                Array.from(e.relatedTarget.classList).some(className => validClassNames.includes(className))
+                            ) {
+                                setHoveredItems((prev) => {
+                                    const newHoveredItems = { ...prev };
+                                    delete newHoveredItems[itemId];
+                                    return Object.keys(newHoveredItems).length === 0 ? {} : newHoveredItems;
+                                });
+                            }
+                        }}
                         onMouseOver={(
                             e: React.MouseEvent<HTMLDivElement, MouseEvent>,
                         ) => {
-                            if (isGroupHeader) {
-                                const folderWrapper = e.currentTarget.closest(
-                                    '.folder-scope-wrapper',
+                            const currentTargetRect =
+                                e.currentTarget.getClientRects();
+                            const isCursorWithinGroupHeader =
+                                currentTargetRect.length &&
+                                e.clientY >= currentTargetRect[0]?.y &&
+                                e.clientY <=
+                                    currentTargetRect[0].y +
+                                        currentTargetRect[0].height;
+                            if (isHighlightGroupOnHover && isGroupHeader && isCursorWithinGroupHeader) {
+                                const groupWrapper = e.currentTarget.closest(
+                                    '.react-fields-keeper-grouped-item-wrapper',
                                 );
                                 const folderRect =
-                                    folderWrapper?.getClientRects();
+                                    groupWrapper?.getClientRects();
 
                                 if (groupHeader?.isFlatGroupHeader) {
                                     setGroupHeight(folderRect?.[0].height ?? 0);
                                 } else {
                                     let masterHeaderHeight = 0;
                                     const hasMasterHeader =
-                                        folderWrapper?.querySelector(
+                                        groupWrapper?.querySelector(
                                             '.react-fields-keeper-master-group-header',
                                         ) !== null;
                                     if (hasMasterHeader) {
@@ -1003,20 +1476,53 @@ function GroupedItemRenderer(
                                             masterHeaderHeight,
                                     );
                                 }
+                            } else {
+                                setGroupHeight(0);
+                            }
+                            if (showSuffixOnHover) {
+                                setHoveredItems((prev) => ({
+                                    ...prev,
+                                    [itemId]: true,
+                                }));
                             }
                         }}
                     >
+                        {isGroupHeader ? (
+                            <div
+                                className={classNames(
+                                    'react-fields-keeper-mapping-column-content-action',
+                                )}
+                                role="button"
+                                onClick={groupHeader.onGroupHeaderToggle}
+                                style={
+                                    groupHeight > 0
+                                        ? { zIndex: 1, ...accentColorStyle }
+                                        : { ...accentColorStyle }
+                                }
+                            >
+                                {groupHeader.isGroupCollapsed ? (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
+                                ) : (
+                                    <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
+                                )}
+                            </div>
+                        ) : (
+                            <div />
+                        )}
                         {!ignoreCheckBox && (
                             <div className="react-fields-keeper-mapping-column-content-checkbox">
                                 <input
                                     type="checkbox"
-                                    className="react-fields-keeper-checkbox"
+                                    className={classNames(
+                                        'react-fields-keeper-checkbox',
+                                        customClassNames?.customCheckBoxClassName,
+                                    )}
                                     checked={isFieldItemAssigned}
                                     style={accentColorStyle}
                                     onChange={
                                         toggleCheckboxOnLabelClick
                                             ? undefined
-                                            : onFieldItemClick(
+                                            : onFieldItemClickHandler(
                                                   isGroupHeader
                                                       ? groupHeader.groupItems
                                                       : [fieldItem],
@@ -1027,7 +1533,10 @@ function GroupedItemRenderer(
                                 />
                             </div>
                         )}
-                        <div className="react-fields-keeper-mapping-column-content-wrapper">
+                        <div
+                            className="react-fields-keeper-mapping-column-content-wrapper"
+                            style={groupHeight > 0 ? { zIndex: 1 } : {}}
+                        >
                             {allowPrefixNode ? (
                                 ((prefixNodeIcon !== undefined &&
                                     prefixNodeIcon != '') ||
@@ -1056,37 +1565,23 @@ function GroupedItemRenderer(
                             >
                                 <span>{fieldItem.label}</span>
                             </div>
-                            {isSuffixNodeValid ? (
-                                <div className="react-fields-keeper-mapping-column-content-suffix">
+                            {isSuffixNodeValid && (
+                                <div
+                                    className="react-fields-keeper-mapping-column-content-suffix"
+                                    style={{ display: isItemHovered ? 'block' : 'none' }}
+                                >
                                     {suffixNodeRendererOutput}
                                 </div>
-                            ) : (
-                                <div />
-                            )}
-                            {isGroupHeader ? (
-                                <div
-                                    className={classNames(
-                                        'react-fields-keeper-mapping-column-content-action',
-                                    )}
-                                    role="button"
-                                    onClick={groupHeader.onGroupHeaderToggle}
-                                    style={accentColorStyle}
-                                >
-                                    {groupHeader.isGroupCollapsed ? (
-                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                                    ) : (
-                                        <i className="fk-ms-Icon fk-ms-Icon--ChevronDown" />
-                                    )}
-                                </div>
-                            ) : (
-                                <div />
                             )}
                         </div>
-                        {isContextMenuOpen && isContextMenuValid && (
-                            <div className="react-fields-keeper-root-mapping-content-action-context-menu">
-                                {contextMenuRendererOutput}
-                            </div>
-                        )}
+                        {contextMenuId ===
+                            (fieldItem.sourceId ?? fieldItem.id) &&
+                            isContextMenuOpen &&
+                            isContextMenuValid && (
+                                <div className="react-fields-keeper-root-mapping-content-action-context-menu">
+                                    {contextMenuRendererOutput}
+                                </div>
+                            )}
                     </div>
                 </div>
             );
@@ -1137,52 +1632,59 @@ function GroupedItemRenderer(
 
         return (
             <>
-                {flatGroup &&
-                    flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
-                    renderFieldItems({
-                        fieldItems: [flatGroupHeaderItem],
-                        groupHeader: {
-                            isGroupHeaderSelected:
-                                isChildrenAssignedFound ||
-                                checkIsFieldItemAssigned(flatGroupHeaderItem),
-                            groupItems: filteredItems,
-                            isGroupCollapsed: isMasterGroupCollapsed,
-                            onGroupHeaderToggle: () => {
-                                setIsMasterGroupCollapsed(
-                                    !isMasterGroupCollapsed,
-                                );
-                                setIsGroupCollapsed(!isGroupCollapsed);
+                <div className="react-fields-keeper-grouped-item-wrapper">
+                    {flatGroup &&
+                        flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                        renderFieldItems({
+                            fieldItems: [flatGroupHeaderItem],
+                            groupHeader: {
+                                isGroupHeaderSelected:
+                                    isChildrenAssignedFound ||
+                                    checkIsFieldItemAssigned(
+                                        flatGroupHeaderItem,
+                                    ),
+                                groupItems: filteredItems,
+                                isGroupCollapsed: isMasterGroupCollapsed,
+                                onGroupHeaderToggle: () => {
+                                    setIsMasterGroupCollapsed(
+                                        !isMasterGroupCollapsed,
+                                    );
+                                    setIsGroupCollapsed(!isGroupCollapsed);
+                                },
+                                isFlatGroupHeader: true,
                             },
-                            isFlatGroupHeader: true,
-                        },
-                    })}
+                            activeHighlightIds
+                        })}
 
-                {!isMasterGroupCollapsed &&
-                    renderFieldItems({
-                        fieldItems: [groupHeaderFieldItem],
-                        groupHeader: {
-                            isGroupHeaderSelected: isChildrenAssignedFound,
-                            groupItems: filteredItems,
-                            isGroupCollapsed,
-                            onGroupHeaderToggle: () =>
-                                setIsGroupCollapsed(!isGroupCollapsed),
-                        },
-                        hasMasterGroup: (flatGroup &&
-                            flatGroup !==
-                                FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
-                    })}
+                    {!isMasterGroupCollapsed &&
+                        renderFieldItems({
+                            fieldItems: [groupHeaderFieldItem],
+                            groupHeader: {
+                                isGroupHeaderSelected: isChildrenAssignedFound,
+                                groupItems: filteredItems,
+                                isGroupCollapsed,
+                                onGroupHeaderToggle: () =>
+                                    setIsGroupCollapsed(!isGroupCollapsed),
+                            },
+                            hasMasterGroup: (flatGroup &&
+                                flatGroup !==
+                                    FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
+                            activeHighlightIds
+                        })}
 
-                {!isMasterGroupCollapsed &&
-                    !isGroupCollapsed &&
-                    renderFieldItems({
-                        fieldItems: filteredItems,
-                        isGroupItem: true,
-                        hasMasterGroup: (flatGroup &&
-                            flatGroup !==
-                                FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
-                    })}
+                    {!isMasterGroupCollapsed &&
+                        !isGroupCollapsed &&
+                        renderFieldItems({
+                            fieldItems: filteredItems,
+                            isGroupItem: true,
+                            hasMasterGroup: (flatGroup &&
+                                flatGroup !==
+                                    FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
+                        activeHighlightIds
+                        })}
+                </div>
             </>
         );
     }
-    return <>{renderFieldItems({ fieldItems: filteredItems })}</>;
+    return <>{renderFieldItems({ fieldItems: filteredItems, activeHighlightIds })}</>;
 }

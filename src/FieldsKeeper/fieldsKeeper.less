@@ -185,6 +185,10 @@
                 border: 1px solid rgb(178, 178, 178);
             }
 
+            &.react-fields-keeper-context-menu-active {
+                background-color: #f5f5f5;
+            }
+
             &.react-fields-keeper-mapping-content-input-filled-bottom-offset {
                 margin-bottom: 5px;
             }
@@ -260,6 +264,7 @@
 .react-fields-keeper-mapping-column-content-action {
     width: 15px;
     height: 15px;
+    min-width: 12px;
     display: grid;
     place-items: center;
 
@@ -304,7 +309,7 @@
         .folder-scope-wrapper {
             .folder-scope-label {
                 cursor: pointer;
-                display: grid;
+                display: flex;
                 width: 100%;
                 max-width: 100%;
                 justify-content: center;
@@ -315,6 +320,7 @@
                 padding: 5px 3px;
                 border-radius: 2px;
                 user-select: none;
+                height: 24px;
 
                 &:hover {
                     background-color: @bgHoverColor;
@@ -324,6 +330,9 @@
                     display: grid;
                     place-items: center;
                     padding-right: 3px;
+                    padding-left: 3px;
+                    width: 30px;
+                    min-width: 25px;
 
                     .folder-scope-label-table-icon {
                         fill: var(--bucket-icon-color);
@@ -354,6 +363,10 @@
             .folder-scope-items {
                 margin-left: 13px;
             }
+
+            .folder-scope-label-suffix {
+                margin-right: 5px;
+            }
         }
     }
 
@@ -364,9 +377,10 @@
         gap: 5px;
         align-items: center;
         cursor: pointer;
-        padding: 6px 4px 6px 6px;
+        padding: 6px 4px 6px 14px;
         user-select: none;
         position: relative;
+        height: 24px;
 
         &:hover {
             background-color: @bgHoverColor;
@@ -392,12 +406,16 @@
             }
         }
 
+        &.react-fields-keeper-master-group-header-offset {
+            padding-left: 3px !important;
+        }
+
         &.react-fields-keeper-mapping-column-content-offset {
-            padding-left: 20px;
+            padding-left: 25px;
         }
 
         &.react-fields-keeper-mapping-column-content-offset-with-master {
-            padding-left: 40px !important;
+            padding-left: 45px !important;
         }
 
         &.react-fields-keeper-mapping-column-content-offset-without-checkbox {
@@ -432,7 +450,6 @@
             overflow: hidden;
             grid-template-columns: auto 1fr auto auto;
             position: relative;
-            z-index: 1;
 
             .react-fields-keeper-mapping-column-content-prefix {
                 height: 100%;
@@ -449,11 +466,9 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 text-align: left;
-                padding-right: 5px;
             }
 
             .react-fields-keeper-mapping-column-content-suffix {
-                padding-right: 3px;
                 height: 100%;
             }
         }
@@ -587,11 +602,12 @@
 
     .check-mark-overlay {
         position: absolute;
-        top: 85%;
+        top: 90%;
         left: 65%;
         transform: translate(-50%, -50%);
         width: 12px;
         height: 12px;
+        fill: var(--bucket-accent-color);
     }
 }
 

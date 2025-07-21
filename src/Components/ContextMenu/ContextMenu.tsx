@@ -48,7 +48,8 @@ export const ContextMenu = (props: IContextMenuProps) => {
         setIsContextMenuVisible(false);
     };
 
-    const onContextMenuClick = () => {
+    const onContextMenuClick = (e: MouseEvent) => {
+        e.stopPropagation();
         setIsContextMenuVisible(!isContextMenuVisible);
     };
 
@@ -115,8 +116,8 @@ export const ContextMenu = (props: IContextMenuProps) => {
         <>
             {React.cloneElement(children ?? <div></div>, {
                 ref: setReferenceElement,
-                onClick: () => {
-                    onContextMenuClick();
+                onClick: (e: MouseEvent) => {
+                    onContextMenuClick(e);
                 },
             })}
 

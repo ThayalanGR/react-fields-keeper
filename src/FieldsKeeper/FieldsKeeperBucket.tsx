@@ -42,6 +42,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
         customClassNames,
+        bucketLabelSuffixRenderer
     } = props;
 
     // state
@@ -300,6 +301,19 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // compute
     const hasRoomForFieldAssignment = groupedItems.length < maxItems;
 
+
+    const getbucketLabelSuffixRenderer = (
+        renderer: unknown,
+        bucketId: string
+    ) => {
+        const isRendererValid = typeof renderer === 'function';
+        const rendererElement =
+            isRendererValid && renderer(bucketId)
+        const isValidElement =
+            rendererElement !== undefined && rendererElement !== null;
+        return { rendererElement, isValidElement };
+    };
+
     // paint
     const emptyFieldPlaceholderElement = (
         <div
@@ -313,6 +327,12 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         </div>
     );
     if (!currentBucket) return null;
+
+    const {
+        rendererElement: bucketLabelSuffixNodeOutput,
+        isValidElement: isBucketSuffixValid,
+    } = getbucketLabelSuffixRenderer(bucketLabelSuffixRenderer, currentBucket.id);
+
     return (
         <div
             className={classNames(
@@ -320,11 +340,16 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 wrapperClassName,
             )}
         >
-            {label && (
-                <div className="react-fields-keeper-mapping-content-title">
+            <div className="react-fields-keeper-mapping-content-title">
+                {label && (
+                <div className="react-fields-keeper-mapping-content-label">
                     {label}
                 </div>
             )}
+            {isBucketSuffixValid && (
+                (bucketLabelSuffixNodeOutput)
+            )}
+            </div>
             <div
                 className={classNames(
                     'react-fields-keeper-mapping-content-input',
@@ -1203,6 +1228,7 @@ export function assignFieldItems(props: {
         isRemoved: removeOnly,
     };
 
+    console.log("🚀 ~ newBuckets:", newBuckets)
     // update context
     updateState(instanceId, { buckets: newBuckets }, updateInfo);
 }

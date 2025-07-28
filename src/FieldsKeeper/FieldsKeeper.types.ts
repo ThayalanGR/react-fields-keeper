@@ -572,6 +572,14 @@ export interface IFieldsKeeperBucketProps {
 
     /** Specifies whether the group label can be edited. */
     allowGroupLabelToEdit?: boolean;
+
+    /**
+     * A function that renders a JSX element as a suffix for a bucket label.
+     *
+     * @param bucketId - The unique identifier of the bucket.
+     * @returns A JSX element to be appended as a suffix to the bucket label.
+     */
+    bucketLabelSuffixRenderer?: (bucketId: string) => JSX.Element;
 }
 
 export interface IFieldItemLabelChangeProps {

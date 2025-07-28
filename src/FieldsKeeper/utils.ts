@@ -46,7 +46,7 @@ export function getGroupedItems(
                 (group) => group.group === item.group,
             );
             const lastGroup = foundGroups[foundGroups.length - 1];
-            const lastGroupItemOrder =  findGroupItemOrder(allItems, lastGroup?.items?.[0]);
+            const lastGroupItemOrder =  findGroupItemOrder(allItems, lastGroup?.items?.[lastGroup?.items?.length - 1]);
             const currentItemOrder = findGroupItemOrder(allItems, item);
             const existingGroup = acc.find((group) => group.group === item.group);
             if (existingGroup && isRootBucketRender) {

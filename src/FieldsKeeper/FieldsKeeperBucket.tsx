@@ -814,6 +814,7 @@ const GroupedItemRenderer = (
                                   fieldItem,
                                   remove,
                                   getDefaultItemRenderer,
+                                  groupFieldItems: groupHeader?.groupItems,
                               })
                             : getDefaultItemRenderer()}
                     </div>

@@ -697,6 +697,9 @@ export interface IFieldItemCustomRendererProps<T = unknown> {
 
     /** Function to remove the field item from the bucket */
     remove: () => void;
+
+    /** Array of child field items when this item is a group header */
+    groupFieldItems?: IFieldsKeeperItem[];
 }
 
 export interface IGroupedFieldsKeeperItem {

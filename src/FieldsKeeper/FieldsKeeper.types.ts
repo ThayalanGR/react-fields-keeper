@@ -568,7 +568,10 @@ export interface IFieldsKeeperBucketProps {
     /**
      * Callback triggered to highlight the element.
      */
-    onHighlightElement?: () => void; // TO - DO
+    onHighlightElement?: () => void;
+
+    /** Specifies whether the group label can be edited. */
+    allowGroupLabelToEdit?: boolean;
 }
 
 export interface IFieldItemLabelChangeProps {

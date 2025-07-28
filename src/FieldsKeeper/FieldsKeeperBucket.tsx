@@ -403,6 +403,7 @@ const GroupedItemRenderer = (
         onFieldItemLabelChange,
         onFieldItemClick,
         customClassNames,
+        allowGroupLabelToEdit
     } = props;
 
     // state
@@ -482,6 +483,9 @@ const GroupedItemRenderer = (
                 clickTimeoutRef.current = null;
             }, DOUBLE_CLICK_THRESHOLD); 
         } else if (clickCountRef.current === 2) {
+            if(fieldItem.group && !allowGroupLabelToEdit && fieldItem.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) {
+                return;
+            }
             if (clickTimeoutRef.current) {
                 clearTimeout(clickTimeoutRef.current);
                 clickTimeoutRef.current = null;

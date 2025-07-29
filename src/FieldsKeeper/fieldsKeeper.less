@@ -19,25 +19,39 @@
     }
     .react-fields-keeper-mapping-content-title {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 5px;
-        white-space: nowrap;
-        .link-label {
-            color: #2e7fec;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .icons {
-            padding: 5px;
-            cursor: pointer;
+        width: 100%;
 
-            &:hover {
-                background: #80808030;
-                border-radius: 2px;
+        .react-fields-keeper-mapping-content-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            
+            .link-label {
+                color: #2e7fec;
+                cursor: pointer;
+                font-weight: 600;
+            }
+            
+            .icons {
+                padding: 5px;
+                cursor: pointer;
+
+                &:hover {
+                    background: #80808030;
+                    border-radius: 2px;
+                }
+            }
+            
+            .ms-Icon--ChromeClose {
+                font-size: 10px;
             }
         }
-        .ms-Icon--ChromeClose {
-            font-size: 10px;
+
+        .react-fields-keeper-mapping-content-suffix {
+            margin-left: auto;
         }
     }
 

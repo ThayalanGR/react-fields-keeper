@@ -568,8 +568,18 @@ export interface IFieldsKeeperBucketProps {
     /**
      * Callback triggered to highlight the element.
      */
-    onHighlightElement?: () => void; 
+    onHighlightElement?: () => void;
 
+    /** Specifies whether the group label can be edited. */
+    allowGroupLabelToEdit?: boolean;
+
+    /**
+     * A function that renders a JSX element as a suffix for a bucket label.
+     *
+     * @param bucketId - The unique identifier of the bucket.
+     * @returns A JSX element to be appended as a suffix to the bucket label.
+     */
+    bucketLabelSuffixRenderer?: (bucketId: string) => JSX.Element;
 
     /**
      * Determines if dragging is allowed
@@ -693,6 +703,9 @@ export interface IFieldItemCustomRendererProps<T = unknown> {
 
     /** Function to remove the field item from the bucket */
     remove: () => void;
+
+    /** Array of child field items when this item is a group header */
+    groupFieldItems?: IFieldsKeeperItem[];
 }
 
 export interface IGroupedFieldsKeeperItem {

@@ -580,6 +580,12 @@ export interface IFieldsKeeperBucketProps {
      * @returns A JSX element to be appended as a suffix to the bucket label.
      */
     bucketLabelSuffixRenderer?: (bucketId: string) => JSX.Element;
+
+    /**
+     * Determines if dragging is allowed
+     * @default true
+     */
+    allowDragging?: boolean;
 }
 
 export interface IFieldItemLabelChangeProps {

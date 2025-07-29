@@ -403,6 +403,7 @@ const GroupedItemRenderer = (
         onFieldItemLabelChange,
         onFieldItemClick,
         customClassNames,
+        allowDragging = true,
     } = props;
 
     // state
@@ -762,7 +763,7 @@ const GroupedItemRenderer = (
                             customClassNames?.customFieldItemContainerClassName,
                         )}
                         style={itemStyle}
-                        draggable={isGroupHeader || isGroupItem ? false : true}
+                        draggable={!allowDragging || isGroupHeader || isGroupItem ? false : true}
                         data-index={fieldItemIndex}
                         onDragStart={onDragStartHandler(
                             (fieldItem._fieldItemIndex ?? '') + '',
@@ -817,7 +818,7 @@ const GroupedItemRenderer = (
                     },
                     customClassNames?.customGroupContainerClassName,
                 )}
-                draggable
+                draggable={allowDragging}
                 onDragStart={onDragStartHandler('', currentBucket.id, items)}
                 onDragOver={(e) => onDragOverHandler(e, false, fieldItemIndex)}
             >

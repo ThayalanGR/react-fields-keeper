@@ -568,7 +568,14 @@ export interface IFieldsKeeperBucketProps {
     /**
      * Callback triggered to highlight the element.
      */
-    onHighlightElement?: () => void; // TO - DO
+    onHighlightElement?: () => void; 
+
+
+    /**
+     * Determines if dragging is allowed
+     * @default true
+     */
+    allowDragging?: boolean;
 }
 
 export interface IFieldItemLabelChangeProps {

@@ -428,7 +428,7 @@ const GroupedItemRenderer = (
         onFieldItemLabelChange,
         onFieldItemClick,
         customClassNames,
-        allowGroupLabelToEdit
+        allowGroupLabelToEdit,
         allowDragging = true,
     } = props;
 

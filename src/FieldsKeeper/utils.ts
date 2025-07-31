@@ -57,7 +57,7 @@ export function getGroupedItems(
             } else if (
                 lastGroup &&
                 currentGroupId === item.group &&
-                lastGroupItemOrder < currentItemOrder
+                lastGroupItemOrder <= currentItemOrder
             ) {
                 lastGroup.items.push({
                     ...item,

@@ -699,7 +699,7 @@ function FolderScopeItemRenderer(
     
     return (
         <div
-        ref={folderRef}
+            ref={folderRef}
             className="folder-scope-wrapper"
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{ paddingLeft: setIndentation(folders ?? []) }}
@@ -721,18 +721,8 @@ function FolderScopeItemRenderer(
                                 setContextMenuFolderId(id);
                                 setIsContextMenuFolderOpen(true);
                             }}
-                            onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
-                                const validClassNames = [
-                                    'folder-scope-wrapper',
-                                    'react-fields-keeper-mapping-content-scrollable-container'
-                                ];
-                                
-                                if (
-                                    rootBucketProps.showSuffixOnHover &&
-                                    e.relatedTarget instanceof Element &&
-                                    e.relatedTarget.classList &&
-                                    Array.from(e.relatedTarget.classList).some(className => validClassNames.includes(className))
-                                ) {
+                            onMouseLeave={() => {
+                                if (rootBucketProps.showSuffixOnHover) {
                                     setHoveredFolderItems((prev) => {
                                         const newHoveredFolderItems = { ...prev };
                                         delete newHoveredFolderItems[id];
@@ -800,7 +790,7 @@ function FolderScopeItemRenderer(
                                 onClick={(e) => {
                                     e.stopPropagation();
                                 }}
-                                style={{display: hoveredFolderItems[id] ? 'block' : 'none'}}
+                                style={{display: rootBucketProps.showSuffixOnHover && !hoveredFolderItems?.[id] ? 'none' : 'block'}}
                             >
                                 {suffixNodeRenderer != undefined &&
                                 typeof suffixNodeRenderer === 'function'
@@ -1117,21 +1107,20 @@ function GroupedItemRenderer(
         targetBucketId = bucketToFill.id;
     }
 
-    assignFieldItems({
-        instanceId: currentInstanceId || instanceId,
-        bucketId: targetBucketId!,
-        fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
-        fieldItems: currentFieldItems,
-        buckets: currentBuckets,
-        removeOnly: false,
-        sortGroupOrderWiseOnAssignment,
-        allowDuplicates,
-        updateState,
-        isFieldItemClick: true,
-        allItems: currentAllItems,
-    });
-};
-
+        assignFieldItems({
+            instanceId: currentInstanceId || instanceId,
+            bucketId: targetBucketId!,
+            fromBucket: FIELDS_KEEPER_CONSTANTS.ROOT_BUCKET_ID,
+            fieldItems: currentFieldItems,
+            buckets: currentBuckets,
+            removeOnly: false,
+            sortGroupOrderWiseOnAssignment,
+            allowDuplicates,
+            updateState,
+            isFieldItemClick: true,
+            allItems: currentAllItems,
+        });
+    };
 
     const onFieldItemClickHandler =
         (fieldItems: IFieldsKeeperItem[], remove = false) =>
@@ -1163,23 +1152,21 @@ function GroupedItemRenderer(
 
     // paint
     const renderFieldItems = ({
-    fieldItems,
-    isGroupItem,
-    groupHeader,
-    hasMasterGroup,
-    activeHighlightIds,
-}: IGroupedItemRenderer & {
-    activeHighlightIds: Record<string, IHighlightInfo>;
-}) => {
+        fieldItems,
+        isGroupItem,
+        groupHeader,
+        hasMasterGroup,
+        activeHighlightIds,
+    }: IGroupedItemRenderer & {
+        activeHighlightIds: Record<string, IHighlightInfo>;
+    }) => {
         const {
             suffixNodeRenderer,
             onContextMenuRenderer,
             onExpandCollapseAll,
         } = props;
-        // compute
         const isGroupHeader = groupHeader !== undefined;
 
-        // styles
         const itemStyle = (
             isGroupHeader
                 ? {
@@ -1188,7 +1175,6 @@ function GroupedItemRenderer(
                 : {}
         ) as CSSProperties;
 
-        // style
         const accentColorStyle = {
             '--bucket-accent-color': accentColor ?? '#007bff',
             '--highlight-element-color': accentHighlightColor ?? '#ffffff',
@@ -1418,17 +1404,8 @@ function GroupedItemRenderer(
                                 onFieldItemClick(fieldItem, e);
                             }
                         }}
-                        onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
-                            const validClassNames = [
-                                'react-fields-keeper-mapping-column-content',
-                                'react-fields-keeper-mapping-content-scrollable-container'
-                            ];
-                            if (
-                                showSuffixOnHover &&
-                                e.relatedTarget instanceof Element &&
-                                e.relatedTarget.classList &&
-                                Array.from(e.relatedTarget.classList).some(className => validClassNames.includes(className))
-                            ) {
+                        onMouseLeave={() => {
+                            if (showSuffixOnHover) {
                                 setHoveredItems((prev) => {
                                     const newHoveredItems = { ...prev };
                                     delete newHoveredItems[itemId];
@@ -1568,7 +1545,7 @@ function GroupedItemRenderer(
                             {isSuffixNodeValid && (
                                 <div
                                     className="react-fields-keeper-mapping-column-content-suffix"
-                                    style={{ display: isItemHovered ? 'block' : 'none' }}
+                                    style={{ display: showSuffixOnHover && !isItemHovered ? 'none' : 'block' }}
                                 >
                                     {suffixNodeRendererOutput}
                                 </div>
@@ -1680,7 +1657,7 @@ function GroupedItemRenderer(
                             hasMasterGroup: (flatGroup &&
                                 flatGroup !==
                                     FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
-                        activeHighlightIds
+                            activeHighlightIds
                         })}
                 </div>
             </>

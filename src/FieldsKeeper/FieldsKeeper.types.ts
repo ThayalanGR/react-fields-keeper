@@ -361,6 +361,17 @@ export interface IFieldsKeeperRootBucketProps {
         fieldItem: IFieldsKeeperItem,
         event: React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => void;
+
+    /**
+     * Callback fired when a field item is rigth clicked (context menu).
+     *
+     * @param fieldItem - The clicked field item.
+     * @param event - The mouse event triggered by the click.
+     */
+    onFieldItemContextMenu?: (
+        fieldItem: IFieldsKeeperItem,
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => void;
 }
 
 /**

@@ -891,7 +891,8 @@ function GroupedItemRenderer(
         isHighlightGroupOnHover = false,
         showSuffixOnHover = false,
         crossHighlightAcrossBucket,
-        onFieldItemClick
+        onFieldItemClick,
+        onFieldItemContextMenu
     } = props;
 
     const {
@@ -1403,6 +1404,9 @@ function GroupedItemRenderer(
                             if (typeof onFieldItemClick === 'function') {
                                 onFieldItemClick(fieldItem, e);
                             }
+                        }}
+                        onContextMenu={(e) => {
+                            onFieldItemContextMenu?.(fieldItem, e)
                         }}
                         onMouseLeave={() => {
                             if (showSuffixOnHover) {

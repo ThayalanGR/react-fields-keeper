@@ -720,6 +720,7 @@ function FolderScopeItemRenderer(
                                 e.stopPropagation();
                                 setContextMenuFolderId(id);
                                 setIsContextMenuFolderOpen(true);
+                                rootBucketProps?.onFieldItemContextMenu?.({...folderScopeItem, type } as IFieldsKeeperItem, e)
                             }}
                             onMouseLeave={() => {
                                 if (rootBucketProps.showSuffixOnHover) {

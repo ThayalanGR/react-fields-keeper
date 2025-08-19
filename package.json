@@ -1,6 +1,6 @@
 {
     "name": "react-fields-keeper",
-    "version": "4.11.20",
+    "version": "4.11.21",
     "type": "module",
     "main": "./dist/index.umd.js",
     "license": "ISC",

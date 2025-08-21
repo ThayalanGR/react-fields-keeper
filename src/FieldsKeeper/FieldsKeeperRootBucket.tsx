@@ -713,7 +713,10 @@ function FolderScopeItemRenderer(
                                 customClassNames?.customLabelClassName,
                             )}
                             role="button"
-                            onClick={(e) => toggleFolderCollapse(id, e)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFolderCollapse(id, e);
+                            }}
                             title={itemLabel ?? ''}
                             onContextMenu={(e) => {
                                 e.preventDefault();
@@ -1475,7 +1478,12 @@ function GroupedItemRenderer(
                                     'react-fields-keeper-mapping-column-content-action',
                                 )}
                                 role="button"
-                                onClick={groupHeader.onGroupHeaderToggle}
+                                onClick={(e) => {
+                                    if (toggleCheckboxOnLabelClick) {
+                                        e.stopPropagation();
+                                    }
+                                    groupHeader.onGroupHeaderToggle();
+                                }}
                                 style={
                                     groupHeight > 0
                                         ? { zIndex: 1, ...accentColorStyle }
@@ -1551,6 +1559,11 @@ function GroupedItemRenderer(
                                 <div
                                     className="react-fields-keeper-mapping-column-content-suffix"
                                     style={{ display: showSuffixOnHover && !isItemHovered ? 'none' : 'block' }}
+                                    onClick={(e) => {
+                                        if (toggleCheckboxOnLabelClick) {
+                                            e.stopPropagation();
+                                        }
+                                    }}
                                 >
                                     {suffixNodeRendererOutput}
                                 </div>

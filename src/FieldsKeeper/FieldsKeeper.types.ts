@@ -23,6 +23,12 @@ export interface IFieldsKeeperFolder {
         | 'calendar-icon'
         | 'globe-icon'
         | ReactNode;
+
+    /** Controls whether the folder is hidden from view */
+    isHidden?: boolean;
+
+    /** CSS class name applied to the folder when it is in active state */
+    activeFolderClassName?: string;
 }
 
 export interface IFieldsKeeperItem<T = any> {

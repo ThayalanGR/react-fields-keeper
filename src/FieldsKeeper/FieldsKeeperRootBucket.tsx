@@ -498,13 +498,21 @@ function FolderScopeItemRenderer(
 
     const checkIsFolderCollapsed = () => {
         let isCollapsed = false;
+        let isHidden = false;
         folders?.forEach((folder) => {
+            if(foldersMeta[folder].isHidden) {
+                isHidden = true;
+            }
             if (collapsedNodes[folder] && !hasSearchQuery) {
                 isCollapsed = true;
             }
         });
 
-        return isCollapsed;
+        if(!isHidden && (type === 'folder' || type === 'table') && folderScopeItem?.id) {
+            isHidden = foldersMeta[folderScopeItem?.id].isHidden ?? false;
+        }
+
+        return {isCollapsed, isHidden};
     };
 
     const updatedFolderScopeItems =
@@ -696,6 +704,8 @@ function FolderScopeItemRenderer(
             }
         }
     }, [highlightedItem, isItemHighlighted, id, isFolderCollapsedOriginal]);
+
+    const {isCollapsed, isHidden} = checkIsFolderCollapsed()
     
     return (
         <div
@@ -704,13 +714,14 @@ function FolderScopeItemRenderer(
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{ paddingLeft: setIndentation(folders ?? []) }}
         >
-            {!checkIsFolderCollapsed() &&
-                (type === 'folder' || type === 'table' ? (
+            {!isCollapsed &&
+                (!isHidden && ((type === 'folder' || type === 'table') ? (
                     <div>
                         <div
                             className={classNames(
                                 'folder-scope-label',
                                 customClassNames?.customLabelClassName,
+                                foldersMeta?.[id]?.activeFolderClassName
                             )}
                             role="button"
                             onClick={(e) => {
@@ -860,7 +871,7 @@ function FolderScopeItemRenderer(
                         suffixNodeRenderer={suffixNodeRenderer}
                         onContextMenuRenderer={onContextMenuRenderer}
                     />
-                ))}
+                )))}
         </div>
     );
 }

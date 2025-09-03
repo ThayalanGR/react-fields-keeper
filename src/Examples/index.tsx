@@ -71,5 +71,5 @@ export const examples = {
     Example33_add_to_bucket,
     Example34_Highlight_Between_Buckets,
     Example35_Cross_Highlight_Across_Buckets,
-    Example36_bucketLabelSuffixRenderer
+    Example36_bucketLabelSuffixRenderer,
 };

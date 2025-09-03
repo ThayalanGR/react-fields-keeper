@@ -19,7 +19,7 @@ export type ContextSetState = (
     instanceId: string,
     newState: Partial<State & AdditionalContextState>,
     updateInfo: StateUpdateInfo,
-    isHighlightUpdate?: boolean
+    isHighlightUpdate?: boolean,
 ) => void;
 
 interface ContextState {
@@ -30,12 +30,12 @@ interface ContextState {
 
 export const getStoreState = (instanceId: string) => {
     const state = useStore.getState().state[instanceId];
- 
+
     if (!state)
         throw new Error(
             'Instance not found, all the buckets should be wrapped under provider / unique instanceIds should be passed',
         );
- 
+
     return state as Required<IFieldsKeeperState>;
 };
 
@@ -52,7 +52,8 @@ export const useStore = create<ContextState>()((set, get) => ({
                 [instanceId]: requiredState,
             },
         });
-        if(!isHighlightUpdate) currentState.onStateUpdate(requiredState, updateInfo);
+        if (!isHighlightUpdate)
+            currentState.onStateUpdate(requiredState, updateInfo);
     },
     deleteState(instanceId) {
         const prevState = { ...get().state };

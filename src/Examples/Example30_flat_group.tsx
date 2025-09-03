@@ -303,8 +303,10 @@ export default function Example30() {
                             label="Root Bucket"
                             collapseFoldersOnMount={false}
                             prefixNode={{ allow: true, reserveSpace: true }}
-                            suffixNodeRenderer={({type, onExpandCollapseAll }) => {
-                                
+                            suffixNodeRenderer={({
+                                type,
+                                onExpandCollapseAll,
+                            }) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Option 1', id: 'option1' },
@@ -312,28 +314,36 @@ export default function Example30() {
                                         { label: 'Option 3', id: 'option3' },
                                     ];
 
-                                    const contextMenuRootLabelOptions: IContextMenuOption[] =
+                                const contextMenuRootLabelOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Expand', id: 'expand' },
                                         { label: 'Collapse', id: 'collapse' },
                                     ];
                                 const onOptionClick = (id: string) => {
-                                    if((id === 'collapse' || id === 'expand') && onExpandCollapseAll !== undefined){
-                                        onExpandCollapseAll((id === 'collapse'));
-                                    } 
+                                    if (
+                                        (id === 'collapse' ||
+                                            id === 'expand') &&
+                                        onExpandCollapseAll !== undefined
+                                    ) {
+                                        onExpandCollapseAll(id === 'collapse');
+                                    }
                                 };
 
                                 return (
                                     <SuffixNode
                                         contextMenuOptions={
-                                            type === 'folder' ? contextMenuRootLabelOptions : contextMenuRootOptions
+                                            type === 'folder'
+                                                ? contextMenuRootLabelOptions
+                                                : contextMenuRootOptions
                                         }
                                         onOptionClick={onOptionClick}
                                     />
                                 );
                             }}
-                            onContextMenuRenderer={({type, onExpandCollapseAll} ) => {
-
+                            onContextMenuRenderer={({
+                                type,
+                                onExpandCollapseAll,
+                            }) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Option 1', id: 'option1' },
@@ -341,21 +351,27 @@ export default function Example30() {
                                         { label: 'Option 3', id: 'option3' },
                                     ];
 
-                                    const contextMenuRootLabelOptions: IContextMenuOption[] =
+                                const contextMenuRootLabelOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Expand', id: 'expand' },
                                         { label: 'Collapse', id: 'collapse' },
                                     ];
                                 const onOptionClick = (id: string) => {
-                                    if((id === 'collapse' || id === 'expand') && onExpandCollapseAll !== undefined){
-                                        onExpandCollapseAll((id === 'collapse'));
-                                    } 
+                                    if (
+                                        (id === 'collapse' ||
+                                            id === 'expand') &&
+                                        onExpandCollapseAll !== undefined
+                                    ) {
+                                        onExpandCollapseAll(id === 'collapse');
+                                    }
                                 };
 
                                 return (
                                     <ContextMenu
                                         contextMenuOptions={
-                                            type === 'folder' ? contextMenuRootLabelOptions : contextMenuRootOptions
+                                            type === 'folder'
+                                                ? contextMenuRootLabelOptions
+                                                : contextMenuRootOptions
                                         }
                                         onOptionClick={onOptionClick}
                                     />

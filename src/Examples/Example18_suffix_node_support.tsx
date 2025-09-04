@@ -263,7 +263,10 @@ export default function Example18() {
                     <div className="root-bucket-container">
                         <FieldsKeeperRootBucket
                             label="Root Bucket"
-                            suffixNodeRenderer={({type, onExpandCollapseAll}) => {
+                            suffixNodeRenderer={({
+                                type,
+                                onExpandCollapseAll,
+                            }) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Option 1', id: 'option1' },
@@ -271,21 +274,27 @@ export default function Example18() {
                                         { label: 'Option 3', id: 'option3' },
                                     ];
 
-                                    const contextMenuRootLabelOptions: IContextMenuOption[] =
+                                const contextMenuRootLabelOptions: IContextMenuOption[] =
                                     [
                                         { label: 'Expand', id: 'expand' },
                                         { label: 'Collapse', id: 'collapse' },
                                     ];
                                 const onOptionClick = (id: string) => {
-                                    if((id === 'collapse' || id === 'expand') && onExpandCollapseAll !== undefined){
-                                        onExpandCollapseAll((id === 'collapse'));
-                                    } 
+                                    if (
+                                        (id === 'collapse' ||
+                                            id === 'expand') &&
+                                        onExpandCollapseAll !== undefined
+                                    ) {
+                                        onExpandCollapseAll(id === 'collapse');
+                                    }
                                 };
 
                                 return (
                                     <SuffixNode
                                         contextMenuOptions={
-                                            type === 'folder' ? contextMenuRootLabelOptions : contextMenuRootOptions
+                                            type === 'folder'
+                                                ? contextMenuRootLabelOptions
+                                                : contextMenuRootOptions
                                         }
                                         onOptionClick={onOptionClick}
                                     />

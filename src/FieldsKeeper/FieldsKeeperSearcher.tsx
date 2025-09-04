@@ -35,6 +35,12 @@ export const FieldsKeeperSearcher = forwardRef<
         if (ref) (ref as MutableRefObject<HTMLDivElement>)?.current?.focus();
         else searchInputRef.current?.focus();
     };
+    const onKeyDown = (callback: () => void) => (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            callback();
+        }
+    };
 
     return (
         <div
@@ -52,6 +58,7 @@ export const FieldsKeeperSearcher = forwardRef<
             <input
                 className="react-fields-keeper-mapping-column-searcher-input"
                 type="text"
+                aria-label={searchPlaceholder}
                 ref={ref ?? searchInputRef}
                 onChange={onSearchInputChange}
                 value={searchQuery}
@@ -61,7 +68,10 @@ export const FieldsKeeperSearcher = forwardRef<
                 <div
                     className="react-fields-keeper-mapping-column-searcher-clear"
                     role="button"
+                    tabIndex={0}
+                    aria-label="Clear Search"
                     onClick={onClearSearchQuery}
+                    onKeyDown={onKeyDown(onClearSearchQuery)}
                     style={iconColorStyle}
                 >
                     <span className="fk-ms-Icon fk-ms-Icon--ChromeClose" />

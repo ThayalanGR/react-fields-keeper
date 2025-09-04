@@ -13,7 +13,7 @@ export const DOUBLE_CLICK_THRESHOLD = 300;
 export interface IHighlightInfo {
     enabled: boolean;
     backgroundColor: string;
-};
+}
 
 export function getUniqueId() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -28,9 +28,18 @@ export function clone(item: unknown) {
     return JSON.parse(JSON.stringify(item));
 }
 
-export function findGroupItemOrder(allItems: IFieldsKeeperItem[], targetItem: IFieldsKeeperItem) {
-    const groupItems = allItems.filter((item) => item.group === targetItem?.group);
-    const targetIndex = groupItems.findIndex((item) => (item.sourceId ?? item.id) === (targetItem?.sourceId ?? targetItem?.id));
+export function findGroupItemOrder(
+    allItems: IFieldsKeeperItem[],
+    targetItem: IFieldsKeeperItem,
+) {
+    const groupItems = allItems.filter(
+        (item) => item.group === targetItem?.group,
+    );
+    const targetIndex = groupItems.findIndex(
+        (item) =>
+            (item.sourceId ?? item.id) ===
+            (targetItem?.sourceId ?? targetItem?.id),
+    );
     return targetIndex;
 }
 
@@ -46,9 +55,14 @@ export function getGroupedItems(
                 (group) => group.group === item.group,
             );
             const lastGroup = foundGroups[foundGroups.length - 1];
-            const lastGroupItemOrder =  findGroupItemOrder(allItems, lastGroup?.items?.[lastGroup?.items?.length - 1]);
+            const lastGroupItemOrder = findGroupItemOrder(
+                allItems,
+                lastGroup?.items?.[lastGroup?.items?.length - 1],
+            );
             const currentItemOrder = findGroupItemOrder(allItems, item);
-            const existingGroup = acc.find((group) => group.group === item.group);
+            const existingGroup = acc.find(
+                (group) => group.group === item.group,
+            );
             if (existingGroup && isRootBucketRender) {
                 existingGroup.items.push({
                     ...item,
@@ -82,25 +96,28 @@ export function getGroupedItems(
     );
 
     groupedItems.forEach((groupedItem) => {
-        groupedItem.items = sortBucketItemsBasedOnGroupOrder(groupedItem.items, allItems);
+        groupedItem.items = sortBucketItemsBasedOnGroupOrder(
+            groupedItem.items,
+            allItems,
+        );
     });
 
     return groupedItems;
 }
 
-
 export const getNodeRendererOutput = (
     renderer: unknown,
     item?: IFieldsKeeperItem,
     fieldItems?: IFieldsKeeperItem[],
-    assignFieldItemToBucket?: (fieldItems: IFieldsKeeperItem[], assignedField: { bucketId: string; currentInstanceId: string }) => void,
+    assignFieldItemToBucket?: (
+        fieldItems: IFieldsKeeperItem[],
+        assignedField: { bucketId: string; currentInstanceId: string },
+    ) => void,
     onExpandCollapseAll?: (isCollapse: boolean) => void,
-    onRenameField?:(
-            fieldItemClickProps: IFieldItemLabelChangeProps,
-        ) => void
+    onRenameField?: (fieldItemClickProps: IFieldItemLabelChangeProps) => void,
 ) => {
     const assignField = (bucketId: string, instanceId: string) => {
-        if(fieldItems) {
+        if (fieldItems) {
             assignFieldItemToBucket?.(fieldItems, {
                 bucketId,
                 currentInstanceId: instanceId,
@@ -109,13 +126,21 @@ export const getNodeRendererOutput = (
     };
     const isRendererValid = typeof renderer === 'function';
     const rendererOutput = isRendererValid
-        ? renderer({type: item?.type, fieldItem: item, onExpandCollapseAll, assignFieldBucketItem: assignField, onRenameField})
+        ? renderer({
+              type: item?.type,
+              fieldItem: item,
+              onExpandCollapseAll,
+              assignFieldBucketItem: assignField,
+              onRenameField,
+          })
         : null;
     const isValidElement =
         rendererOutput !== undefined && rendererOutput !== null;
     return { rendererOutput, isValidElement };
 };
 
-export const getFolderIdsFromValues = (foldersMeta: Record<string, { id: string }>): string[] => {
-    return Object.values(foldersMeta).map(folder => folder.id);
+export const getFolderIdsFromValues = (
+    foldersMeta: Record<string, { id: string }>,
+): string[] => {
+    return Object.values(foldersMeta).map((folder) => folder.id);
 };

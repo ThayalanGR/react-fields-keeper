@@ -103,7 +103,9 @@ export default function Example33_add_to_bucket() {
 
     return (
         <div className="example-container">
-            <div className="example-container-title">33. Assign Fields directly to Bucket</div>
+            <div className="example-container-title">
+                33. Assign Fields directly to Bucket
+            </div>
             <FieldsKeeperProvider
                 allItems={allItems}
                 buckets={rootBuckets}
@@ -185,10 +187,7 @@ export default function Example33_add_to_bucket() {
                             label="Root Bucket"
                             collapseFoldersOnMount={false}
                             showSuffixOnHover={true}
-                            suffixNodeRenderer={({
-                                assignFieldBucketItem,
-                            }
-                            ) => {
+                            suffixNodeRenderer={({ assignFieldBucketItem }) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
                                         {

@@ -130,7 +130,15 @@ export interface IFieldsKeeperItem<T = any> {
      * pass 'measure-icon' to show default measure icon
      *
      */
-    prefixNode?: 'measure-icon' | 'calculator-icon' | 'date-icon' | 'calculation-group-icon' | 'calculation-group-item-icon' | 'globe-icon' | 'planning-icon' | ReactNode;
+    prefixNode?:
+        | 'measure-icon'
+        | 'calculator-icon'
+        | 'date-icon'
+        | 'calculation-group-icon'
+        | 'calculation-group-item-icon'
+        | 'globe-icon'
+        | 'planning-icon'
+        | ReactNode;
 
     /**
      * useful for matching the field item type with corresponding bucket type
@@ -187,11 +195,11 @@ export interface IGetPriorityTargetBucketToFillProps {
     priorityGroup?: string;
 }
 
-export interface ISuffixRootNodeRendererProps <T = any> {
-  type: 'folder' | 'group' | 'leaf' | 'table' | 'hierarchy';
-  fieldItem?: IFieldsKeeperItem<T>;
-  onExpandCollapseAll?: (isCollapse: boolean) => void;
-  assignFieldBucketItem?: (bucketId: string, instanceId: string) => void;
+export interface ISuffixRootNodeRendererProps<T = any> {
+    type: 'folder' | 'group' | 'leaf' | 'table' | 'hierarchy';
+    fieldItem?: IFieldsKeeperItem<T>;
+    onExpandCollapseAll?: (isCollapse: boolean) => void;
+    assignFieldBucketItem?: (bucketId: string, instanceId: string) => void;
 }
 
 export interface IHighlightAcrossBuckets {
@@ -298,7 +306,9 @@ export interface IFieldsKeeperRootBucketProps {
     suffixNodeRenderer?: (props: ISuffixRootNodeRendererProps) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?: (props: ISuffixRootNodeRendererProps) => JSX.Element;
+    onContextMenuRenderer?: (
+        props: ISuffixRootNodeRendererProps,
+    ) => JSX.Element;
 
     /** If true, assignments will not be allowed */
     disableAssignments?: boolean;
@@ -351,8 +361,8 @@ export interface IFieldsKeeperRootBucketProps {
     showSuffixOnHover?: boolean;
 
     /**
-     * Configuration object for managing cross-highlight functionality 
-     * across multiple buckets. When provided, it enables items in one 
+     * Configuration object for managing cross-highlight functionality
+     * across multiple buckets. When provided, it enables items in one
      * bucket to influence highlighting behavior in others.
      */
     crossHighlightAcrossBucket?: ICrossHighlightAcrossBuckets;
@@ -365,7 +375,7 @@ export interface IFieldsKeeperRootBucketProps {
      */
     onFieldItemClick?: (
         fieldItem: IFieldsKeeperItem,
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
     ) => void;
 
     /**
@@ -376,7 +386,7 @@ export interface IFieldsKeeperRootBucketProps {
      */
     onFieldItemContextMenu?: (
         fieldItem: IFieldsKeeperItem,
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
     ) => void;
 }
 
@@ -442,12 +452,11 @@ export interface IFieldsKeeperState {
     /**
      * @internal
      * Function to set or clear the highlighted item.
-     * 
+     *
      * @param instanceId - The instance or scope identifier for the operation.
      * @param itemId - The ID of the item to highlight, or `null` to clear the highlight.
      */
     setHighlightedItem?: (instanceId: string, itemId: string | null) => void;
-
 }
 
 /**
@@ -533,7 +542,9 @@ export interface IFieldsKeeperBucketProps {
     suffixNodeRenderer?: (props: ISuffixBucketNodeRendererProps) => JSX.Element;
 
     /**  Function to render context menu on right click **/
-    onContextMenuRenderer?: (props: ISuffixBucketNodeRendererProps) => JSX.Element;
+    onContextMenuRenderer?: (
+        props: ISuffixBucketNodeRendererProps,
+    ) => JSX.Element;
 
     /** Layout orientation for items within the bucket */
     orientation?: 'vertical' | 'horizontal';
@@ -557,7 +568,7 @@ export interface IFieldsKeeperBucketProps {
      */
     onFieldItemClick?: (
         fieldItem: IFieldsKeeperItem,
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
     ) => void;
 
     /**
@@ -621,7 +632,7 @@ export interface IFieldItemLabelChangeProps {
     /**
      * Index of the field item to which the label is updated.
      */
-    fieldIndex?: number
+    fieldIndex?: number;
 }
 
 /**

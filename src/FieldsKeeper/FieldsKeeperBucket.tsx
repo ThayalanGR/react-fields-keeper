@@ -1230,7 +1230,6 @@ export function assignFieldItems(props: {
         isRemoved: removeOnly,
     };
 
-    console.log("🚀 ~ newBuckets:", newBuckets)
     // update context
     updateState(instanceId, { buckets: newBuckets }, updateInfo);
 }

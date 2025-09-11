@@ -8,7 +8,11 @@ import {
 } from '..';
 
 export default function Example35() {
-    const [crossHighlightConfig, setCrossHighlightConfig] = useState({enabled: true, highlightColor: 'red', crossHighlightIds: ['folder_1', 'folder_2']});
+    const [crossHighlightConfig, setCrossHighlightConfig] = useState({
+        enabled: true,
+        highlightColor: 'red',
+        crossHighlightIds: ['folder_1', 'folder_2'],
+    });
     // compute
     const allItems: IFieldsKeeperItem[] = [
         { id: 'a', label: 'a', folders: ['folder_1'] },
@@ -142,13 +146,14 @@ export default function Example35() {
                         />
                     </div>
                     <div className="root-bucket-container">
-                        <FieldsKeeperRootBucket label="Root Bucket"
+                        <FieldsKeeperRootBucket
+                            label="Root Bucket"
                             crossHighlightAcrossBucket={crossHighlightConfig}
                             onFieldItemClick={(fieldItem) => {
                                 setCrossHighlightConfig((prevState) => ({
                                     ...prevState,
-                                    crossHighlightIds: [fieldItem.id]
-                                }))
+                                    crossHighlightIds: [fieldItem.id],
+                                }));
                             }}
                         />
                     </div>

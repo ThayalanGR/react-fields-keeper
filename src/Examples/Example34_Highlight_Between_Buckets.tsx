@@ -120,7 +120,11 @@ export default function Example34() {
                         prefixNodeIcon: 'folder-icon',
                     },
                 }}
-                highlightAcrossBuckets={{enabled: true, highlightColor: 'red', highlightDuration: 1000}}
+                highlightAcrossBuckets={{
+                    enabled: true,
+                    highlightColor: 'red',
+                    highlightDuration: 1000,
+                }}
             >
                 <div className="keeper-container">
                     <div className="buckets-container">

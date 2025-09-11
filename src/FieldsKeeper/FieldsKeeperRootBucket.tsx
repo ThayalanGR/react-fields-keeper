@@ -29,7 +29,13 @@ import {
     useStoreState,
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
-import { FIELD_DELIMITER, getFolderIdsFromValues, getGroupedItems, getNodeRendererOutput, IHighlightInfo } from './utils';
+import {
+    FIELD_DELIMITER,
+    getFolderIdsFromValues,
+    getGroupedItems,
+    getNodeRendererOutput,
+    IHighlightInfo,
+} from './utils';
 import { Icons } from '../Components/svgElements/Icons';
 
 export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
@@ -268,6 +274,15 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
             ...collapsedFolders,
         }));
     };
+    const onKeyDown = (
+        e: React.KeyboardEvent<HTMLElement>,
+        handler: () => void,
+    ) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handler();
+        }
+    };
 
     // paint
     return (
@@ -346,7 +361,17 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                                                 className="react-fields-keeper-mapping-clear-search-link"
                                                 onClick={onClearSearchQuery}
                                                 role="button"
+                                                tabIndex={0}
+                                                aria-label="Clear search"
                                                 style={accentColorStyle}
+                                                onKeyDown={(
+                                                    e: React.KeyboardEvent<HTMLDivElement>,
+                                                ) =>
+                                                    onKeyDown(
+                                                        e,
+                                                        onClearSearchQuery,
+                                                    )
+                                                }
                                             >
                                                 Clear search
                                             </div>
@@ -371,9 +396,7 @@ function FolderScopeItemRenderer(
         setCollapsedNodes: React.Dispatch<
             React.SetStateAction<Record<string, boolean>>
         >;
-        onExpandCollapseAll: (
-            isCollapse: boolean,
-        ) => void;
+        onExpandCollapseAll: (isCollapse: boolean) => void;
     },
 ) {
     // props
@@ -403,28 +426,49 @@ function FolderScopeItemRenderer(
     const [isFolderCollapsedOriginal, setIsFolderCollapsed] = useState(
         rootBucketProps.collapseFoldersOnMount ?? true,
     );
-    const [hoveredFolderItems, setHoveredFolderItems] = useState<Record<string, boolean>>({});
+    const [hoveredFolderItems, setHoveredFolderItems] = useState<
+        Record<string, boolean>
+    >({});
     const getCrossHighlightIds = () => {
-        if(rootBucketProps.crossHighlightAcrossBucket?.enabled) {
-            return rootBucketProps?.crossHighlightAcrossBucket.crossHighlightIds
+        if (rootBucketProps.crossHighlightAcrossBucket?.enabled) {
+            return rootBucketProps?.crossHighlightAcrossBucket
+                .crossHighlightIds;
         }
         return [];
-    }
-    const [crossHighlightItemIds, setCrossHighlightItemIds] = useState(getCrossHighlightIds());
+    };
+    const [crossHighlightItemIds, setCrossHighlightItemIds] = useState(
+        getCrossHighlightIds(),
+    );
 
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = rootBucketProps.instanceId ?? instanceIdFromContext;
-    const { buckets, accentColor, iconColor, highlightAcrossBuckets, foldersMeta, highlightedItemId, setHighlightedItem } = useStoreState(instanceId);
+    const {
+        buckets,
+        accentColor,
+        iconColor,
+        highlightAcrossBuckets,
+        foldersMeta,
+        highlightedItemId,
+        setHighlightedItem,
+    } = useStoreState(instanceId);
     const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)?.[0];
     const getIsItemHighlighted = (): boolean => {
         if (!folderScopeItems) return false;
-        return folderScopeItems.some(scopeItem =>
-            scopeItem.items.some(item => item.id === highlightedItem || crossHighlightItemIds.includes(item.id))
+        return folderScopeItems.some((scopeItem) =>
+            scopeItem.items.some(
+                (item) =>
+                    item.id === highlightedItem ||
+                    crossHighlightItemIds.includes(item.id),
+            ),
         );
     };
 
-    const isItemHighlighted = highlightAcrossBuckets?.enabled || rootBucketProps.crossHighlightAcrossBucket?.enabled ? getIsItemHighlighted() : false;
+    const isItemHighlighted =
+        highlightAcrossBuckets?.enabled ||
+        rootBucketProps.crossHighlightAcrossBucket?.enabled
+            ? getIsItemHighlighted()
+            : false;
     let isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
     if (isFolderCollapsed && isItemHighlighted) {
         isFolderCollapsed = false;
@@ -450,11 +494,17 @@ function FolderScopeItemRenderer(
     }, [collapsedNodes]);
 
     useEffect(() => {
-        setCrossHighlightItemIds(rootBucketProps?.crossHighlightAcrossBucket?.crossHighlightIds ?? []);
+        setCrossHighlightItemIds(
+            rootBucketProps?.crossHighlightAcrossBucket?.crossHighlightIds ??
+                [],
+        );
     }, [rootBucketProps?.crossHighlightAcrossBucket?.crossHighlightIds]);
 
     // handlers
-    const toggleFolderCollapse = (id: string, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const toggleFolderCollapse = (
+        id: string,
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    ) => {
         const target = event?.target as HTMLElement;
 
         const iconClassList = [
@@ -465,10 +515,14 @@ function FolderScopeItemRenderer(
         ];
 
         const isExpansionNeeded = iconClassList.some((className) =>
-            target?.classList?.contains(className)
+            target?.classList?.contains(className),
         );
 
-        if (!isExpansionNeeded && rootBucketProps.onFieldItemClick && folderScopeItem) {
+        if (
+            !isExpansionNeeded &&
+            rootBucketProps.onFieldItemClick &&
+            folderScopeItem
+        ) {
             rootBucketProps.onFieldItemClick(folderScopeItem, event);
             return; // Restricting the expand collapse functionality if onFieldItemClick is called
         }
@@ -500,7 +554,7 @@ function FolderScopeItemRenderer(
         let isCollapsed = false;
         let isHidden = false;
         folders?.forEach((folder) => {
-            if(foldersMeta[folder].isHidden) {
+            if (foldersMeta[folder].isHidden) {
                 isHidden = true;
             }
             if (collapsedNodes[folder] && !hasSearchQuery) {
@@ -508,11 +562,15 @@ function FolderScopeItemRenderer(
             }
         });
 
-        if(!isHidden && (type === 'folder' || type === 'table') && folderScopeItem?.id) {
+        if (
+            !isHidden &&
+            (type === 'folder' || type === 'table') &&
+            folderScopeItem?.id
+        ) {
             isHidden = foldersMeta[folderScopeItem?.id].isHidden ?? false;
         }
 
-        return {isCollapsed, isHidden};
+        return { isCollapsed, isHidden };
     };
 
     const updatedFolderScopeItems =
@@ -682,7 +740,11 @@ function FolderScopeItemRenderer(
     const folderRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (highlightAcrossBuckets?.enabled && highlightedItem && isItemHighlighted) {
+        if (
+            highlightAcrossBuckets?.enabled &&
+            highlightedItem &&
+            isItemHighlighted
+        ) {
             if (folderRef.current) {
                 const highlightedElement = folderRef.current.querySelector(
                     `[data-item-id="${highlightedItem}"]`,
@@ -705,8 +767,16 @@ function FolderScopeItemRenderer(
         }
     }, [highlightedItem, isItemHighlighted, id, isFolderCollapsedOriginal]);
 
-    const {isCollapsed, isHidden} = checkIsFolderCollapsed()
-    
+    const { isCollapsed, isHidden } = checkIsFolderCollapsed();
+    const onKeyDown =
+        (callback: (e: React.KeyboardEvent) => void) =>
+        (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                callback(e);
+            }
+        };
+
     return (
         <div
             ref={folderRef}
@@ -715,30 +785,62 @@ function FolderScopeItemRenderer(
             style={{ paddingLeft: setIndentation(folders ?? []) }}
         >
             {!isCollapsed &&
-                (!isHidden && ((type === 'folder' || type === 'table') ? (
+                !isHidden &&
+                (type === 'folder' || type === 'table' ? (
                     <div>
                         <div
                             className={classNames(
                                 'folder-scope-label',
                                 customClassNames?.customLabelClassName,
-                                foldersMeta?.[id]?.activeFolderClassName
+                                foldersMeta?.[id]?.activeFolderClassName,
                             )}
                             role="button"
-                            onClick={(e) => toggleFolderCollapse(id, e)}
+                            tabIndex={0}
+                            aria-label={`${
+                                isFolderCollapsed
+                                    ? `Expand ${itemLabel ?? null}`
+                                    : `Collapse ${itemLabel ?? null}`
+                            }`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFolderCollapse(id, e);
+                            }}
+                            onKeyDown={onKeyDown((e) => {
+                                e.stopPropagation();
+                                toggleFolderCollapse(
+                                    id,
+                                    e as unknown as React.MouseEvent<
+                                        HTMLDivElement,
+                                        MouseEvent
+                                    >,
+                                );
+                            })}
                             title={itemLabel ?? ''}
                             onContextMenu={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setContextMenuFolderId(id);
                                 setIsContextMenuFolderOpen(true);
-                                rootBucketProps?.onFieldItemContextMenu?.({...folderScopeItem, type } as IFieldsKeeperItem, e)
+                                rootBucketProps?.onFieldItemContextMenu?.(
+                                    {
+                                        ...folderScopeItem,
+                                        type,
+                                    } as IFieldsKeeperItem,
+                                    e,
+                                );
                             }}
                             onMouseLeave={() => {
                                 if (rootBucketProps.showSuffixOnHover) {
                                     setHoveredFolderItems((prev) => {
-                                        const newHoveredFolderItems = { ...prev };
+                                        const newHoveredFolderItems = {
+                                            ...prev,
+                                        };
                                         delete newHoveredFolderItems[id];
-                                        return Object.keys(newHoveredFolderItems).length === 0 ? {} : newHoveredFolderItems;
+                                        return Object.keys(
+                                            newHoveredFolderItems,
+                                        ).length === 0
+                                            ? {}
+                                            : newHoveredFolderItems;
                                     });
                                 }
                             }}
@@ -751,8 +853,13 @@ function FolderScopeItemRenderer(
                                 }
                             }}
                             style={{
-                                backgroundColor:
-                                    crossHighlightItemIds.includes(id) ? rootBucketProps?.crossHighlightAcrossBucket?.highlightColor : 'transparent',
+                                backgroundColor: crossHighlightItemIds.includes(
+                                    id,
+                                )
+                                    ? rootBucketProps
+                                          ?.crossHighlightAcrossBucket
+                                          ?.highlightColor
+                                    : 'transparent',
                             }}
                         >
                             <div
@@ -767,12 +874,13 @@ function FolderScopeItemRenderer(
                             </div>
                             <div className="folder-scope-label-icon">
                                 {getPrefixNodeIcon(prefixNode)}
-                                {!React.isValidElement(prefixNode) && hasActiveSelection && (
-                                    <Icons.checkMark
-                                        className="check-mark-overlay"
-                                        style={accentColorStyle}
-                                    />
-                                )}
+                                {!React.isValidElement(prefixNode) &&
+                                    hasActiveSelection && (
+                                        <Icons.checkMark
+                                            className="check-mark-overlay"
+                                            style={accentColorStyle}
+                                        />
+                                    )}
                             </div>
 
                             <div
@@ -802,7 +910,13 @@ function FolderScopeItemRenderer(
                                 onClick={(e) => {
                                     e.stopPropagation();
                                 }}
-                                style={{display: rootBucketProps.showSuffixOnHover && !hoveredFolderItems?.[id] ? 'none' : 'block'}}
+                                style={{
+                                    display:
+                                        rootBucketProps.showSuffixOnHover &&
+                                        !hoveredFolderItems?.[id]
+                                            ? 'none'
+                                            : 'block',
+                                }}
                             >
                                 {suffixNodeRenderer != undefined &&
                                 typeof suffixNodeRenderer === 'function'
@@ -829,7 +943,9 @@ function FolderScopeItemRenderer(
                                         onContextMenuRenderer={
                                             onContextMenuRenderer
                                         }
-                                        onExpandCollapseAll={onExpandCollapseAll}
+                                        onExpandCollapseAll={
+                                            onExpandCollapseAll
+                                        }
                                     />
                                 ))}
                             </div>
@@ -868,7 +984,7 @@ function FolderScopeItemRenderer(
                         suffixNodeRenderer={suffixNodeRenderer}
                         onContextMenuRenderer={onContextMenuRenderer}
                     />
-                )))}
+                ))}
         </div>
     );
 }
@@ -927,7 +1043,7 @@ function GroupedItemRenderer(
         accentHighlightColor,
         iconColor,
         highlightedItemId,
-        highlightAcrossBuckets
+        highlightAcrossBuckets,
     } = useStoreState(instanceId);
     const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)[0];
     const updateState = useStore((state) => state.setState);
@@ -939,20 +1055,34 @@ function GroupedItemRenderer(
     const [contextMenuId, setContextMenuId] = useState('');
 
     const getInitialActiveHighlightIds = () => {
-        const activeIds: Record<string, IHighlightInfo> = {}
-        if(crossHighlightAcrossBucket?.enabled && crossHighlightAcrossBucket?.crossHighlightIds?.length) {
-            crossHighlightAcrossBucket?.crossHighlightIds.forEach((highlightedId) => {
-                activeIds[highlightedId] = {enabled: crossHighlightAcrossBucket.enabled, backgroundColor: crossHighlightAcrossBucket.highlightColor};
-            })
-        } 
+        const activeIds: Record<string, IHighlightInfo> = {};
+        if (
+            crossHighlightAcrossBucket?.enabled &&
+            crossHighlightAcrossBucket?.crossHighlightIds?.length
+        ) {
+            crossHighlightAcrossBucket?.crossHighlightIds.forEach(
+                (highlightedId) => {
+                    activeIds[highlightedId] = {
+                        enabled: crossHighlightAcrossBucket.enabled,
+                        backgroundColor:
+                            crossHighlightAcrossBucket.highlightColor,
+                    };
+                },
+            );
+        }
         return activeIds;
-    }
-    const [activeHighlightIds, setActiveHighlightIds] = useState<Record<string, IHighlightInfo>>(getInitialActiveHighlightIds());
+    };
+    const [activeHighlightIds, setActiveHighlightIds] = useState<
+        Record<string, IHighlightInfo>
+    >(getInitialActiveHighlightIds());
     useEffect(() => {
         if (highlightedItem) {
             setActiveHighlightIds((prev) => ({
                 ...prev,
-                [highlightedItem]: {enabled: true, backgroundColor: highlightAcrossBuckets?.highlightColor},
+                [highlightedItem]: {
+                    enabled: true,
+                    backgroundColor: highlightAcrossBuckets?.highlightColor,
+                },
             }));
 
             const timer = setTimeout(() => {
@@ -964,15 +1094,25 @@ function GroupedItemRenderer(
     }, [highlightedItemId, instanceId]);
 
     useEffect(() => {
-        if(crossHighlightAcrossBucket) {
-            const updatedActiveIds: Record<string, IHighlightInfo> = {}
-            crossHighlightAcrossBucket.crossHighlightIds.forEach((highlightId) => {
-                updatedActiveIds[highlightId] =  {enabled: true, backgroundColor: crossHighlightAcrossBucket?.highlightColor as string}
-            })
+        if (crossHighlightAcrossBucket) {
+            const updatedActiveIds: Record<string, IHighlightInfo> = {};
+            crossHighlightAcrossBucket.crossHighlightIds.forEach(
+                (highlightId) => {
+                    updatedActiveIds[highlightId] = {
+                        enabled: true,
+                        backgroundColor:
+                            crossHighlightAcrossBucket?.highlightColor as string,
+                    };
+                },
+            );
             setActiveHighlightIds(() => ({
-                ...updatedActiveIds
+                ...updatedActiveIds,
             }));
-            if (crossHighlightAcrossBucket?.enabled && crossHighlightAcrossBucket?.crossHighlightIds && crossHighlightAcrossBucket?.highlightDuration) {
+            if (
+                crossHighlightAcrossBucket?.enabled &&
+                crossHighlightAcrossBucket?.crossHighlightIds &&
+                crossHighlightAcrossBucket?.highlightDuration
+            ) {
                 const timer = setTimeout(() => {
                     setActiveHighlightIds({});
                 }, crossHighlightAcrossBucket?.highlightDuration);
@@ -980,7 +1120,6 @@ function GroupedItemRenderer(
                 return () => clearTimeout(timer);
             }
         }
-        
     }, [crossHighlightAcrossBucket]);
 
     useEffect(() => {
@@ -1018,7 +1157,9 @@ function GroupedItemRenderer(
                 instanceId,
                 fieldItems.map((item) => item.id).join(FIELD_DELIMITER) +
                     '***' +
-                    fieldItems.map((item) => item.sourceId).join(FIELD_DELIMITER),
+                    fieldItems
+                        .map((item) => item.sourceId)
+                        .join(FIELD_DELIMITER),
             );
         };
 
@@ -1078,48 +1219,50 @@ function GroupedItemRenderer(
         return leastFilledOrderedBuckets[0];
     };
 
-   const assignFieldItemToBucket = (
-    fieldItems: IFieldsKeeperItem[],
-    assignedField: { bucketId: string; currentInstanceId: string },
-) => {
-    const { bucketId, currentInstanceId } = assignedField || {};
-    const isDifferentInstance = currentInstanceId && currentInstanceId !== instanceId;
+    const assignFieldItemToBucket = (
+        fieldItems: IFieldsKeeperItem[],
+        assignedField: { bucketId: string; currentInstanceId: string },
+    ) => {
+        const { bucketId, currentInstanceId } = assignedField || {};
+        const isDifferentInstance =
+            currentInstanceId && currentInstanceId !== instanceId;
 
-    let currentBuckets = buckets;
-    let currentAllItems = allItems;
-    let currentFieldItems = fieldItems;
-    let targetBucketId = bucketId;
+        let currentBuckets = buckets;
+        let currentAllItems = allItems;
+        let currentFieldItems = fieldItems;
+        let targetBucketId = bucketId;
 
-    if (isDifferentInstance) {
-        try {
-            const storeState = getStoreState(currentInstanceId);
-            currentBuckets = storeState.buckets;
-            currentAllItems = storeState.allItems;
+        if (isDifferentInstance) {
+            try {
+                const storeState = getStoreState(currentInstanceId);
+                currentBuckets = storeState.buckets;
+                currentAllItems = storeState.allItems;
 
-            const fieldItemIds = new Set(fieldItems.map(item => item.id));
-            const fieldItemSourceIds = new Set(
-                fieldItems.map(item => item.sourceId).filter(Boolean),
-            );
+                const fieldItemIds = new Set(fieldItems.map((item) => item.id));
+                const fieldItemSourceIds = new Set(
+                    fieldItems.map((item) => item.sourceId).filter(Boolean),
+                );
 
-            currentFieldItems = currentAllItems.filter(
-                item =>
-                    fieldItemIds.has(item.id) ||
-                    (item.sourceId && fieldItemSourceIds.has(item.sourceId)),
-            );
-        } catch {
-            // Keep using local `buckets` and `allItems` if store fetch fails
+                currentFieldItems = currentAllItems.filter(
+                    (item) =>
+                        fieldItemIds.has(item.id) ||
+                        (item.sourceId &&
+                            fieldItemSourceIds.has(item.sourceId)),
+                );
+            } catch {
+                // Keep using local `buckets` and `allItems` if store fetch fails
+            }
+        } else {
+            if (disableAssignments) return false;
+
+            const bucketToFill = getPriorityTargetBucketToFill({
+                buckets,
+                priorityGroup: fieldItems[0]?.group,
+                currentFillingItem: filteredItems,
+            });
+
+            targetBucketId = bucketToFill.id;
         }
-    } else {
-        if (disableAssignments) return false;
-
-        const bucketToFill = getPriorityTargetBucketToFill({
-            buckets,
-            priorityGroup: fieldItems[0]?.group,
-            currentFillingItem: filteredItems,
-        });
-
-        targetBucketId = bucketToFill.id;
-    }
 
         assignFieldItems({
             instanceId: currentInstanceId || instanceId,
@@ -1334,6 +1477,15 @@ function GroupedItemRenderer(
 
             const itemId = fieldItem.sourceId ?? fieldItem.id;
             const isItemHovered = showSuffixOnHover && hoveredItems[itemId];
+            const onKeyDown = (
+                e: React.KeyboardEvent<HTMLElement>, // ✅ fixes "any"
+                handler: () => void,
+            ) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handler();
+                }
+            };
 
             return (
                 <div
@@ -1364,8 +1516,10 @@ function GroupedItemRenderer(
                         setIsContextMenuOpen(true);
                     }}
                     style={{
-                        backgroundColor:
-                            activeHighlightIds?.[fieldItem.id] ? activeHighlightIds?.[fieldItem.id]?.backgroundColor : 'transparent',
+                        backgroundColor: activeHighlightIds?.[fieldItem.id]
+                            ? activeHighlightIds?.[fieldItem.id]
+                                  ?.backgroundColor
+                            : 'transparent',
                     }}
                 >
                     <div
@@ -1374,7 +1528,8 @@ function GroupedItemRenderer(
                             fieldItem.rootBucketActiveNodeClassName,
                             {
                                 'react-fields-keeper-master-group-header-offset':
-                                    groupHeader?.isFlatGroupHeader || (isGroupHeader && !hasMasterGroup),
+                                    groupHeader?.isFlatGroupHeader ||
+                                    (isGroupHeader && !hasMasterGroup),
                                 'react-fields-keeper-mapping-column-content-offset':
                                     isGroupItem ||
                                     (isGroupHeader && hasMasterGroup),
@@ -1406,7 +1561,7 @@ function GroupedItemRenderer(
                                 : [fieldItem]),
                         )}
                         onClick={(e) => {
-                            if(toggleCheckboxOnLabelClick) {
+                            if (toggleCheckboxOnLabelClick) {
                                 onFieldItemClickHandler(
                                     isGroupHeader
                                         ? groupHeader.groupItems
@@ -1419,14 +1574,17 @@ function GroupedItemRenderer(
                             }
                         }}
                         onContextMenu={(e) => {
-                            onFieldItemContextMenu?.(fieldItem, e)
+                            onFieldItemContextMenu?.(fieldItem, e);
                         }}
                         onMouseLeave={() => {
                             if (showSuffixOnHover) {
                                 setHoveredItems((prev) => {
                                     const newHoveredItems = { ...prev };
                                     delete newHoveredItems[itemId];
-                                    return Object.keys(newHoveredItems).length === 0 ? {} : newHoveredItems;
+                                    return Object.keys(newHoveredItems)
+                                        .length === 0
+                                        ? {}
+                                        : newHoveredItems;
                                 });
                             }
                         }}
@@ -1441,7 +1599,11 @@ function GroupedItemRenderer(
                                 e.clientY <=
                                     currentTargetRect[0].y +
                                         currentTargetRect[0].height;
-                            if (isHighlightGroupOnHover && isGroupHeader && isCursorWithinGroupHeader) {
+                            if (
+                                isHighlightGroupOnHover &&
+                                isGroupHeader &&
+                                isCursorWithinGroupHeader
+                            ) {
                                 const groupWrapper = e.currentTarget.closest(
                                     '.react-fields-keeper-grouped-item-wrapper',
                                 );
@@ -1487,11 +1649,30 @@ function GroupedItemRenderer(
                                     'react-fields-keeper-mapping-column-content-action',
                                 )}
                                 role="button"
-                                onClick={groupHeader.onGroupHeaderToggle}
+                                tabIndex={0}
+                                aria-label={`${
+                                    groupHeader.isGroupCollapsed
+                                        ? `Expand ${groupLabel}`
+                                        : `Collapse ${groupLabel}`
+                                }`}
+                                onClick={(e) => {
+                                    if (toggleCheckboxOnLabelClick) {
+                                        e.stopPropagation();
+                                    }
+                                    groupHeader.onGroupHeaderToggle();
+                                }}
                                 style={
                                     groupHeight > 0
                                         ? { zIndex: 1, ...accentColorStyle }
                                         : { ...accentColorStyle }
+                                }
+                                onKeyDown={(
+                                    e: React.KeyboardEvent<HTMLDivElement>,
+                                ) =>
+                                    onKeyDown(
+                                        e,
+                                        groupHeader.onGroupHeaderToggle,
+                                    )
                                 }
                             >
                                 {groupHeader.isGroupCollapsed ? (
@@ -1513,6 +1694,10 @@ function GroupedItemRenderer(
                                     )}
                                     checked={isFieldItemAssigned}
                                     style={accentColorStyle}
+                                    aria-label={`Select ${
+                                        fieldItem?.label || 'field'
+                                    }`}
+                                    tabIndex={0}
                                     onChange={
                                         toggleCheckboxOnLabelClick
                                             ? undefined
@@ -1522,6 +1707,16 @@ function GroupedItemRenderer(
                                                       : [fieldItem],
                                                   isFieldItemAssigned,
                                               )
+                                    }
+                                    onKeyDown={(e) =>
+                                        onKeyDown(e, () =>
+                                            onFieldItemClickHandler(
+                                                isGroupHeader
+                                                    ? groupHeader.groupItems
+                                                    : [fieldItem],
+                                                isFieldItemAssigned,
+                                            )(),
+                                        )
                                     }
                                     readOnly={toggleCheckboxOnLabelClick}
                                 />
@@ -1562,7 +1757,17 @@ function GroupedItemRenderer(
                             {isSuffixNodeValid && (
                                 <div
                                     className="react-fields-keeper-mapping-column-content-suffix"
-                                    style={{ display: showSuffixOnHover && !isItemHovered ? 'none' : 'block' }}
+                                    style={{
+                                        display:
+                                            showSuffixOnHover && !isItemHovered
+                                                ? 'none'
+                                                : 'block',
+                                    }}
+                                    onClick={(e) => {
+                                        if (toggleCheckboxOnLabelClick) {
+                                            e.stopPropagation();
+                                        }
+                                    }}
                                 >
                                     {suffixNodeRendererOutput}
                                 </div>
@@ -1647,7 +1852,7 @@ function GroupedItemRenderer(
                                 },
                                 isFlatGroupHeader: true,
                             },
-                            activeHighlightIds
+                            activeHighlightIds,
                         })}
 
                     {!isMasterGroupCollapsed &&
@@ -1663,7 +1868,7 @@ function GroupedItemRenderer(
                             hasMasterGroup: (flatGroup &&
                                 flatGroup !==
                                     FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
-                            activeHighlightIds
+                            activeHighlightIds,
                         })}
 
                     {!isMasterGroupCollapsed &&
@@ -1674,11 +1879,18 @@ function GroupedItemRenderer(
                             hasMasterGroup: (flatGroup &&
                                 flatGroup !==
                                     FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) as boolean,
-                            activeHighlightIds
+                            activeHighlightIds,
                         })}
                 </div>
             </>
         );
     }
-    return <>{renderFieldItems({ fieldItems: filteredItems, activeHighlightIds })}</>;
+    return (
+        <>
+            {renderFieldItems({
+                fieldItems: filteredItems,
+                activeHighlightIds,
+            })}
+        </>
+    );
 }

@@ -24,7 +24,12 @@ import {
     useStore,
     useStoreState,
 } from './FieldsKeeper.context';
-import { DOUBLE_CLICK_THRESHOLD, FIELD_DELIMITER, findGroupItemOrder, getGroupedItems } from './utils';
+import {
+    DOUBLE_CLICK_THRESHOLD,
+    FIELD_DELIMITER,
+    findGroupItemOrder,
+    getGroupedItems,
+} from './utils';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -42,7 +47,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         orientation = 'vertical',
         horizontalFillOverflowType = 'scroll',
         customClassNames,
-        bucketLabelSuffixRenderer
+        bucketLabelSuffixRenderer,
     } = props;
 
     // state
@@ -301,14 +306,12 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // compute
     const hasRoomForFieldAssignment = groupedItems.length < maxItems;
 
-
     const getbucketLabelSuffixRenderer = (
         renderer: unknown,
-        bucketId: string
+        bucketId: string,
     ) => {
         const isRendererValid = typeof renderer === 'function';
-        const rendererElement =
-            isRendererValid && renderer(bucketId)
+        const rendererElement = isRendererValid && renderer(bucketId);
         const isValidElement =
             rendererElement !== undefined && rendererElement !== null;
         return { rendererElement, isValidElement };
@@ -331,7 +334,10 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const {
         rendererElement: bucketLabelSuffixNodeOutput,
         isValidElement: isBucketSuffixValid,
-    } = getbucketLabelSuffixRenderer(bucketLabelSuffixRenderer, currentBucket.id);
+    } = getbucketLabelSuffixRenderer(
+        bucketLabelSuffixRenderer,
+        currentBucket.id,
+    );
 
     return (
         <div
@@ -342,13 +348,11 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         >
             <div className="react-fields-keeper-mapping-content-title">
                 {label && (
-                <div className="react-fields-keeper-mapping-content-label">
-                    {label}
-                </div>
-            )}
-            {isBucketSuffixValid && (
-                (bucketLabelSuffixNodeOutput)
-            )}
+                    <div className="react-fields-keeper-mapping-content-label">
+                        {label}
+                    </div>
+                )}
+                {isBucketSuffixValid && bucketLabelSuffixNodeOutput}
             </div>
             <div
                 className={classNames(
@@ -362,7 +366,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                         'react-fields-keeper-mapping-content-multi-input':
                             hasRoomForFieldAssignment &&
                             !showExtendedAssignmentPlaceholder &&
-                            orientation === 'vertical' && groupedItems?.length,
+                            orientation === 'vertical' &&
+                            groupedItems?.length,
                         'react-fields-keeper-mapping-content-input-active':
                             isCurrentFieldActive,
                         'react-fields-keeper-mapping-content-disabled':
@@ -436,7 +441,8 @@ const GroupedItemRenderer = (
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
-    const { iconColor, highlightAcrossBuckets, setHighlightedItem } = useStoreState(instanceId);
+    const { iconColor, highlightAcrossBuckets, setHighlightedItem } =
+        useStoreState(instanceId);
     const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -497,7 +503,10 @@ const GroupedItemRenderer = (
     const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const clickCountRef = useRef<number>(0);
 
-    const handleFieldItemClick = (fieldItem: IFieldsKeeperItem, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleFieldItemClick = (
+        fieldItem: IFieldsKeeperItem,
+        e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    ) => {
         clickCountRef.current += 1;
 
         if (clickCountRef.current === 1) {
@@ -505,11 +514,15 @@ const GroupedItemRenderer = (
                 if (clickCountRef.current === 1 && onFieldItemClick) {
                     onFieldItemClick(fieldItem, e);
                 }
-                clickCountRef.current = 0; 
+                clickCountRef.current = 0;
                 clickTimeoutRef.current = null;
-            }, DOUBLE_CLICK_THRESHOLD); 
+            }, DOUBLE_CLICK_THRESHOLD);
         } else if (clickCountRef.current === 2) {
-            if(fieldItem.group && !allowGroupLabelToEdit && fieldItem.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) {
+            if (
+                fieldItem.group &&
+                !allowGroupLabelToEdit &&
+                fieldItem.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+            ) {
                 return;
             }
             if (clickTimeoutRef.current) {
@@ -519,7 +532,7 @@ const GroupedItemRenderer = (
             if (onFieldItemLabelChange) {
                 setEditableItemId(fieldItem.id);
             }
-            clickCountRef.current = 0; 
+            clickCountRef.current = 0;
         }
     };
 
@@ -546,7 +559,9 @@ const GroupedItemRenderer = (
                 instanceId,
                 fieldItems.map((item) => item.id).join(FIELD_DELIMITER) +
                     '***' +
-                    fieldItems.map((item) => item.sourceId).join(FIELD_DELIMITER),
+                    fieldItems
+                        .map((item) => item.sourceId)
+                        .join(FIELD_DELIMITER),
             );
             activeDraggedElementRef.current = e.target as HTMLDivElement;
         };
@@ -573,7 +588,7 @@ const GroupedItemRenderer = (
                 fieldItem: updatedFieldItem,
                 oldValue,
                 newValue: editedLabels[fieldItem.id],
-                fieldIndex
+                fieldIndex,
             });
             setEditableItemId(null);
         }
@@ -628,7 +643,7 @@ const GroupedItemRenderer = (
 
             const onFieldRename = () => {
                 setEditableItemId(fieldItem.id);
-            }
+            };
 
             const {
                 rendererElement: suffixNodeRendererOutput,
@@ -638,7 +653,7 @@ const GroupedItemRenderer = (
                 fieldItem,
                 isGroupHeader,
                 groupFieldItems: groupHeader?.groupItems,
-                onRenameField: onFieldRename
+                onRenameField: onFieldRename,
             });
 
             const {
@@ -649,9 +664,17 @@ const GroupedItemRenderer = (
                 fieldItem,
                 isGroupHeader,
                 groupFieldItems: groupHeader?.groupItems,
-                onRenameField: onFieldRename
+                onRenameField: onFieldRename,
             });
-            
+            const onKeyDown = (
+                e: React.KeyboardEvent<HTMLElement>,
+                handler: () => void,
+            ) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handler();
+                }
+            };
             const getDefaultItemRenderer = () => {
                 const groupCollapseButton = isGroupHeader && (
                     <div
@@ -659,8 +682,17 @@ const GroupedItemRenderer = (
                             'react-fields-keeper-mapping-column-content-action',
                         )}
                         role="button"
+                        tabIndex={0}
+                        aria-label={`${
+                            groupHeader.isGroupCollapsed
+                                ? `Expand ${groupLabel}`
+                                : `Collapse ${groupLabel}`
+                        }`}
                         onClick={groupHeader.onGroupHeaderToggle}
                         style={iconColorStyle}
+                        onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
+                            onKeyDown(e, groupHeader.onGroupHeaderToggle)
+                        }
                     >
                         {groupHeader.isGroupCollapsed ? (
                             <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
@@ -687,9 +719,20 @@ const GroupedItemRenderer = (
                                     )
                                 }
                                 onKeyDown={(e) =>
-                                    onEnterKeyPress(fieldItem, false, fieldItem._fieldItemIndex, e)
+                                    onEnterKeyPress(
+                                        fieldItem,
+                                        false,
+                                        fieldItem._fieldItemIndex,
+                                        e,
+                                    )
                                 }
-                                onBlur={() => onEnterKeyPress(fieldItem, true, fieldItem._fieldItemIndex)}
+                                onBlur={() =>
+                                    onEnterKeyPress(
+                                        fieldItem,
+                                        true,
+                                        fieldItem._fieldItemIndex,
+                                    )
+                                }
                                 onFocus={(e) => e.target.select()}
                                 autoFocus
                             />
@@ -723,8 +766,13 @@ const GroupedItemRenderer = (
                                             'react-fields-keeper-mapping-content-input-filled-close',
                                         )}
                                         role="button"
+                                        tabIndex={0}
+                                        aria-label="Remove Field"
                                         onClick={remove}
                                         style={iconColorStyle}
+                                        onKeyDown={(
+                                            e: React.KeyboardEvent<HTMLDivElement>,
+                                        ) => onKeyDown(e, remove)}
                                     >
                                         <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                                     </div>
@@ -762,16 +810,26 @@ const GroupedItemRenderer = (
                     }
                     onContextMenu={(e) => {
                         e.preventDefault();
-                        if(isContextMenuValid && contextMenuRendererOutput) {
+                        if (isContextMenuValid && contextMenuRendererOutput) {
                             setIsContextMenuOpen(true);
                         }
                     }}
                     onClick={(e) => {
                         const target = e.target as HTMLElement;
-                        if (highlightAcrossBuckets?.enabled && target.classList.contains('react-fields-keeper-mapping-content-input-filled')) {
-                            setHighlightedItem(instanceId, `${fieldItem.id}${FIELD_DELIMITER}${Date.now()}`);
+                        if (
+                            highlightAcrossBuckets?.enabled &&
+                            target.classList.contains(
+                                'react-fields-keeper-mapping-content-input-filled',
+                            )
+                        ) {
+                            setHighlightedItem(
+                                instanceId,
+                                `${
+                                    fieldItem.id
+                                }${FIELD_DELIMITER}${Date.now()}`,
+                            );
                         }
-                        handleFieldItemClick(fieldItem, e)
+                        handleFieldItemClick(fieldItem, e);
                     }}
                 >
                     <div
@@ -787,12 +845,17 @@ const GroupedItemRenderer = (
                                     fieldItem.disabled?.active,
                                 'react-fields-keeper-mapping-content-input-filled-custom-renderer':
                                     customItemRenderer !== undefined,
-                                'react-fields-keeper-context-menu-active': isContextMenuOpen
+                                'react-fields-keeper-context-menu-active':
+                                    isContextMenuOpen,
                             },
                             customClassNames?.customFieldItemContainerClassName,
                         )}
                         style={itemStyle}
-                        draggable={!allowDragging || isGroupHeader || isGroupItem ? false : true}
+                        draggable={
+                            !allowDragging || isGroupHeader || isGroupItem
+                                ? false
+                                : true
+                        }
                         data-index={fieldItemIndex}
                         onDragStart={onDragStartHandler(
                             (fieldItem._fieldItemIndex ?? '') + '',
@@ -1081,7 +1144,8 @@ export function assignFieldItems(props: {
                     });
 
                     targetBucket.items = [...updatedItemsInBucket];
-                    if(!isRequiredItemAdded) targetBucket.items.push(...requiredFieldItems)
+                    if (!isRequiredItemAdded)
+                        targetBucket.items.push(...requiredFieldItems);
                     return;
                 }
             }
@@ -1106,7 +1170,8 @@ export function assignFieldItems(props: {
                         targetBucketItems.findIndex(
                             (item, index) =>
                                 index < bucketIndex &&
-                                targetBucketItems[index + 1]?.group === groupAbove &&
+                                targetBucketItems[index + 1]?.group ===
+                                    groupAbove &&
                                 item.group !== groupAbove,
                         ) + 1;
 
@@ -1117,7 +1182,8 @@ export function assignFieldItems(props: {
                             index > bucketIndex && item.group !== groupBelow,
                     );
 
-                    if (insertIndex === -1) insertIndex = targetBucketItems.length;
+                    if (insertIndex === -1)
+                        insertIndex = targetBucketItems.length;
                 }
 
                 targetBucketItems.splice(insertIndex, 0, ...requiredFieldItems);

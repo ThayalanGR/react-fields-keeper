@@ -126,9 +126,16 @@ export default function Example36() {
                             allowRemoveFields
                             bucketLabelSuffixRenderer={(bucketId) => {
                                 return (
-                                    <div onClick={() => console.log('called ++ onclick', bucketId)}>
+                                    <div
+                                        onClick={() =>
+                                            console.log(
+                                                'called ++ onclick',
+                                                bucketId,
+                                            )
+                                        }
+                                    >
                                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                                    </div> 
+                                    </div>
                                 );
                             }}
                         />
@@ -138,9 +145,16 @@ export default function Example36() {
                             allowRemoveFields
                             bucketLabelSuffixRenderer={(bucketId) => {
                                 return (
-                                    <div onClick={() => console.log('called ++ onclick', bucketId)}>
+                                    <div
+                                        onClick={() =>
+                                            console.log(
+                                                'called ++ onclick',
+                                                bucketId,
+                                            )
+                                        }
+                                    >
                                         <i className="fk-ms-Icon fk-ms-Icon--ChevronRight" />
-                                    </div> 
+                                    </div>
                                 );
                             }}
                         />
@@ -151,9 +165,7 @@ export default function Example36() {
                         />
                     </div>
                     <div className="root-bucket-container">
-                        <FieldsKeeperRootBucket
-                            label="Root Bucket"
-                        />
+                        <FieldsKeeperRootBucket label="Root Bucket" />
                     </div>
                 </div>
             </FieldsKeeperProvider>

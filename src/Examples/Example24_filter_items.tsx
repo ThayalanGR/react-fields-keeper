@@ -120,7 +120,7 @@ export default function Example24() {
                         <FieldsKeeperRootBucket
                             label="All Items"
                             collapseFoldersOnMount={false}
-                            suffixNodeRenderer={({fieldItem}) => {
+                            suffixNodeRenderer={({ fieldItem }) => {
                                 return (
                                     <div>
                                         <span

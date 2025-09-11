@@ -1021,6 +1021,7 @@ function GroupedItemRenderer(
         crossHighlightAcrossBucket,
         onFieldItemClick,
         onFieldItemContextMenu,
+        collapseHierarchyOnMount
     } = props;
 
     const {
@@ -1046,11 +1047,9 @@ function GroupedItemRenderer(
     } = useStoreState(instanceId);
     const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)[0];
     const updateState = useStore((state) => state.setState);
-    const [isGroupCollapsed, setIsGroupCollapsed] = useState(false);
-    const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(false);
-    const [hoveredItems, setHoveredItems] = useState<Record<string, boolean>>(
-        {},
-    );
+    const [isGroupCollapsed, setIsGroupCollapsed] = useState(collapseHierarchyOnMount ?? false);
+    const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(collapseHierarchyOnMount ?? false);
+    const [hoveredItems, setHoveredItems] = useState<Record<string, boolean>>({});
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');

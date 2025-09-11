@@ -286,6 +286,13 @@ export interface IFieldsKeeperRootBucketProps {
      */
     collapseFoldersOnMount?: boolean;
 
+    /**
+     * Auto collapse Hierarchy on mount
+     *
+     * default - false
+     */
+    collapseHierarchyOnMount?: boolean;
+
     prefixNode?: {
         allow: boolean;
         /**

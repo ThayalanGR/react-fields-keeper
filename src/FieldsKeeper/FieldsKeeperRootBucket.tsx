@@ -1048,7 +1048,12 @@ function GroupedItemRenderer(
     const highlightedItem = highlightedItemId?.split(FIELD_DELIMITER)[0];
     const updateState = useStore((state) => state.setState);
     const [isGroupCollapsed, setIsGroupCollapsed] = useState(collapseHierarchyOnMount ?? false);
-    const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(collapseHierarchyOnMount ?? false);
+    const [isMasterGroupCollapsed, setIsMasterGroupCollapsed] = useState(() => {
+        if (collapseHierarchyOnMount && (!flatGroup || flatGroup === FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID)) {
+            return false;
+        }
+        return collapseHierarchyOnMount ?? false;
+    });
     const [hoveredItems, setHoveredItems] = useState<Record<string, boolean>>({});
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);

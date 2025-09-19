@@ -65,7 +65,6 @@ Flexible bucket based data assignment tool for react.
 
 https://github.com/ThayalanGR/react-fields-keeper/blob/3b6dbadd79c3890314952de7f08ba6285c95f2c0/src/App.tsx#LL1C1-L41C2
 
-
 ## Supported by
 
 [Lumel Technologies](https://lumel.com/)

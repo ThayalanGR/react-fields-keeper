@@ -56,11 +56,13 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         filteredItems,
         emptyDataMessage = 'No data found',
         sortBasedOnFolder = true,
+        onFolderStateChange,
+        initialFolderStates,
     } = props;
 
     const [collapsedNodes, setCollapsedNodes] = useState<
         Record<string, boolean>
-    >({});
+    >(initialFolderStates || {});
 
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -269,10 +271,20 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 collapsedFolders[folderId] = isCollapse;
             }
         });
-        setCollapsedNodes((prevState) => ({
-            ...prevState,
-            ...collapsedFolders,
-        }));
+        setCollapsedNodes((prevState) => {
+            const newState = {
+                ...prevState,
+                ...collapsedFolders,
+            };
+            
+            if (onFolderStateChange) {
+                Object.keys(collapsedFolders).forEach(folderId => {
+                    onFolderStateChange(folderId, isCollapse, newState);
+                });
+            }
+            
+            return newState;
+        });
     };
     const onKeyDown = (
         e: React.KeyboardEvent<HTMLElement>,
@@ -531,10 +543,16 @@ function FolderScopeItemRenderer(
         const toggleCollapse = (id: string) => {
             setCollapsedNodes((prevState) => {
                 const newCollapsed = !prevState[id];
-                return {
+                const newState = {
                     ...prevState,
                     [id]: newCollapsed,
                 };
+                
+                if (rootBucketProps.onFolderStateChange) {
+                    rootBucketProps.onFolderStateChange(id, newCollapsed, newState);
+                }
+                
+                return newState;
             });
 
             // Move highlight update logic outside of render phase

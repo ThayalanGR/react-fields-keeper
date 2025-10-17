@@ -106,6 +106,33 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 allItems: allItems,
             });
 
+    const onMoveFieldToBucket = (targetBucketId: string, fieldItems?: IFieldsKeeperItem[]) => {
+        const itemsToMove = fieldItems || [];
+        
+        if (itemsToMove.length === 0) {
+            return;
+        }
+
+        const validItems = itemsToMove.filter(item => item && item.id);
+        
+        if (validItems.length === 0) {
+            return;
+        }
+
+        assignFieldItems({
+            instanceId,
+            bucketId: targetBucketId,
+            fromBucket: id,
+            buckets,
+            fieldItems: validItems,
+            sortGroupOrderWiseOnAssignment,
+            updateState,
+            removeOnly: false,
+            allowDuplicates,
+            allItems: allItems,
+        });
+    };
+
     // event handlers
     const onDragLeaveHandler = () => {
         if (preHoveredElementRef.current) {
@@ -391,6 +418,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                             fieldItemIndex={index}
                             activeDraggedElementRef={activeDraggedElementRef}
                             customClassNames={customClassNames}
+                            onMoveFieldToBucket={onMoveFieldToBucket}
                         />
                     ))}
                 {(groupedItems.length === 0 ||
@@ -413,6 +441,7 @@ const GroupedItemRenderer = (
         onFieldItemRemove: (...fieldItem: IFieldsKeeperItem[]) => () => void;
         fieldItemIndex: number;
         activeDraggedElementRef: React.MutableRefObject<HTMLDivElement | null>;
+        onMoveFieldToBucket: (targetBucketId: string, fieldItems?: IFieldsKeeperItem[]) => void;
     } & IFieldsKeeperBucketProps,
 ) => {
     // props
@@ -435,6 +464,7 @@ const GroupedItemRenderer = (
         customClassNames,
         allowGroupLabelToEdit,
         allowDragging = true,
+        onMoveFieldToBucket,
     } = props;
 
     // state
@@ -654,6 +684,16 @@ const GroupedItemRenderer = (
                 isGroupHeader,
                 groupFieldItems: groupHeader?.groupItems,
                 onRenameField: onFieldRename,
+                onMoveFieldToBucket: (targetBucketId: string, fieldItems?: IFieldsKeeperItem[]) => {
+                    const itemsToMove = fieldItems || (isGroupHeader ? groupHeader?.groupItems : [fieldItem]);
+                    
+                    if (itemsToMove && itemsToMove.length > 0) {
+                        const validItems = itemsToMove.filter(item => item && item.id);
+                        if (validItems.length > 0) {
+                            onMoveFieldToBucket(targetBucketId, validItems);
+                        }
+                    }
+                },
             });
 
             const {

@@ -681,6 +681,13 @@ export interface ISuffixBucketNodeRendererProps {
      * Callback triggered when renaming a field.
      */
     onRenameField?: () => void;
+
+    /**
+     * Callback function to move field item(s) to a different bucket
+     * @param targetBucketId - The ID of the bucket to move the item(s) to
+     * @param fieldItems - The field item(s) to move (defaults to current fieldItem if not provided)
+     */
+    onMoveFieldToBucket?: (targetBucketId: string, fieldItems?: IFieldsKeeperItem[]) => void;
 }
 
 /**

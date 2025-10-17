@@ -395,6 +395,25 @@ export interface IFieldsKeeperRootBucketProps {
         fieldItem: IFieldsKeeperItem,
         event: React.MouseEvent<HTMLDivElement, MouseEvent>,
     ) => void;
+
+    /**
+     * Callback fired when a folder's expand/collapse state changes.
+     *
+     * @param folderId - The ID of the folder whose state changed.
+     * @param isCollapsed - Whether the folder is now collapsed (true) or expanded (false).
+     * @param collapsedNodes - Complete state of all folder collapse states.
+     */
+    onFolderStateChange?: (
+        folderId: string,
+        isCollapsed: boolean,
+        collapsedNodes: Record<string, boolean>,
+    ) => void;
+
+    /**
+     * Initial state of folder collapse/expand states.
+     * Key is folder ID, value is whether the folder should be collapsed.
+     */
+    initialFolderStates?: Record<string, boolean>;
 }
 
 /**
@@ -662,6 +681,13 @@ export interface ISuffixBucketNodeRendererProps {
      * Callback triggered when renaming a field.
      */
     onRenameField?: () => void;
+
+    /**
+     * Callback function to move field item(s) to a different bucket
+     * @param targetBucketId - The ID of the bucket to move the item(s) to
+     * @param fieldItems - The field item(s) to move (defaults to current fieldItem if not provided)
+     */
+    onMoveFieldToBucket?: (targetBucketId: string, fieldItems?: IFieldsKeeperItem[]) => void;
 }
 
 /**

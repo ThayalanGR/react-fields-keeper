@@ -56,11 +56,13 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         filteredItems,
         emptyDataMessage = 'No data found',
         sortBasedOnFolder = true,
+        onFolderStateChange,
+        initialFolderStates,
     } = props;
 
     const [collapsedNodes, setCollapsedNodes] = useState<
         Record<string, boolean>
-    >({});
+    >(initialFolderStates || {});
 
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -87,7 +89,6 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     // compute
     const defaultFolderScope = '___DEFAULT';
     const hasCustomSearchQuery = customSearchQuery !== undefined;
-    const hasSearchQuery = (customSearchQuery ?? searchQuery) !== '';
     const folderScopedItems = useMemo<
         IFolderScopedItem<IGroupedFieldsKeeperItem>[]
     >(() => {
@@ -269,10 +270,20 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                 collapsedFolders[folderId] = isCollapse;
             }
         });
-        setCollapsedNodes((prevState) => ({
-            ...prevState,
-            ...collapsedFolders,
-        }));
+        setCollapsedNodes((prevState) => {
+            const newState = {
+                ...prevState,
+                ...collapsedFolders,
+            };
+            
+            if (onFolderStateChange) {
+                Object.keys(collapsedFolders).forEach(folderId => {
+                    onFolderStateChange(folderId, isCollapse, newState);
+                });
+            }
+            
+            return newState;
+        });
     };
     const onKeyDown = (
         e: React.KeyboardEvent<HTMLElement>,
@@ -333,7 +344,6 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             key={index}
                             folderScopedItem={folderScopedItem}
                             showFlatFolderScope={showFlatFolderScope}
-                            hasSearchQuery={hasSearchQuery}
                             folderScopedItemsArray={folderScopedItems}
                             collapsedNodes={collapsedNodes}
                             setCollapsedNodes={setCollapsedNodes}
@@ -390,7 +400,6 @@ function FolderScopeItemRenderer(
     props: IFieldsKeeperRootBucketProps & {
         folderScopedItem: IFolderScopedItem<IGroupedFieldsKeeperItem>;
         showFlatFolderScope: boolean;
-        hasSearchQuery: boolean;
         folderScopedItemsArray: IFolderScopedItem<IGroupedFieldsKeeperItem>[];
         collapsedNodes: Record<string, boolean>;
         setCollapsedNodes: React.Dispatch<
@@ -403,7 +412,6 @@ function FolderScopeItemRenderer(
     const {
         folderScopedItem: { type, folderScopeItem, folderScopeItems },
         showFlatFolderScope,
-        hasSearchQuery,
         folderScopedItemsArray,
         collapsedNodes,
         setCollapsedNodes,
@@ -469,7 +477,7 @@ function FolderScopeItemRenderer(
         rootBucketProps.crossHighlightAcrossBucket?.enabled
             ? getIsItemHighlighted()
             : false;
-    let isFolderCollapsed = !hasSearchQuery && isFolderCollapsedOriginal;
+    let isFolderCollapsed = isFolderCollapsedOriginal;
     if (isFolderCollapsed && isItemHighlighted) {
         isFolderCollapsed = false;
     }
@@ -531,10 +539,16 @@ function FolderScopeItemRenderer(
         const toggleCollapse = (id: string) => {
             setCollapsedNodes((prevState) => {
                 const newCollapsed = !prevState[id];
-                return {
+                const newState = {
                     ...prevState,
                     [id]: newCollapsed,
                 };
+                
+                if (rootBucketProps.onFolderStateChange) {
+                    rootBucketProps.onFolderStateChange(id, newCollapsed, newState);
+                }
+                
+                return newState;
             });
 
             // Move highlight update logic outside of render phase
@@ -557,7 +571,7 @@ function FolderScopeItemRenderer(
             if (foldersMeta[folder].isHidden) {
                 isHidden = true;
             }
-            if (collapsedNodes[folder] && !hasSearchQuery) {
+            if (collapsedNodes[folder]) {
                 isCollapsed = true;
             }
         });

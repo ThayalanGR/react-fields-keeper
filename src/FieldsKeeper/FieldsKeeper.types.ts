@@ -385,6 +385,11 @@ export interface IFieldsKeeperRootBucketProps {
         event: React.MouseEvent<HTMLDivElement, MouseEvent>,
     ) => void;
 
+    /** Callback triggered when a field item label is changed */
+    onFieldItemLabelChange?: (
+        fieldItemClickProps: IRootBucketFieldItemLabelChangeProps,
+    ) => void;
+
     /**
      * Callback fired when a field item is rigth clicked (context menu).
      *
@@ -646,6 +651,25 @@ export interface IFieldItemLabelChangeProps {
     /** ID of the bucket containing the field item */
     bucketId: string;
 
+    /** The clicked field item object */
+    fieldItem: IFieldsKeeperItem;
+
+    /** Previous value of the field item */
+    oldValue: string;
+
+    /** Updated value of the field item */
+    newValue: string;
+
+    /**
+     * Index of the field item to which the label is updated.
+     */
+    fieldIndex?: number;
+}
+
+/**
+ * Properties for field item label change in root bucket (excludes bucketId)
+ */
+export interface IRootBucketFieldItemLabelChangeProps {
     /** The clicked field item object */
     fieldItem: IFieldsKeeperItem;
 

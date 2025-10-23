@@ -35,6 +35,7 @@ import Example34_Highlight_Between_Buckets from './Example34_Highlight_Between_B
 import Example35_Cross_Highlight_Across_Buckets from './Example35_Cross_Highlight_Across_Buckets';
 import Example36_bucketLabelSuffixRenderer from './Example36_bucketLabelSuffixRenderer';
 import Example37_bucket_move_suffix from './Example37_bucket_move_suffix';
+import Example38_root_bucket_label_editing from './Example38_root_bucket_label_editing';
 
 export const examples = {
     Example1_sample_use_case,
@@ -73,5 +74,6 @@ export const examples = {
     Example34_Highlight_Between_Buckets,
     Example35_Cross_Highlight_Across_Buckets,
     Example36_bucketLabelSuffixRenderer,
-    Example37_bucket_move_suffix
+    Example37_bucket_move_suffix,
+    Example38_root_bucket_label_editing
 };

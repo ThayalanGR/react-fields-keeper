@@ -30,6 +30,7 @@ import {
 } from './FieldsKeeper.context';
 import { FieldsKeeperSearcher } from './FieldsKeeperSearcher';
 import {
+    DOUBLE_CLICK_THRESHOLD,
     FIELD_DELIMITER,
     getFolderIdsFromValues,
     getGroupedItems,
@@ -1034,6 +1035,7 @@ function GroupedItemRenderer(
         showSuffixOnHover = false,
         crossHighlightAcrossBucket,
         onFieldItemClick,
+        onFieldItemLabelChange,
         onFieldItemContextMenu,
         collapseHierarchyOnMount
     } = props;
@@ -1069,6 +1071,20 @@ function GroupedItemRenderer(
         return collapseHierarchyOnMount ?? false;
     });
     const [hoveredItems, setHoveredItems] = useState<Record<string, boolean>>({});
+    
+    // State to manage editable field items and their labels
+    const [editableItemId, setEditableItemId] = useState<string | null>(null);
+    const [editedLabels, setEditedLabels] = useState<Record<string, string>>(
+        allItems.reduce((acc: Record<string, string>, item: IFieldsKeeperItem) => {
+            acc[item.id] = item.label;
+            return acc;
+        }, {} as Record<string, string>)
+    );
+    const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+    
+    // Click tracking for double-click detection
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const clickCountRef = useRef<number>(0);
     const [groupHeight, setGroupHeight] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [contextMenuId, setContextMenuId] = useState('');
@@ -1152,6 +1168,84 @@ function GroupedItemRenderer(
             };
         }
     }, [isContextMenuOpen]);
+
+    // Focus management for inline editing
+    useEffect(() => {
+        if (editableItemId && inputRefs.current[editableItemId]) {
+            const input = inputRefs.current[editableItemId];
+            input?.focus();
+            input?.setSelectionRange(input.value.length, input.value.length);
+        }
+    }, [editableItemId]);
+
+    // Update editedLabels when allItems change
+    useEffect(() => {
+        setEditedLabels((prev) => {
+            const newLabels = { ...prev };
+            allItems.forEach((item) => {
+                if (!(item.id in newLabels)) {
+                    newLabels[item.id] = item.label;
+                }
+            });
+            return newLabels;
+        });
+    }, [allItems]);
+
+    // Handler functions for inline editing
+    const onInputFieldChange = (fieldId: string, newValue: string) => {
+        setEditedLabels((prev) => ({
+            ...prev,
+            [fieldId]: newValue,
+        }));
+    };
+
+    const onEnterKeyPress = (
+        fieldItem: IFieldsKeeperItem,
+        isBlur: boolean,
+        fieldIndex?: number,
+        e?: React.KeyboardEvent<HTMLInputElement>
+    ) => {
+        if (e && e.key !== 'Enter' && !isBlur) {
+            return;
+        }
+        
+        if (onFieldItemLabelChange && editedLabels[fieldItem.id] !== fieldItem.label) {
+            onFieldItemLabelChange({
+                fieldItem: fieldItem,
+                oldValue: fieldItem.label,
+                newValue: editedLabels[fieldItem.id],
+                fieldIndex,
+            });
+        }
+        setEditableItemId(null);
+    };
+
+    // Handle field item click with double-click detection for label editing
+    const handleFieldItemClick = (
+        fieldItem: IFieldsKeeperItem,
+        e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    ) => {
+        clickCountRef.current += 1;
+
+        if (clickCountRef.current === 1) {
+            clickTimeoutRef.current = setTimeout(() => {
+                if (clickCountRef.current === 1 && onFieldItemClick) {
+                    onFieldItemClick(fieldItem, e);
+                }
+                clickCountRef.current = 0;
+                clickTimeoutRef.current = null;
+            }, DOUBLE_CLICK_THRESHOLD);
+        } else if (clickCountRef.current === 2) {
+            if (clickTimeoutRef.current) {
+                clearTimeout(clickTimeoutRef.current);
+                clickTimeoutRef.current = null;
+            }
+            if (onFieldItemLabelChange) {
+                setEditableItemId(fieldItem.id);
+            }
+            clickCountRef.current = 0;
+        }
+    };
 
     // compute
     const hasGroup = group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID;
@@ -1588,9 +1682,7 @@ function GroupedItemRenderer(
                                     isFieldItemAssigned,
                                 )();
                             }
-                            if (typeof onFieldItemClick === 'function') {
-                                onFieldItemClick(fieldItem, e);
-                            }
+                            handleFieldItemClick(fieldItem, e);
                         }}
                         onContextMenu={(e) => {
                             onFieldItemContextMenu?.(fieldItem, e);
@@ -1771,7 +1863,39 @@ function GroupedItemRenderer(
                                 )}
                                 style={accentColorStyle}
                             >
-                                <span>{fieldItem.label}</span>
+                                {editableItemId === fieldItem.id ? (
+                                    <input
+                                        ref={(el) => {
+                                            inputRefs.current[fieldItem.id] = el;
+                                        }}
+                                        className="react-fields-keeper-mapping-content-input-edit"
+                                        value={editedLabels[fieldItem.id]}
+                                        onChange={(e) =>
+                                            onInputFieldChange(
+                                                fieldItem.id,
+                                                e.target.value,
+                                            )
+                                        }
+                                        onKeyDown={(e) =>
+                                            onEnterKeyPress(
+                                                fieldItem,
+                                                false,
+                                                undefined,
+                                                e,
+                                            )
+                                        }
+                                        onBlur={() =>
+                                            onEnterKeyPress(
+                                                fieldItem,
+                                                true,
+                                            )
+                                        }
+                                        onFocus={(e) => e.target.select()}
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <span>{editedLabels[fieldItem.id] || fieldItem.label}</span>
+                                )}
                             </div>
                             {isSuffixNodeValid && (
                                 <div

@@ -30,6 +30,7 @@ import {
     findGroupItemOrder,
     getGroupedItems,
 } from './utils';
+import { WarningTooltip } from '../Components/WarningTooltip/WarningTooltip';
 
 export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     // props
@@ -48,10 +49,16 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         horizontalFillOverflowType = 'scroll',
         customClassNames,
         bucketLabelSuffixRenderer,
+        onBucketDropBlockHandler
     } = props;
 
     // state
     const [isCurrentFieldActive, setIsCurrentFieldActive] = useState(false);
+    
+    // Warning message state
+    const [warningMessage, setWarningMessage] = useState<string | JSX.Element | null>(null);
+    const [showWarning, setShowWarning] = useState(false);
+    
     const updateState = useStore((state) => state.setState);
     const { instanceId: instanceIdFromContext } =
         useContext(FieldsKeeperContext);
@@ -309,24 +316,33 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         //     return item;
         // });
 
-        if (fieldItems.length)
-            assignFieldItems({
-                instanceId,
-                bucketId: id,
-                buckets,
-                sortGroupOrderWiseOnAssignment,
-                fieldItems,
-                allowDuplicates,
-                fromBucket,
-                removeIndex:
-                    fieldItems.length === 1 && fieldItemIndex
-                        ? +fieldItemIndex
-                        : undefined,
-                updateState,
-                dropIndex,
-                isPointerAboveCenter,
-                allItems: allItems,
-            });
+        if (fieldItems.length) {
+            const dropBlock = onBucketDropBlockHandler?.();
+            const isShouldBlockAssignment = dropBlock?.isShouldBlockAssignment ?? false;
+            const warningMessage = dropBlock?.warningMessage ?? '';
+            if (!isShouldBlockAssignment) {
+                assignFieldItems({
+                    instanceId,
+                    bucketId: id,
+                    buckets,
+                    sortGroupOrderWiseOnAssignment,
+                    fieldItems,
+                    allowDuplicates,
+                    fromBucket,
+                    removeIndex:
+                        fieldItems.length === 1 && fieldItemIndex
+                            ? +fieldItemIndex
+                            : undefined,
+                    updateState,
+                    dropIndex,
+                    isPointerAboveCenter,
+                    allItems: allItems,
+                });
+            } else {
+                setWarningMessage(warningMessage);
+                setShowWarning(true);
+            }
+        }
         onDragLeaveHandler();
     };
 
@@ -372,6 +388,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 'react-fields-keeper-mapping-content',
                 wrapperClassName,
             )}
+            style={{ position: 'relative' }}
         >
             <div className="react-fields-keeper-mapping-content-title">
                 {label && (
@@ -425,6 +442,14 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                     showExtendedAssignmentPlaceholder === true) &&
                     emptyFieldPlaceholderElement}
             </div>
+            
+            {/* Warning Message Tooltip */}
+            <WarningTooltip
+                isVisible={showWarning}
+                message={warningMessage}
+                onClose={() => setShowWarning(false)}
+                autoCloseTimeout={3000}
+            />
         </div>
     );
 };

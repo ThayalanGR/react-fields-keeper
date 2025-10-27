@@ -645,6 +645,13 @@ export interface IFieldsKeeperBucketProps {
      * @default true
      */
     allowDragging?: boolean;
+
+    onBucketDropBlockHandler?: () => IBucketDropBlock;
+}
+
+export interface IBucketDropBlock {
+    isShouldBlockAssignment: boolean;
+    warningMessage: string | JSX.Element;
 }
 
 export interface IFieldItemLabelChangeProps {

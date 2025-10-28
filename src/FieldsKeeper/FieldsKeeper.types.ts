@@ -200,6 +200,10 @@ export interface ISuffixRootNodeRendererProps<T = any> {
     fieldItem?: IFieldsKeeperItem<T>;
     onExpandCollapseAll?: (isCollapse: boolean) => void;
     assignFieldBucketItem?: (bucketId: string, instanceId: string) => void;
+    /**
+     * Callback triggered when renaming a field/folder label.
+     */
+    onRenameField?: () => void;
 }
 
 export interface IHighlightAcrossBuckets {
@@ -349,6 +353,11 @@ export interface IFieldsKeeperRootBucketProps {
          * Class name applied to checkbox.
          */
         customCheckBoxClassName?: string;
+
+        /**
+         * Class name applied to editable input fields (for inline label editing).
+         */
+        customEditableInputClassName?: string;
     };
 
     /**

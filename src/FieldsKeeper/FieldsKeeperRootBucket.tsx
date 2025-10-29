@@ -1337,7 +1337,7 @@ function GroupedItemRenderer(
             onFieldItemLabelChange({
                 fieldItem: fieldItem,
                 oldValue: fieldItem.label,
-                newValue: editedLabels[fieldItem.id],
+                newValue: editedLabels[fieldItem.id] ? editedLabels[fieldItem.id] : fieldItem.label,
                 fieldIndex,
             });
         }

@@ -6,6 +6,8 @@ import {
     IFieldsKeeperItem,
     IFieldsKeeperBucket,
     IRootBucketFieldItemLabelChangeProps,
+    SuffixNode,
+    IContextMenuOption,
 } from '..';
 
 export default function Example38() {
@@ -74,19 +76,13 @@ export default function Example38() {
         { id: 'bucket3', items: [] },
     ]);
 
-
     const [rootItems, setRootItems] = useState<IFieldsKeeperItem[]>(allItems);
 
     const updateRootFieldLabel = (
         fieldItemLabelClickProps: IRootBucketFieldItemLabelChangeProps,
     ) => {
-        const {
-            fieldItem,
-            newValue,
-        } = fieldItemLabelClickProps;
-        
-        console.log(`Updating root field label: ${fieldItem.label} -> ${newValue}`);
-        
+        const { fieldItem, newValue } = fieldItemLabelClickProps;
+
         // Update root items
         const updatedRootItems = rootItems.map((item) => {
             if (item.group === fieldItem.id) {
@@ -97,9 +93,9 @@ export default function Example38() {
             }
             return item;
         });
-        
+
         setRootItems(updatedRootItems);
-        
+
         // Also update any items that might be in buckets to keep them in sync
         const updatedBuckets = buckets.map((bucket) => ({
             ...bucket,
@@ -113,14 +109,30 @@ export default function Example38() {
                 return item;
             }),
         }));
-        
+
         setBuckets(updatedBuckets);
     };
 
     // paint
     return (
         <div className="example-container">
-            <div className="example-container-title">38. Edit Root Field Label</div>
+            <style>
+                {`
+                    .custom-editable-input-green-border {
+                        border: 2px solid #117865 !important;
+                        border-radius: 4px;
+                    }
+                    .custom-editable-input-green-border:focus {
+                        border-color: #117865 !important;
+                    }
+                    .custom-editable-input-green-border:focus-visible {
+                        border-color: #117865 !important;
+                    }
+                `}
+            </style>
+            <div className="example-container-title">
+                38. Edit Root Field Label
+            </div>
             <FieldsKeeperProvider
                 allItems={rootItems}
                 buckets={buckets}
@@ -164,10 +176,54 @@ export default function Example38() {
                             label="Root Bucket"
                             collapseFoldersOnMount={false}
                             prefixNode={{ allow: true, reserveSpace: true }}
+                            customClassNames={{
+                                customEditableInputClassName:
+                                    'custom-editable-input-green-border',
+                            }}
                             onFieldItemLabelChange={(
                                 fieldItemLabelClickProps: IRootBucketFieldItemLabelChangeProps,
                             ) => {
                                 updateRootFieldLabel(fieldItemLabelClickProps);
+                            }}
+                            suffixNodeRenderer={({
+                                type,
+                                onExpandCollapseAll,
+                                onRenameField
+                            }) => {
+                                const contextMenuRootOptions: IContextMenuOption[] =
+                                    [
+                                        { label: 'Rename', id: 'rename' },
+                                    ];
+
+                                const contextMenuRootLabelOptions: IContextMenuOption[] =
+                                    [
+                                        { label: 'Expand', id: 'expand' },
+                                        { label: 'Collapse', id: 'collapse' },
+                                    ];
+                                const onOptionClick = (id: string) => {
+                                    if (
+                                        (id === 'collapse' ||
+                                            id === 'expand') &&
+                                        onExpandCollapseAll !== undefined
+                                    ) {
+                                        onExpandCollapseAll(id === 'collapse');
+                                    }
+
+                                    if(id === 'rename') {
+                                        onRenameField?.();
+                                    }
+                                };
+
+                                return (
+                                    <SuffixNode
+                                        contextMenuOptions={
+                                            type === 'folder'
+                                                ? contextMenuRootLabelOptions
+                                                : contextMenuRootOptions
+                                        }
+                                        onOptionClick={onOptionClick}
+                                    />
+                                );
                             }}
                         />
                     </div>

@@ -655,11 +655,21 @@ export interface IFieldsKeeperBucketProps {
      */
     allowDragging?: boolean;
 
+    /**
+     * Callback function to handle bucket drop block
+     * @returns IBucketDropBlock
+     */
     onBucketDropBlockHandler?: () => IBucketDropBlock;
 }
 
 export interface IBucketDropBlock {
+    /**
+     * If true, blocks the assignment
+     */
     isShouldBlockAssignment: boolean;
+    /**
+     * Warning message to be displayed
+     */
     warningMessage: string | JSX.Element;
 }
 

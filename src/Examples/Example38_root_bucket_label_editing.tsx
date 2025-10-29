@@ -192,9 +192,7 @@ export default function Example38() {
                             }) => {
                                 const contextMenuRootOptions: IContextMenuOption[] =
                                     [
-                                        { label: 'Option 1', id: 'option1' },
-                                        { label: 'Option 2', id: 'option2' },
-                                        { label: 'Option 3', id: 'option3' },
+                                        { label: 'Rename', id: 'rename' },
                                     ];
 
                                 const contextMenuRootLabelOptions: IContextMenuOption[] =
@@ -203,17 +201,17 @@ export default function Example38() {
                                         { label: 'Collapse', id: 'collapse' },
                                     ];
                                 const onOptionClick = (id: string) => {
-                                    // if (
-                                    //     (id === 'collapse' ||
-                                    //         id === 'expand') &&
-                                    //     onExpandCollapseAll !== undefined
-                                    // ) {
-                                    //     onExpandCollapseAll(id === 'collapse');
-                                    // }
+                                    if (
+                                        (id === 'collapse' ||
+                                            id === 'expand') &&
+                                        onExpandCollapseAll !== undefined
+                                    ) {
+                                        onExpandCollapseAll(id === 'collapse');
+                                    }
 
-                                    // if(id === 'option1' || id === 'option2' || id === 'option3') {
+                                    if(id === 'rename') {
                                         onRenameField?.();
-                                    // }
+                                    }
                                 };
 
                                 return (

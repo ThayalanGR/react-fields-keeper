@@ -423,7 +423,7 @@ function FolderScopeItemRenderer(
         onExpandCollapseAll,
         ...rootBucketProps
     } = props;
-
+    const activeInputRef = useRef<HTMLInputElement | null>(null);
     const {
         id,
         label: itemLabel,
@@ -548,6 +548,10 @@ function FolderScopeItemRenderer(
         id: string,
         event: React.MouseEvent<HTMLDivElement, MouseEvent>,
     ) => {
+        if (activeInputRef.current) {
+            return;
+        }
+    
         const target = event?.target as HTMLElement;
 
         const iconClassList = [
@@ -912,18 +916,41 @@ function FolderScopeItemRenderer(
                             }`}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                handleFolderLabelClick(folderScopeItem as IFieldsKeeperItem, e);
-                            }}
-                            onKeyDown={onKeyDown((e) => {
-                                e.stopPropagation();
-                                toggleFolderCollapse(
-                                    id,
-                                    e as unknown as React.MouseEvent<
-                                        HTMLDivElement,
-                                        MouseEvent
-                                    >,
+                                handleFolderLabelClick(
+                                    folderScopeItem as IFieldsKeeperItem,
+                                    e,
                                 );
-                            })}
+                            }}
+                            onKeyDown={(
+                                e: React.KeyboardEvent<HTMLInputElement>,
+                            ) => {
+                                if (activeInputRef.current) {
+                                    if (e.key === 'Enter') {
+                                        onFolderLabelSave(
+                                            folderScopeItem as IFieldsKeeperItem,
+                                            false,
+                                            e,
+                                        );
+                                    } else if (e.key === 'Escape') {
+                                        setEditableFolderName(null);
+                                        setEditedFolderLabels((prev) => ({
+                                            ...prev,
+                                            [id]: itemLabel,
+                                        }));
+                                    }
+                                } else {
+                                    onKeyDown((e) => {
+                                        e.stopPropagation();
+                                        toggleFolderCollapse(
+                                            id,
+                                            e as unknown as React.MouseEvent<
+                                                HTMLDivElement,
+                                                MouseEvent
+                                            >,
+                                        );
+                                    });
+                                }
+                            }}
                             title={itemLabel ?? ''}
                             onContextMenu={(e) => {
                                 e.preventDefault();
@@ -992,34 +1019,49 @@ function FolderScopeItemRenderer(
                                     )}
                             </div>
 
-                        {editableFolderName === id ? (
-                            <input
-                                ref={(el) => {
-                                    folderInputRefs.current[id] = el;
-                                }}
-                                type="text"
-                                className={classNames(
-                                    'folder-scope-label-input folder-scope-label-input-custom',
-                                    customClassNames?.customEditableInputClassName,
-                                )}
-                                value={editedFolderLabels[id] ?? itemLabel}
-                                onChange={(e) => onFolderLabelChange(id, e.target.value)}
-                                onKeyDown={(e) => onFolderLabelSave(folderScopeItem as IFieldsKeeperItem, false, e)}
-                                onBlur={() => onFolderLabelSave(folderScopeItem as IFieldsKeeperItem, true)}
-                                onFocus={(e) => e.target.select()}
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                        ) : (
-                            <div
-                                className={classNames(
-                                    'folder-scope-label-text',
-                                    customClassNames?.customLabelClassName,
-                                )}
-                                style={accentColorStyle}
-                            >
-                                {editedFolderLabels[id] || itemLabel}
-                            </div>
-                        )}
+                            {editableFolderName === id ? (
+                                <input
+                                    ref={(el) => {
+                                        folderInputRefs.current[id] = el;
+                                        activeInputRef.current = el; // Track globally
+                                    }}
+                                    type="text"
+                                    className={classNames(
+                                        'folder-scope-label-input folder-scope-label-input-custom',
+                                        customClassNames?.customEditableInputClassName,
+                                    )}
+                                    value={editedFolderLabels[id] ?? itemLabel}
+                                    onChange={(e) =>
+                                        onFolderLabelChange(id, e.target.value)
+                                    }
+                                    onKeyDown={(e) =>
+                                        onFolderLabelSave(
+                                            folderScopeItem as IFieldsKeeperItem,
+                                            false,
+                                            e,
+                                        )
+                                    }
+                                    onBlur={() => {
+                                        activeInputRef.current = null; // Clear on blur
+                                        onFolderLabelSave(
+                                            folderScopeItem as IFieldsKeeperItem,
+                                            true,
+                                        );
+                                    }}
+                                    onFocus={(e) => e.target.select()}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            ) : (
+                                <div
+                                    className={classNames(
+                                        'folder-scope-label-text',
+                                        customClassNames?.customLabelClassName,
+                                    )}
+                                    style={accentColorStyle}
+                                >
+                                    {editedFolderLabels[id] || itemLabel}
+                                </div>
+                            )}
                             <div className="folder-label-context-menu">
                                 {contextMenuFolderId === id &&
                                 isContextMenuFolderOpen &&
@@ -1042,7 +1084,7 @@ function FolderScopeItemRenderer(
                                     display:
                                         editableFolderName === id ||
                                         (rootBucketProps.showSuffixOnHover &&
-                                        !hoveredFolderItems?.[id])
+                                            !hoveredFolderItems?.[id])
                                             ? 'none'
                                             : 'block',
                                 }}
@@ -1055,7 +1097,9 @@ function FolderScopeItemRenderer(
                                           onExpandCollapseAll:
                                               onExpandCollapseAll,
                                           onRenameField: () => {
-                                              if (rootBucketProps.onFieldItemLabelChange) {
+                                              if (
+                                                  rootBucketProps.onFieldItemLabelChange
+                                              ) {
                                                   setEditableFolderName(id);
                                               }
                                           },
@@ -1193,12 +1237,30 @@ function GroupedItemRenderer(
     
     // State to manage editable field items and their labels
     const [editableItemId, setEditableItemId] = useState<string | null>(null);
-    const [editedLabels, setEditedLabels] = useState<Record<string, string>>(
-        allItems.reduce((acc: Record<string, string>, item: IFieldsKeeperItem) => {
-            acc[item.id] = item.label;
-            return acc;
-        }, {} as Record<string, string>)
-    );
+    const [editedLabels, setEditedLabels] = useState<Record<string, string>>(() => {
+    const labels: Record<string, string> = {};
+
+    // 1. Add all real items
+    allItems.forEach((item) => {
+        labels[item.id] = item.label;
+    });
+
+    // 2. Add group header (if exists)
+    if (group && group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && groupLabel) {
+        labels[group] = groupLabel;
+    }
+
+    // 3. Add flat group header (if exists)
+    if (
+        flatGroup &&
+        flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+        flatGroupLabel
+    ) {
+        labels[flatGroup as string] = flatGroupLabel as string;
+    }
+
+    return labels;
+});
     const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
     
     // Click tracking for double-click detection
@@ -1299,16 +1361,29 @@ function GroupedItemRenderer(
 
     // Update editedLabels when allItems change
     useEffect(() => {
-        setEditedLabels((prev) => {
-            const newLabels = { ...prev };
-            allItems.forEach((item) => {
-                if (!(item.id in newLabels)) {
-                    newLabels[item.id] = item.label;
-                }
-            });
-            return newLabels;
+    setEditedLabels((prev) => {
+        const newLabels = { ...prev };
+
+        // Sync real items
+        allItems.forEach((item) => {
+            if (!(item.id in newLabels)) {
+                newLabels[item.id] = item.label;
+            }
         });
-    }, [allItems]);
+
+        // Sync group header
+        if (group && group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && groupLabel) {
+            newLabels[group] = groupLabel;
+        }
+
+        // Sync flat group
+        if (flatGroup && flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && flatGroupLabel) {
+            newLabels[flatGroup as string] = flatGroupLabel as string;
+        }
+
+        return newLabels;
+    });
+}, [allItems, group, groupLabel, flatGroup, flatGroupLabel]);
 
     // Handler functions for inline editing
     const onInputFieldChange = (fieldId: string, newValue: string) => {
@@ -1322,25 +1397,36 @@ function GroupedItemRenderer(
         fieldItem: IFieldsKeeperItem,
         isBlur: boolean,
         fieldIndex?: number,
-        e?: React.KeyboardEvent<HTMLInputElement>
+        e?: React.KeyboardEvent<HTMLInputElement>,
     ) => {
-        if (e && e.key !== 'Enter' && !isBlur) {
+        if (e && e.key !== 'Enter' && e.key !== 'Escape' && !isBlur) {
             return;
         }
-        
+
         if (e) {
-            e.stopPropagation();
             e.preventDefault();
+            e.stopPropagation();
         }
-        
-        if (onFieldItemLabelChange && editedLabels[fieldItem.id] !== fieldItem.label) {
+
+        if (e?.key === 'Escape') {
+            setEditedLabels((prev) => ({
+                ...prev,
+                [fieldItem.id]: fieldItem.label,
+            }));
+            setEditableItemId(null);
+            return;
+        }
+
+        const newLabel = editedLabels[fieldItem.id] ?? fieldItem.label;
+        if (onFieldItemLabelChange && newLabel !== fieldItem.label) {
             onFieldItemLabelChange({
-                fieldItem: fieldItem,
+                fieldItem,
                 oldValue: fieldItem.label,
-                newValue: editedLabels[fieldItem.id] ? editedLabels[fieldItem.id] : fieldItem.label,
+                newValue: newLabel,
                 fieldIndex,
             });
         }
+
         setEditableItemId(null);
     };
 
@@ -1360,6 +1446,8 @@ function GroupedItemRenderer(
                 clickTimeoutRef.current = null;
             }, DOUBLE_CLICK_THRESHOLD);
         } else if (onFieldItemLabelChange && clickCountRef.current === 2) {
+            console.log(clickTimeoutRef.current, " clickTimeoutRef.current ++")
+            console.log(fieldItem, " field Item ++")
             if (clickTimeoutRef.current) {
                 clearTimeout(clickTimeoutRef.current);
                 clickTimeoutRef.current = null;
@@ -1991,41 +2079,24 @@ function GroupedItemRenderer(
                                 style={accentColorStyle}
                             >
                                 {editableItemId === fieldItem.id ? (
-                                    <input
-                                        ref={(el) => {
-                                            inputRefs.current[fieldItem.id] = el;
-                                        }}
-                                        className={classNames(
-                                            'react-fields-keeper-mapping-content-input-edit',
-                                            customClassNames?.customEditableInputClassName,
-                                        )}
-                                        value={editedLabels[fieldItem.id]}
-                                        onChange={(e) =>
-                                            onInputFieldChange(
-                                                fieldItem.id,
-                                                e.target.value,
-                                            )
-                                        }
-                                        onKeyDown={(e) =>
-                                            onEnterKeyPress(
-                                                fieldItem,
-                                                false,
-                                                undefined,
-                                                e,
-                                            )
-                                        }
-                                        onBlur={() =>
-                                            onEnterKeyPress(
-                                                fieldItem,
-                                                true,
-                                            )
-                                        }
-                                        onFocus={(e) => e.target.select()}
-                                        autoFocus
-                                    />
-                                ) : (
-                                    <span>{editedLabels[fieldItem.id] || fieldItem.label}</span>
-                                )}
+    <input
+        ref={(el) => {
+            inputRefs.current[fieldItem.id] = el;
+        }}
+        className={classNames(
+            'react-fields-keeper-mapping-content-input-edit',
+            customClassNames?.customEditableInputClassName,
+        )}
+        value={editedLabels[fieldItem.id] ?? fieldItem.label}  // Fallback to fieldItem.label
+        onChange={(e) => onInputFieldChange(fieldItem.id, e.target.value)}
+        onKeyDown={(e) => onEnterKeyPress(fieldItem, false, undefined, e)}
+        onBlur={() => onEnterKeyPress(fieldItem, true)}
+        onFocus={(e) => e.target.select()}
+        autoFocus
+    />
+) : (
+    <span>{editedLabels[fieldItem.id] || fieldItem.label}</span>
+)}
                             </div>
                             {isSuffixNodeValid && (
                                 <div

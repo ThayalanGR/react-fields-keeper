@@ -659,7 +659,7 @@ export interface IFieldsKeeperBucketProps {
      * Callback function to handle bucket drop block
      * @returns IBucketDropBlock
      */
-    onBucketDropBlockHandler?: () => IBucketDropBlock;
+    onBucketDropBlockHandler?: (bucketDropBlockArgs: {fromBucket?: string, fieldItemIds?: string[], fieldItemIndex?: string, fieldSourceIds?: string[], bucketId?: string}) => IBucketDropBlock;
 }
 
 export interface IBucketDropBlock {

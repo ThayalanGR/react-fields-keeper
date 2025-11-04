@@ -317,7 +317,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         // });
 
         if (fieldItems.length) {
-            const dropBlock = onBucketDropBlockHandler?.();
+            const dropBlock = onBucketDropBlockHandler?.({fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds, bucketId: id});
             const isShouldBlockAssignment = dropBlock?.isShouldBlockAssignment ?? false;
             const warningMessage = dropBlock?.warningMessage ?? '';
             if (!isShouldBlockAssignment) {
@@ -444,12 +444,14 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             </div>
             
             {/* Warning Message Tooltip */}
-            <WarningTooltip
-                isVisible={showWarning}
-                message={warningMessage}
-                onClose={() => setShowWarning(false)}
-                autoCloseTimeout={3000}
-            />
+            {showWarning && (typeof warningMessage === 'string' ? 
+                <WarningTooltip
+                    isVisible={showWarning}
+                    message={warningMessage}
+                    onClose={() => setShowWarning(false)}
+                    autoCloseTimeout={3000}
+                />
+            : warningMessage)}
         </div>
     );
 };

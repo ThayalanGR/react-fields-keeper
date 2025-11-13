@@ -65,6 +65,9 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
         Record<string, boolean>
     >(initialFolderStates || {});
 
+    const [searchBasedExpCollapse, setSearchBasedExpCollapse] = useState<
+        Record<string, boolean>
+    >({});
     // refs
     const searchInputRef = useRef<HTMLInputElement>(null);
     const contentContainerRef = useRef<HTMLDivElement>(null);
@@ -90,6 +93,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     // compute
     const defaultFolderScope = '___DEFAULT';
     const hasCustomSearchQuery = customSearchQuery !== undefined;
+    const hasSearchQuery = (customSearchQuery ?? searchQuery) !== '';
     const folderScopedItems = useMemo<
         IFolderScopedItem<IGroupedFieldsKeeperItem>[]
     >(() => {
@@ -222,6 +226,29 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     ]);
 
     useEffect(() => {
+        if (!hasSearchQuery) {
+            setSearchBasedExpCollapse({});
+            return;
+        }
+
+        if (Object.keys(searchBasedExpCollapse).length === 0) {
+            const allExpanded: Record<string, boolean> = {};
+            folderScopedItems.forEach((folderItem) => {
+                const folderId = folderItem.folderScopeItem?.id;
+                if (folderId) {
+                    allExpanded[folderId] = false; 
+                }
+            });
+            setSearchBasedExpCollapse(allExpanded);
+        }
+    }, [hasSearchQuery]);
+
+    const activeCollapseMap = hasSearchQuery ? searchBasedExpCollapse : collapsedNodes;
+    const setActiveCollapseMap = hasSearchQuery
+        ? setSearchBasedExpCollapse
+        : setCollapsedNodes;
+
+    useEffect(() => {
         if (contentContainerRef.current) {
             const markInstance = new Mark(contentContainerRef.current);
             const query = customSearchQuery || searchQuery;
@@ -265,25 +292,19 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
 
     const onExpandCollapseAll = (isCollapse: boolean) => {
         const collapsedFolders: Record<string, boolean> = {};
-        folderScopedItems.map((folderItem) => {
-            if (folderItem.folderScopeItem) {
-                const folderId = folderItem.folderScopeItem.id as string;
-                collapsedFolders[folderId] = isCollapse;
-            }
+        folderScopedItems.forEach((folderItem) => {
+            const folderId = folderItem.folderScopeItem?.id as string;
+            if (folderId) collapsedFolders[folderId] = isCollapse;
         });
-        setCollapsedNodes((prevState) => {
-            const newState = {
-                ...prevState,
-                ...collapsedFolders,
-            };
-            
+
+        setActiveCollapseMap((prev) => {
+            const newState = { ...prev, ...collapsedFolders };
             if (onFolderStateChange) {
-                Object.keys(collapsedFolders).forEach(folderId => {
-                    onFolderStateChange(folderId, isCollapse, newState);
-                });
+                Object.keys(collapsedFolders).forEach((folderId) =>
+                    onFolderStateChange(folderId, isCollapse, newState),
+                );
             }
-            
-            return newState;
+                return newState;
         });
     };
     const onKeyDown = (
@@ -345,9 +366,10 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
                             key={index}
                             folderScopedItem={folderScopedItem}
                             showFlatFolderScope={showFlatFolderScope}
+                            hasSearchQuery={hasSearchQuery}
                             folderScopedItemsArray={folderScopedItems}
-                            collapsedNodes={collapsedNodes}
-                            setCollapsedNodes={setCollapsedNodes}
+                            collapsedNodes={activeCollapseMap}
+                            setCollapsedNodes={setActiveCollapseMap}
                             onExpandCollapseAll={onExpandCollapseAll}
                         />
                     ))
@@ -401,6 +423,7 @@ function FolderScopeItemRenderer(
     props: IFieldsKeeperRootBucketProps & {
         folderScopedItem: IFolderScopedItem<IGroupedFieldsKeeperItem>;
         showFlatFolderScope: boolean;
+        hasSearchQuery: boolean;
         folderScopedItemsArray: IFolderScopedItem<IGroupedFieldsKeeperItem>[];
         collapsedNodes: Record<string, boolean>;
         setCollapsedNodes: React.Dispatch<
@@ -413,9 +436,9 @@ function FolderScopeItemRenderer(
     const {
         folderScopedItem: { type, folderScopeItem, folderScopeItems },
         showFlatFolderScope,
+        hasSearchQuery,
         folderScopedItemsArray,
-        collapsedNodes,
-        setCollapsedNodes,
+        collapsedNodes: activeCollapseMap, setCollapsedNodes: setActive,
         customClassNames,
         sortBasedOnFolder = true,
         suffixNodeRenderer,
@@ -495,7 +518,7 @@ function FolderScopeItemRenderer(
         if (rootBucketProps.collapseFoldersOnMount !== undefined) {
             setIsFolderCollapsed(rootBucketProps.collapseFoldersOnMount);
             if (rootBucketProps.collapseFoldersOnMount) {
-                setCollapsedNodes((prevState) => ({
+                setActive((prevState) => ({
                     ...prevState,
                     [id]: true,
                 }));
@@ -504,10 +527,10 @@ function FolderScopeItemRenderer(
     }, [rootBucketProps.collapseFoldersOnMount, id]);
 
     useEffect(() => {
-        if (Object.keys(collapsedNodes).includes(id)) {
-            setIsFolderCollapsed(collapsedNodes[id]);
+        if (Object.keys(activeCollapseMap).includes(id)) {
+            setIsFolderCollapsed(activeCollapseMap[id]);
         }
-    }, [collapsedNodes]);
+    }, [activeCollapseMap]);
 
     useEffect(() => {
         setCrossHighlightItemIds(
@@ -576,24 +599,20 @@ function FolderScopeItemRenderer(
 
         setHighlightedItem(instanceId, null);
         const toggleCollapse = (id: string) => {
-            setCollapsedNodes((prevState) => {
+            setActive((prevState) => {
                 const newCollapsed = !prevState[id];
-                const newState = {
-                    ...prevState,
-                    [id]: newCollapsed,
-                };
-                
+                const newState = { ...prevState, [id]: newCollapsed };
+
                 if (rootBucketProps.onFolderStateChange) {
                     rootBucketProps.onFolderStateChange(id, newCollapsed, newState);
                 }
-                
                 return newState;
             });
 
             // Move highlight update logic outside of render phase
             const highlightedIds = getCrossHighlightIds();
             const folderIds = getFolderIdsFromValues(foldersMeta);
-            const updatedHighlightIds = !collapsedNodes[id]
+            const updatedHighlightIds = !activeCollapseMap[id]
                 ? [...highlightedIds.filter((id) => folderIds.includes(id))]
                 : highlightedIds;
             setCrossHighlightItemIds(updatedHighlightIds);
@@ -670,7 +689,7 @@ function FolderScopeItemRenderer(
             if (foldersMeta[folder].isHidden) {
                 isHidden = true;
             }
-            if (collapsedNodes[folder]) {
+            if (activeCollapseMap[folder]) {
                 isCollapsed = true;
             }
         });
@@ -872,7 +891,7 @@ function FolderScopeItemRenderer(
             }
             if (isFolderCollapsedOriginal) {
                 setIsFolderCollapsed(false);
-                setCollapsedNodes((prevState) => ({
+                setActive((prevState) => ({
                     ...prevState,
                     [id]: false,
                 }));
@@ -1237,30 +1256,37 @@ function GroupedItemRenderer(
     
     // State to manage editable field items and their labels
     const [editableItemId, setEditableItemId] = useState<string | null>(null);
-    const [editedLabels, setEditedLabels] = useState<Record<string, string>>(() => {
-    const labels: Record<string, string> = {};
+    const [editedLabels, setEditedLabels] = useState<Record<string, string>>(
+        () => {
+            const labels: Record<string, string> = {};
 
-    // 1. Add all real items
-    allItems.forEach((item) => {
-        labels[item.id] = item.label;
-    });
+            // 1. Add all real items
+            allItems.forEach((item) => {
+                labels[item.id] = item.label;
+            });
 
-    // 2. Add group header (if exists)
-    if (group && group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && groupLabel) {
-        labels[group] = groupLabel;
-    }
+            // 2. Add group header (if exists)
+            if (
+                group &&
+                group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                groupLabel
+            ) {
+                labels[group] = groupLabel;
+            }
 
-    // 3. Add flat group header (if exists)
-    if (
-        flatGroup &&
-        flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
-        flatGroupLabel
-    ) {
-        labels[flatGroup as string] = flatGroupLabel as string;
-    }
+            // 3. Add flat group header (if exists)
+            if (
+                flatGroup &&
+                flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                flatGroupLabel
+            ) {
+                labels[flatGroup as string] = flatGroupLabel as string;
+            }
 
-    return labels;
-});
+            return labels;
+        },
+    );
+
     const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
     
     // Click tracking for double-click detection
@@ -1288,9 +1314,11 @@ function GroupedItemRenderer(
         }
         return activeIds;
     };
+
     const [activeHighlightIds, setActiveHighlightIds] = useState<
         Record<string, IHighlightInfo>
     >(getInitialActiveHighlightIds());
+
     useEffect(() => {
         if (highlightedItem) {
             setActiveHighlightIds((prev) => ({
@@ -1362,28 +1390,28 @@ function GroupedItemRenderer(
     // Update editedLabels when allItems change
     useEffect(() => {
     setEditedLabels((prev) => {
-        const newLabels = { ...prev };
+            const newLabels = { ...prev };
 
-        // Sync real items
-        allItems.forEach((item) => {
-            if (!(item.id in newLabels)) {
-                newLabels[item.id] = item.label;
+            // Sync real items
+            allItems.forEach((item) => {
+                if (!(item.id in newLabels)) {
+                    newLabels[item.id] = item.label;
+                }
+            });
+
+            // Sync group header
+            if (group && group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && groupLabel) {
+                newLabels[group] = groupLabel;
             }
+
+            // Sync flat group
+            if (flatGroup && flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && flatGroupLabel) {
+                newLabels[flatGroup as string] = flatGroupLabel as string;
+            }
+
+            return newLabels;
         });
-
-        // Sync group header
-        if (group && group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && groupLabel) {
-            newLabels[group] = groupLabel;
-        }
-
-        // Sync flat group
-        if (flatGroup && flatGroup !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID && flatGroupLabel) {
-            newLabels[flatGroup as string] = flatGroupLabel as string;
-        }
-
-        return newLabels;
-    });
-}, [allItems, group, groupLabel, flatGroup, flatGroupLabel]);
+    }, [allItems, group, groupLabel, flatGroup, flatGroupLabel]);
 
     // Handler functions for inline editing
     const onInputFieldChange = (fieldId: string, newValue: string) => {
@@ -1446,8 +1474,6 @@ function GroupedItemRenderer(
                 clickTimeoutRef.current = null;
             }, DOUBLE_CLICK_THRESHOLD);
         } else if (onFieldItemLabelChange && clickCountRef.current === 2) {
-            console.log(clickTimeoutRef.current, " clickTimeoutRef.current ++")
-            console.log(fieldItem, " field Item ++")
             if (clickTimeoutRef.current) {
                 clearTimeout(clickTimeoutRef.current);
                 clickTimeoutRef.current = null;
@@ -1498,6 +1524,7 @@ function GroupedItemRenderer(
     const customTargetBucketIdentifier =
         getPriorityTargetBucketToFillFromProps ??
         getPriorityTargetBucketToFillFromContext;
+
     const getPriorityTargetBucketToFill = ({
         buckets,
         currentFillingItem,

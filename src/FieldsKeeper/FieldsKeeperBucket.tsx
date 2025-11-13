@@ -712,7 +712,12 @@ const GroupedItemRenderer = (
                 groupFieldItems: groupHeader?.groupItems,
                 onRenameField: onFieldRename,
                 onMoveFieldToBucket: (targetBucketId: string, fieldItems?: IFieldsKeeperItem[]) => {
-                    const itemsToMove = fieldItems || (isGroupHeader ? groupHeader?.groupItems : [fieldItem]);
+                    let itemsToMove = fieldItems
+                    if(isGroupHeader) {
+                        itemsToMove = groupHeader?.groupItems;
+                    } else if(!fieldItems) {
+                        itemsToMove = [fieldItem];
+                    }
                     
                     if (itemsToMove && itemsToMove.length > 0) {
                         const validItems = itemsToMove.filter(item => item && item.id);

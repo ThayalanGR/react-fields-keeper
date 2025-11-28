@@ -6,6 +6,7 @@ import {
     Fragment,
     useRef,
     useEffect,
+    useCallback,
 } from 'react';
 import classNames from 'classnames';
 
@@ -65,8 +66,8 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const preHoveredElementRef = useRef<HTMLDivElement | null>(null);
     const activeDraggedElementRef = useRef<HTMLDivElement | null>(null);
-    let isPointerAboveCenter = false;
-    let hoveredFieldItemIndex = -1;
+    const isPointerAboveCenterRef = useRef<boolean>(false);
+    const hoveredFieldItemIndexRef = useRef<number>(-1);
 
     const {
         allItems,
@@ -196,14 +197,14 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
 
                 const cursorOffsetY = e.clientY - hoveredElementTop;
 
-                isPointerAboveCenter = cursorOffsetY < hoveredElementHeight / 2;
+                isPointerAboveCenterRef.current = cursorOffsetY < hoveredElementHeight / 2;
 
                 const borderStyle = accentColor
                     ? `3px solid ${accentColor}`
                     : '3px solid #0078d4';
                 Object.assign(
                     hoveredTargetElement.style,
-                    isPointerAboveCenter
+                    isPointerAboveCenterRef.current
                         ? {
                               borderTop: borderStyle,
                               borderBottom: 'none',
@@ -222,7 +223,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
             preHoveredElementRef.current = hoveredTargetElement;
         }
         if (fieldItemIndex != null && fieldItemIndex >= 0) {
-            hoveredFieldItemIndex = fieldItemIndex;
+            hoveredFieldItemIndexRef.current = fieldItemIndex;
         }
         onDragEnterHandler();
     };
@@ -254,97 +255,71 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
         return { fieldItemIds, fromBucket, fieldItemIndex, fieldSourceIds };
     };
 
-    const onDropHandler = (e: React.DragEvent<HTMLDivElement>) => {
-        const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } =
-            getFieldItemIds(e);
-
-        const getDropIndex = () => {
-            return hoveredFieldItemIndex;
-        };
-        const dropIndex = getDropIndex();
-        const currentBucket = buckets.find((b) => b.id === fromBucket);
-        const currentBucketFieldItems = currentBucket?.items?.filter?.(
-            (item, itemIndex) => {
-                if (
-                    item.group &&
-                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
-                ) {
-                    item.groupOrder =
-                        item.groupOrder !== undefined
-                            ? item.groupOrder
-                            : itemIndex;
-                }
-                return fieldItemIds.some(
-                    (fieldItemId) => item.id === fieldItemId,
-                );
-            },
-        );
-
-        const fieldItemsRaw =
-            currentBucketFieldItems ??
-            allItems.filter((item, itemIndex) => {
-                if (
-                    item.group &&
-                    item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
-                ) {
-                    item.groupOrder =
-                        item.groupOrder !== undefined
-                            ? item.groupOrder
-                            : itemIndex;
-                }
-                return (
-                    fieldItemIds.some(
-                        (fieldItemId) => item.id === fieldItemId,
-                    ) ||
-                    fieldSourceIds.some(
-                        (fieldSourceId) => item.sourceId === fieldSourceId,
-                    )
-                );
-            });
-
-        // const generateUniqueId = (itemId: string) => `${itemId}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-        // const destinationItemIds = destinationBucket?.items?.map(item => item.id) ?? [];
-
-        const fieldItems = fieldItemsRaw;
-        // const fieldItems = fieldItemsRaw.map((item) => {
-        //     if (allowDuplicates && fromBucket !== id && destinationItemIds.includes(item.id)) {
-        //         return {
-        //             ...item,
-        //             id: generateUniqueId(item.id),
-        //         };
-        //     }
-        //     return item;
-        // });
-
-        if (fieldItems.length) {
-            const dropBlock = onBucketDropBlockHandler?.({fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds, bucketId: id});
-            const isShouldBlockAssignment = dropBlock?.isShouldBlockAssignment ?? false;
-            const warningMessage = dropBlock?.warningMessage ?? '';
-            if (!isShouldBlockAssignment) {
-                assignFieldItems({
-                    instanceId,
-                    bucketId: id,
-                    buckets,
-                    sortGroupOrderWiseOnAssignment,
-                    fieldItems,
-                    allowDuplicates,
-                    fromBucket,
-                    removeIndex:
-                        fieldItems.length === 1 && fieldItemIndex
-                            ? +fieldItemIndex
-                            : undefined,
-                    updateState,
-                    dropIndex,
-                    isPointerAboveCenter,
-                    allItems: allItems,
-                });
-            } else {
-                setWarningMessage(warningMessage);
-                setShowWarning(true);
-            }
+    const assignGroupOrder = useCallback((item: IFieldsKeeperItem, index: number) => {
+        if (item.group && item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID) {
+            item.groupOrder = item.groupOrder ?? index;
         }
+    }, []);
+
+    const extractFieldItems = useCallback((fromBucket: string, fieldItemIds: string[], fieldSourceIds: string[]) => {
+        const sourceBucket = buckets.find((b) => b.id === fromBucket);
+        
+        if (sourceBucket?.items) {
+            return sourceBucket.items.filter((item, index) => {
+                assignGroupOrder(item, index);
+                return fieldItemIds.includes(item.id);
+            });
+        }
+        
+        return allItems.filter((item, index) => {
+            assignGroupOrder(item, index);
+            return fieldItemIds.includes(item.id) || (item.sourceId && fieldSourceIds.includes(item.sourceId));
+        });
+    }, [buckets, allItems, assignGroupOrder]);
+
+    const onDropHandler = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        const { fromBucket, fieldItemIds, fieldItemIndex, fieldSourceIds } = getFieldItemIds(e);
+        const dropIndex = hoveredFieldItemIndexRef.current;
+        
+        const fieldItems = extractFieldItems(fromBucket, fieldItemIds, fieldSourceIds);
+
+        if (!fieldItems.length) {
+            onDragLeaveHandler();
+            return;
+        }
+
+        const dropBlock = onBucketDropBlockHandler?.({
+            fromBucket,
+            fieldItemIds,
+            fieldItemIndex,
+            fieldSourceIds,
+            bucketId: id
+        });
+        
+        if (dropBlock?.isShouldBlockAssignment) {
+            setWarningMessage(dropBlock.warningMessage ?? '');
+            setShowWarning(true);
+            onDragLeaveHandler();
+            return;
+        }
+
+        assignFieldItems({
+            instanceId,
+            bucketId: id,
+            buckets,
+            sortGroupOrderWiseOnAssignment,
+            fieldItems,
+            allowDuplicates,
+            fromBucket,
+            removeIndex: fieldItems.length === 1 && fieldItemIndex ? +fieldItemIndex : undefined,
+            updateState,
+            dropIndex,
+            isPointerAboveCenter: isPointerAboveCenterRef.current,
+            allItems,
+        });
+        
         onDragLeaveHandler();
-    };
+    }, [getFieldItemIds, extractFieldItems, onBucketDropBlockHandler, id, instanceId, buckets, sortGroupOrderWiseOnAssignment, allowDuplicates, updateState, allItems, onDragLeaveHandler]);
 
     // compute
     const hasRoomForFieldAssignment = groupedItems.length < maxItems;
@@ -1093,22 +1068,28 @@ export function assignFieldItems(props: {
     ) => {
         if (removeIndex !== undefined && bucket.id === fromBucketId) {
             bucket.items.splice(removeIndex, requiredFieldItems.length);
-        } else {
-            bucket.items = bucket.items.filter((item, itemIndex) => {
-                const shouldKeepItem =
-                    requiredFieldItems.some(
-                        (fieldItem) =>
-                            (fieldItem.sourceId ?? fieldItem.id) ===
-                                (item.sourceId ?? item.id) ||
-                            fieldItem.flatGroup === item.id,
-                    ) === false ||
-                    restrictedItems.some(
-                        (fieldItem) => fieldItem.id === item.id,
-                    );
-                if (!shouldKeepItem) draggedIndex = itemIndex;
-                return shouldKeepItem;
-            });
+            return;
         }
+
+        bucket.items = bucket.items.filter((item, itemIndex) => {
+            const isItemToRemove = requiredFieldItems.some(
+                (fieldItem) =>
+                    (fieldItem.sourceId ?? fieldItem.id) === (item.sourceId ?? item.id) ||
+                    fieldItem.flatGroup === item.id,
+            );
+            
+            const isRestricted = restrictedItems.some(
+                (fieldItem) => fieldItem.id === item.id,
+            );
+            
+            const shouldKeepItem = !isItemToRemove || isRestricted;
+            
+            if (!shouldKeepItem) {
+                draggedIndex = itemIndex;
+            }
+            
+            return shouldKeepItem;
+        });
     };
 
     const targetBucket = newBuckets.find((bucket) => bucket.id === bucketId);
@@ -1146,88 +1127,79 @@ export function assignFieldItems(props: {
         const targetBucketItemsPreviousLength = targetBucket.items.length;
 
         const getGroupDetails = (
-            items: IFieldsKeeperItem<any>[],
+            items: IFieldsKeeperItem[],
             index: number,
         ): { group: string; groupOrder: number } => {
             const item = items[index];
+            if (!item) return { group: '', groupOrder: -1 };
+            
             const itemOrder = findGroupItemOrder(allItems, item);
             return {
-                group: item?.group ?? '',
+                group: item.group ?? '',
                 groupOrder: itemOrder ?? -1,
             };
         };
 
-        const insertItemsToBucket = (bucketIndex: number) => {
-            if (isFieldItemClick) {
-                const updatedItemsInBucket: IFieldsKeeperItem<any>[] = [];
-                if (
-                    requiredFieldItems.length === 1 &&
-                    requiredFieldItems.every(
-                        (item) =>
-                            item.group &&
-                            item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID,
-                    ) &&
-                    targetBucket.items.length
-                ) {
-                    let currentGroupItems: IFieldsKeeperItem[] = [];
-                    let isRequiredItemAdded = false;
-                    targetBucket.items.forEach((itemInBucket, itemIndex) => {
-                        if (
-                            itemInBucket.group &&
-                            itemInBucket.group !==
-                                FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
-                            requiredFieldItems.every(
-                                (ite) => ite.group === itemInBucket.group,
-                            )
-                        ) {
-                            if (
-                                targetBucket?.items?.length === itemIndex + 1 ||
-                                itemInBucket.group !==
-                                    targetBucket?.items?.[itemIndex + 1]?.group
-                            ) {
-                                currentGroupItems.push(itemInBucket);
-                                if (
-                                    (!allowDuplicates &&
-                                        !isRequiredItemAdded) ||
-                                    allowDuplicates
-                                ) {
-                                    currentGroupItems.push(
-                                        ...requiredFieldItems,
-                                    );
-                                    isRequiredItemAdded = true;
-                                }
-                                if (currentGroupItems.length) {
-                                    const sortedCurrentGrpItems =
-                                        sortBucketItemsBasedOnGroupOrder(
-                                            currentGroupItems,
-                                            allItems,
-                                        );
-                                    updatedItemsInBucket.push(
-                                        ...sortedCurrentGrpItems,
-                                    );
-                                    currentGroupItems = [];
-                                }
-                            } else {
-                                currentGroupItems.push(itemInBucket);
-                            }
-                        } else {
-                            updatedItemsInBucket.push(itemInBucket);
-                        }
-                    });
+        const shouldInsertIntoGroup = (): boolean => {
+            return (
+                requiredFieldItems.length === 1 &&
+                requiredFieldItems.every(
+                    (item) => item.group && item.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID
+                ) &&
+                targetBucket.items.length > 0
+            );
+        };
 
-                    targetBucket.items = [...updatedItemsInBucket];
-                    if (!isRequiredItemAdded)
-                        targetBucket.items.push(...requiredFieldItems);
-                    return;
+        const insertIntoGroupItems = () => {
+            const updatedItemsInBucket: IFieldsKeeperItem[] = [];
+            let currentGroupItems: IFieldsKeeperItem[] = [];
+            let isRequiredItemAdded = false;
+            const targetGroup = requiredFieldItems[0].group;
+
+            targetBucket.items.forEach((itemInBucket, itemIndex) => {
+                const isMatchingGroup =
+                    itemInBucket.group &&
+                    itemInBucket.group !== FIELDS_KEEPER_CONSTANTS.NO_GROUP_ID &&
+                    itemInBucket.group === targetGroup;
+
+                if (isMatchingGroup) {
+                    currentGroupItems.push(itemInBucket);
+                    
+                    const isLastInGroup =
+                        itemIndex === targetBucket.items.length - 1 ||
+                        targetBucket.items[itemIndex + 1]?.group !== itemInBucket.group;
+
+                    if (isLastInGroup) {
+                        if ((allowDuplicates || !isRequiredItemAdded)) {
+                            currentGroupItems.push(...requiredFieldItems);
+                            isRequiredItemAdded = true;
+                        }
+                        
+                        const sortedItems = sortBucketItemsBasedOnGroupOrder(currentGroupItems, allItems);
+                        updatedItemsInBucket.push(...sortedItems);
+                        currentGroupItems = [];
+                    }
+                } else {
+                    updatedItemsInBucket.push(itemInBucket);
                 }
+            });
+
+            targetBucket.items = updatedItemsInBucket;
+            if (!isRequiredItemAdded) {
+                targetBucket.items.push(...requiredFieldItems);
+            }
+        };
+
+        const insertItemsToBucket = (bucketIndex: number) => {
+            if (isFieldItemClick && shouldInsertIntoGroup()) {
+                insertIntoGroupItems();
+                return;
             }
 
             const targetBucketItems = targetBucket.items;
 
-            const { group: groupAbove, groupOrder: orderAbove } =
-                getGroupDetails(targetBucketItems, bucketIndex - 1);
-            const { group: groupBelow, groupOrder: orderBelow } =
-                getGroupDetails(targetBucketItems, bucketIndex);
+            const { group: groupAbove, groupOrder: orderAbove } = getGroupDetails(targetBucketItems, bucketIndex - 1);
+            const { group: groupBelow, groupOrder: orderBelow } = getGroupDetails(targetBucketItems, bucketIndex);
 
             const isBetweenSameGroup =
                 bucketIndex > 0 &&
@@ -1264,43 +1236,28 @@ export function assignFieldItems(props: {
             }
         };
 
+        const calculateDropTargetIndex = (isAssignmentFromSameBucket: boolean): number => {
+            if (dropIndex < 0) return targetBucket.items.length;
+
+            if (!isAssignmentFromSameBucket) {
+                return isPointerAboveCenter ? dropIndex : dropIndex + 1;
+            }
+
+            if (draggedIndex === dropIndex) return dropIndex;
+
+            const isDraggingTopToBottom = draggedIndex < dropIndex;
+            
+            let targetIndex = isPointerAboveCenter ? dropIndex : dropIndex + 1;
+            
+            if (isDraggingTopToBottom && dropIndex > draggedIndex) {
+                targetIndex -= 1;
+            }
+            
+            return targetIndex;
+        };
+
         const updateTargetBucket = (isAssignmentFromSameBucket = false) => {
-            if (dropIndex < 0) {
-                insertItemsToBucket(targetBucket.items.length);
-                return;
-            }
-
-            let dropTargetIndex: number;
-
-            if (isAssignmentFromSameBucket) {
-                const isDraggingBottomToTop = draggedIndex > dropIndex;
-                const isDraggingTopToBottom = draggedIndex < dropIndex;
-                const isSamePosition = draggedIndex === dropIndex;
-
-                if (isSamePosition) {
-                    dropTargetIndex = dropIndex;
-                } else if (isDraggingBottomToTop) {
-                    dropTargetIndex = isPointerAboveCenter
-                        ? dropIndex
-                        : dropIndex + 1;
-                } else if (isDraggingTopToBottom) {
-                    dropTargetIndex = isPointerAboveCenter
-                        ? dropIndex
-                        : dropIndex + 1;
-                    if (dropIndex > draggedIndex) {
-                        dropTargetIndex -= 1;
-                    }
-                } else {
-                    dropTargetIndex = dropIndex;
-                }
-            } else {
-                if (isPointerAboveCenter) {
-                    dropTargetIndex = dropIndex;
-                } else {
-                    dropTargetIndex = dropIndex + 1;
-                }
-            }
-
+            const dropTargetIndex = calculateDropTargetIndex(isAssignmentFromSameBucket);
             insertItemsToBucket(dropTargetIndex);
         };
 

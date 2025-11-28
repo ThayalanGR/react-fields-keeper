@@ -1508,6 +1508,7 @@ function GroupedItemRenderer(
                     '***' +
                     fieldItems
                         .map((item) => item.sourceId)
+                        .filter((sourceId) => sourceId != null)
                         .join(FIELD_DELIMITER),
             );
         };

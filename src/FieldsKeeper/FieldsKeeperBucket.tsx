@@ -839,7 +839,7 @@ const GroupedItemRenderer = (
                                         )}
                                         role="button"
                                         tabIndex={0}
-                                        aria-label="Remove Field"
+                                        aria-label={`Remove ${fieldItem.label} Field`}
                                         onClick={remove}
                                         style={iconColorStyle}
                                         onKeyDown={(
@@ -905,6 +905,11 @@ const GroupedItemRenderer = (
                     }}
                 >
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-disabled={fieldItem.disabled?.active}
+                        aria-roledescription="Draggable field"
+                        aria-label={fieldItem.label}
                         className={classNames(
                             'react-fields-keeper-mapping-content-input-filled',
                             fieldItem.activeNodeClassName,
@@ -943,6 +948,14 @@ const GroupedItemRenderer = (
                                 fieldItem._fieldItemIndex,
                             )
                         }
+                        onKeyDown={(e) => {
+                            if (fieldItem.disabled?.active) return;
+
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleFieldItemClick(fieldItem, e as any);
+                            }
+                        }}
                     >
                         {customItemRenderer !== undefined
                             ? customItemRenderer({

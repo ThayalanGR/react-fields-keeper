@@ -45,10 +45,20 @@ export const ContextMenuOption = (props: IContextMenuOptionProps) => {
         <div
             className="react-fields-keeper-context-menu-item"
             ref={setReferenceElement}
+            role="menuitem"
+            tabIndex={0}
+            aria-haspopup={option.subMenuOptions?.length ? 'menu' : undefined}
             title={option.label}
             onClick={(e) => {
                 e.stopPropagation();
                 onOptionClickHandler(option);
+            }}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onOptionClickHandler(option);
+                }
             }}
             onMouseOver={(e) => onMouseOver(e, option, isSubMenu)}
             onMouseLeave={(e) => {

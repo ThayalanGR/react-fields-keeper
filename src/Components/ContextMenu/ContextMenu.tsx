@@ -116,8 +116,19 @@ export const ContextMenu = (props: IContextMenuProps) => {
         <>
             {React.cloneElement(children ?? <div></div>, {
                 ref: setReferenceElement,
+                role: 'button',
+                tabIndex: 0,
+                'aria-haspopup': 'menu',
+                'aria-expanded': isContextMenuVisible,
+                'aria-label': 'Open menu',
                 onClick: (e: MouseEvent) => {
                     onContextMenuClick(e);
+                },
+                onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setIsContextMenuVisible(true);
+                    }
                 },
             })}
 

@@ -320,6 +320,9 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
     // paint
     return (
         <div
+            role="region"
+            aria-label={label ?? 'Available fields'}
+            aria-disabled={isDisabled ? true : undefined}
             className={classNames(
                 'react-fields-keeper-mapping-container',
                 {
@@ -354,6 +357,7 @@ export const FieldsKeeperRootBucket = (props: IFieldsKeeperRootBucketProps) => {
             )}
             <div
                 ref={contentContainerRef}
+                aria-label="Field list"
                 className={classNames(
                     'react-fields-keeper-mapping-content-scrollable-container',
                     'react-fields-keeper-mapping-content-scrollable-container-columns',
@@ -912,6 +916,8 @@ function FolderScopeItemRenderer(
     return (
         <div
             ref={folderRef}
+            role="group"
+            aria-label={itemLabel ?? ''}
             className="folder-scope-wrapper"
             id={`folder-scope-${folders?.[folders.length - 1]}`}
             style={{ paddingLeft: setIndentation(folders ?? []) }}
@@ -928,6 +934,7 @@ function FolderScopeItemRenderer(
                             )}
                             role="button"
                             tabIndex={0}
+                            aria-expanded={!isFolderCollapsed}
                             aria-label={`${
                                 isFolderCollapsed
                                     ? `Expand ${itemLabel ?? null}`
@@ -1878,6 +1885,10 @@ function GroupedItemRenderer(
                     }}
                 >
                     <div
+                        tabIndex={ignoreCheckBox && !fieldItem.rootDisabled?.active ? 0 : -1}
+                        aria-label={isGroupHeader ? `Group: ${groupLabel ?? ''}` : fieldItem.label}
+                        aria-selected={isFieldItemAssigned}
+                        aria-disabled={fieldItem.rootDisabled?.active ? true : undefined}
                         className={classNames(
                             'react-fields-keeper-mapping-column-content',
                             fieldItem.rootBucketActiveNodeClassName,
@@ -1915,6 +1926,27 @@ function GroupedItemRenderer(
                                 ? groupHeader.groupItems
                                 : [fieldItem]),
                         )}
+                        onKeyDown={(e) => {
+                            if ((e.target as HTMLElement).tagName === 'INPUT') return;
+                            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                const container = e.currentTarget.closest('.react-fields-keeper-mapping-content-scrollable-container');
+                                if (!container) return;
+                                const items = Array.from(container.querySelectorAll('[aria-label][tabindex]')) as HTMLElement[];
+                                const focusable = items.filter(el => parseInt(el.getAttribute('tabindex') ?? '-1') >= 0);
+                                const idx = focusable.indexOf(e.currentTarget);
+                                if (e.key === 'ArrowDown' && idx < focusable.length - 1) focusable[idx + 1].focus();
+                                if (e.key === 'ArrowUp' && idx > 0) focusable[idx - 1].focus();
+                                return;
+                            }
+                            if (ignoreCheckBox && (e.key === 'Enter' || e.key === ' ') && !fieldItem.rootDisabled?.active) {
+                                e.preventDefault();
+                                onFieldItemClickHandler(
+                                    groupHeader?.groupItems ?? [fieldItem],
+                                    isFieldItemAssigned,
+                                )();
+                            }
+                        }}
                         onClick={(e) => {
                             if (toggleCheckboxOnLabelClick) {
                                 onFieldItemClickHandler(
@@ -2114,9 +2146,10 @@ function GroupedItemRenderer(
             'react-fields-keeper-mapping-content-input-edit',
             customClassNames?.customEditableInputClassName,
         )}
-        value={editedLabels[fieldItem.id] ?? fieldItem.label}  // Fallback to fieldItem.label
+        aria-label={`Edit label for ${fieldItem.label}`}
+        value={editedLabels[fieldItem.id] ?? fieldItem.label}
         onChange={(e) => onInputFieldChange(fieldItem.id, e.target.value)}
-        onKeyDown={(e) => onEnterKeyPress(fieldItem, false, undefined, e)}
+        onKeyDown={(e) => { e.stopPropagation(); onEnterKeyPress(fieldItem, false, undefined, e); }}
         onBlur={() => onEnterKeyPress(fieldItem, true)}
         onFocus={(e) => e.target.select()}
         autoFocus

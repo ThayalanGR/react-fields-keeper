@@ -65,6 +65,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
     const instanceId = instanceIdFromProps ?? instanceIdFromContext;
     const preHoveredElementRef = useRef<HTMLDivElement | null>(null);
     const activeDraggedElementRef = useRef<HTMLDivElement | null>(null);
+    const bucketListRef = useRef<HTMLDivElement | null>(null);
     let isPointerAboveCenter = false;
     let hoveredFieldItemIndex = -1;
 
@@ -399,6 +400,10 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                 {isBucketSuffixValid && bucketLabelSuffixNodeOutput}
             </div>
             <div
+                ref={bucketListRef}
+                role="list"
+                aria-label={typeof label === 'string' ? `${label} bucket` : 'Bucket'}
+                aria-disabled={disabled ? true : undefined}
                 className={classNames(
                     'react-fields-keeper-mapping-content-input',
                     {
@@ -436,6 +441,7 @@ export const FieldsKeeperBucket = (props: IFieldsKeeperBucketProps) => {
                             activeDraggedElementRef={activeDraggedElementRef}
                             customClassNames={customClassNames}
                             onMoveFieldToBucket={onMoveFieldToBucket}
+                            bucketListRef={bucketListRef}
                         />
                     ))}
                 {(groupedItems.length === 0 ||
@@ -469,6 +475,7 @@ const GroupedItemRenderer = (
         fieldItemIndex: number;
         activeDraggedElementRef: React.MutableRefObject<HTMLDivElement | null>;
         onMoveFieldToBucket: (targetBucketId: string, fieldItems?: IFieldsKeeperItem[]) => void;
+        bucketListRef: React.MutableRefObject<HTMLDivElement | null>;
     } & IFieldsKeeperBucketProps,
 ) => {
     // props
@@ -492,7 +499,25 @@ const GroupedItemRenderer = (
         allowGroupLabelToEdit,
         allowDragging = true,
         onMoveFieldToBucket,
+        bucketListRef,
     } = props;
+
+    const removeWithFocusRestore = (
+        removeFn: () => void,
+        currentElement: HTMLElement | null,
+    ) => {
+        if (currentElement && bucketListRef.current) {
+            const items = Array.from(
+                bucketListRef.current.querySelectorAll('[role="listitem"][tabindex="0"]'),
+            ) as HTMLElement[];
+            const idx = items.indexOf(currentElement);
+            const nextFocus = items[idx + 1] ?? items[idx - 1] ?? bucketListRef.current;
+            removeFn();
+            requestAnimationFrame(() => (nextFocus as HTMLElement).focus());
+        } else {
+            removeFn();
+        }
+    };
 
     // state
     const { instanceId: instanceIdFromContext } =
@@ -532,12 +557,22 @@ const GroupedItemRenderer = (
         }
     }, [isContextMenuOpen]);
 
+    const lastEditedItemIdRef = useRef<string | null>(null);
+
     useEffect(() => {
-        if (editableItemId && inputRefs.current[editableItemId]) {
+        if (editableItemId) {
+            lastEditedItemIdRef.current = editableItemId;
             const input = inputRefs.current[editableItemId];
             input?.focus();
             input?.setSelectionRange(input.value.length, input.value.length);
+        } else if (lastEditedItemIdRef.current && bucketListRef.current) {
+            const target = bucketListRef.current.querySelector(
+                `[data-field-id="${lastEditedItemIdRef.current}"]`,
+            ) as HTMLElement | null;
+            requestAnimationFrame(() => target?.focus());
+            lastEditedItemIdRef.current = null;
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editableItemId]);
 
     useEffect(() => {
@@ -633,6 +668,11 @@ const GroupedItemRenderer = (
         fieldIndex?: number,
         e?: React.KeyboardEvent<HTMLInputElement>,
     ) => {
+        if (e?.key === 'Escape') {
+            setEditedLabels((prev) => ({ ...prev, [fieldItem.id]: fieldItem.label }));
+            setEditableItemId(null);
+            return;
+        }
         const isEnter = e?.key === 'Enter';
         if (onFieldItemLabelChange && (isEnter || isOnBlur)) {
             const oldValue = fieldItem.label;
@@ -783,6 +823,7 @@ const GroupedItemRenderer = (
                                     inputRefs.current[fieldItem.id] = el;
                                 }}
                                 className="react-fields-keeper-mapping-content-input-edit"
+                                aria-label={`Edit label for ${fieldItem.label}`}
                                 value={editedLabels[fieldItem.id]}
                                 onChange={(e) =>
                                     onInputFieldChange(
@@ -790,14 +831,15 @@ const GroupedItemRenderer = (
                                         e.target.value,
                                     )
                                 }
-                                onKeyDown={(e) =>
+                                onKeyDown={(e) => {
+                                    e.stopPropagation();
                                     onEnterKeyPress(
                                         fieldItem,
                                         false,
                                         fieldItem._fieldItemIndex,
                                         e,
-                                    )
-                                }
+                                    );
+                                }}
                                 onBlur={() =>
                                     onEnterKeyPress(
                                         fieldItem,
@@ -839,12 +881,12 @@ const GroupedItemRenderer = (
                                         )}
                                         role="button"
                                         tabIndex={0}
-                                        aria-label="Remove Field"
-                                        onClick={remove}
+                                        aria-label={`Remove ${isGroupHeader ? groupLabel : fieldItem.label}`}
+                                        onClick={(e) => removeWithFocusRestore(remove, (e.currentTarget as HTMLElement).closest('[role="listitem"]') as HTMLElement | null)}
                                         style={iconColorStyle}
                                         onKeyDown={(
                                             e: React.KeyboardEvent<HTMLDivElement>,
-                                        ) => onKeyDown(e, remove)}
+                                        ) => onKeyDown(e, () => removeWithFocusRestore(remove, e.currentTarget.closest('[role="listitem"]') as HTMLElement | null))}
                                     >
                                         <i className="fk-ms-Icon fk-ms-Icon--ChromeClose" />
                                     </div>
@@ -905,6 +947,10 @@ const GroupedItemRenderer = (
                     }}
                 >
                     <div
+                        role="listitem"
+                        tabIndex={fieldItem.disabled?.active ? -1 : 0}
+                        aria-label={isGroupHeader ? `Group: ${groupLabel}` : fieldItem.label}
+                        aria-disabled={fieldItem.disabled?.active ? true : undefined}
                         className={classNames(
                             'react-fields-keeper-mapping-content-input-filled',
                             fieldItem.activeNodeClassName,
@@ -929,6 +975,7 @@ const GroupedItemRenderer = (
                                 : true
                         }
                         data-index={fieldItemIndex}
+                        data-field-id={fieldItem.id}
                         onDragStart={onDragStartHandler(
                             (fieldItem._fieldItemIndex ?? '') + '',
                             currentBucket.id,
@@ -943,6 +990,28 @@ const GroupedItemRenderer = (
                                 fieldItem._fieldItemIndex,
                             )
                         }
+                        onKeyDown={(e) => {
+                            if ((e.target as HTMLElement).tagName === 'INPUT') return;
+                            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                const container = e.currentTarget.closest('.react-fields-keeper-mapping-content-input');
+                                if (!container) return;
+                                const items = Array.from(container.querySelectorAll('[role="listitem"][tabindex="0"]')) as HTMLElement[];
+                                const idx = items.indexOf(e.currentTarget);
+                                if (e.key === 'ArrowDown' && idx < items.length - 1) items[idx + 1].focus();
+                                if (e.key === 'ArrowUp' && idx > 0) items[idx - 1].focus();
+                                return;
+                            }
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                if (onFieldItemClick) onFieldItemClick(fieldItem, e as unknown as React.MouseEvent<HTMLDivElement>);
+                                return;
+                            }
+                            if ((e.key === 'Delete' || e.key === 'Backspace') && allowRemoveFields && !fieldItem.disabled?.active) {
+                                e.preventDefault();
+                                removeWithFocusRestore(remove, e.currentTarget);
+                            }
+                        }}
                     >
                         {customItemRenderer !== undefined
                             ? customItemRenderer({
@@ -974,6 +1043,8 @@ const GroupedItemRenderer = (
 
         return (
             <div
+                role="group"
+                aria-label={groupLabel}
                 className={classNames(
                     'react-fields-keeper-mapping-content-input-filled-group',
                     {

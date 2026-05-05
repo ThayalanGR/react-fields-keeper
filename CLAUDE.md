@@ -55,15 +55,24 @@ src/
 
 ## .ai/ Folder Convention
 
-Planned documents and session context live in `.ai/`:
-
 ```
 .ai/
-  context/   # persistent feature/architecture context docs
-  sessions/  # session-scoped working notes per feature or fix
+  context/    # Deep domain knowledge. Stable. Changes rarely.
+  commands/   # Task-specific instructions. How to do X in this codebase.
+  sessions/   # Living log. Append an entry after each non-trivial session.
 ```
 
-**Always read relevant `.ai/` files before starting work on a feature or fix.** Ask the user whether to create or update an `.ai/context/` or `.ai/sessions/` doc when starting non-trivial work. Never create docs under `.ai/` without asking first.
+**Always read relevant `.ai/` files before starting work.**
+- Check `context/` for domain knowledge on the area being touched.
+- Check `commands/` for a runbook if the task is a known workflow (e.g. release, new example, extend API).
+- Check `sessions/log.md` for recent decisions and in-progress work.
+
+**After non-trivial sessions**, ask the user whether to create or update a session file under `sessions/`. Never write to `.ai/` without asking first.
+
+Session file lifecycle:
+- Named `YYYY-MM-DD-{feature}.md`
+- Kept until the feature is merged and deployed
+- Deleted after 2 patch releases post-deployment
 
 ---
 
@@ -76,6 +85,9 @@ Planned documents and session context live in `.ai/`:
 - **Never add a Claude Code signature** (`Co-Authored-By`, "Generated with Claude Code", or similar) anywhere — in code, commit messages, PRs, or docs.
 - **Do not generate summary or markdown files unprompted.** Only create `.md` files when explicitly asked.
 
+### Features
+- **Every new feature must ship with an example.** When adding a new prop, behaviour, or component, add a self-contained example under `src/Examples/` demonstrating it. Follow `.ai/commands/new-example.md` for the steps. No feature is complete without a working example.
+
 ### Context & Research
-- **Read `.ai/` first.** Before exploring the codebase from scratch, check `.ai/context/` and `.ai/sessions/` for existing context on the feature or fix in scope.
-- **Ask before creating `.ai/` docs.** When starting a new feature or significant fix, ask the user whether to create or update the relevant context/session doc rather than doing it silently.
+- **Read `.ai/` first.** Before exploring the codebase from scratch, check `context/`, `commands/`, and any open session files under `sessions/` for existing context on the area in scope.
+- **Ask before writing `.ai/` docs.** After non-trivial sessions, ask the user whether to append to `sessions/log.md`. Never create or modify `.ai/` files without asking first.

@@ -1,21 +1,19 @@
 # .ai/
 
-AI-assisted development context for react-fields-keeper.
-
-## Folder structure
+AI context layer for react-fields-keeper. Read the relevant folder before starting any non-trivial work.
 
 ```
 .ai/
-  context/    # Stable, codebase-wide docs — read before starting any non-trivial work
-  feats/      # Feature-scoped docs — spec, decisions, open questions; archived or deleted after shipping
-  sessions/   # Ephemeral session notes — what was done today; deleted after the feature lands
+  context/    # Deep domain knowledge. Stable. Changes rarely.
+  commands/   # Task-specific instructions. How to do X in this codebase.
+  sessions/   # Living log. Append an entry after each non-trivial session.
 ```
 
 ---
 
 ## context/
 
-Persistent context documents. Read these before starting any non-trivial work.
+Deep domain knowledge about the codebase. Read before touching any non-trivial area.
 
 | File | Contents |
 |---|---|
@@ -23,29 +21,33 @@ Persistent context documents. Read these before starting any non-trivial work.
 | [architecture.md](architecture.md) | Component hierarchy, Zustand state model, data flow, drag & drop, grouping, CSS |
 | [api-reference.md](api-reference.md) | All public props, TypeScript interfaces, exported functions, examples index |
 | [development.md](development.md) | Scripts, build pipeline, code conventions, CI/CD, common gotchas |
+| [accessibility.md](accessibility.md) | ARIA patterns in use, keyboard interaction model, known gaps |
 
-### Reading order for new work
-
-- **Bug fix or feature**: overview → architecture → api-reference
-- **Build/release task**: overview → development
-- **API addition**: architecture → api-reference → development (conventions)
+**Reading order:**
+- Bug fix or feature → overview → architecture → api-reference
+- Build / release → overview → development
+- API addition → architecture → api-reference → development
+- Accessibility work → accessibility → architecture
 
 ---
 
-## feats/
+## commands/
 
-One file per in-progress or recently shipped feature. Contains: motivation, scope, phase breakdown, key decisions, known gaps.
+Runbooks for known workflows. Check here before figuring out a process from scratch.
 
-After a feature ships — promote any non-obvious decisions or constraints into `context/`, then delete the feat doc.
-
-| File | Feature |
+| File | When to use |
 |---|---|
-| [accessibility.md](../feats/accessibility.md) | ARIA labels, keyboard navigation, focus restoration |
+| [new-example.md](../commands/new-example.md) | Adding a new example to the demo app |
+| [extend-api.md](../commands/extend-api.md) | Adding a new prop to an existing component |
+| [release.md](../commands/release.md) | Bumping version and publishing to npm |
+| [a11y.md](../commands/a11y.md) | Adding accessibility to new or existing components |
 
 ---
 
 ## sessions/
 
-One file per working session, named `YYYY-MM-DD-<topic>.md`. Contains: what was discussed, what was implemented, what's pending.
+One file per feature, named `YYYY-MM-DD-{feature}.md`. Kept until the feature is merged and deployed, then deleted after 2 patch releases.
 
-Delete after the feature lands.
+| File | Feature | Status |
+|---|---|---|
+| [2026-05-05-accessibility.md](../sessions/2026-05-05-accessibility.md) | Accessibility support | in-progress |
